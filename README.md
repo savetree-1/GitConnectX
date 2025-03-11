@@ -1,5 +1,4 @@
 
-```md
 # GitConnectX
 
 ## Overview
