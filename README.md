@@ -4,6 +4,61 @@
 ## Overview
 GitConnectX is a developer network analysis tool for GitHub that extracts and analyzes user interactions using graph-based models and social network analysis. It applies algorithms such as BFS, DFS, Dijkstra's, PageRank, and Louvain clustering to reveal insights into developer influence and collaboration dynamics.
 
+## Repo
+GitConnectX/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── .gitignore
+│
+├── backend/                  
+│   ├── fetch_data.py          
+│   ├── save_edges.py          
+│   └── visualize_data.py      
+│
+├── cpp_algorithms/            
+│   ├── graph_build.cpp        
+│   ├── bfs_dfs.cpp            
+│   ├── dijkstra.cpp           
+│   ├── floyd_warshall.cpp     
+│   ├── pagerank.cpp           
+│   ├── hits.cpp               
+│   ├── kcore.cpp              
+│   └── louvain.cpp            
+│
+├── frontend/                  
+│   ├── public/
+│   │   └── index.html          
+│   ├── src/
+│   │   ├── App.js              
+│   │   ├── components/
+│   │   │   ├── GraphVisualization.js   
+│   │   │   ├── UserRanking.js           
+│   │   │   ├── CommunityDetection.js    
+│   │   │   ├── ShortestPathFinder.js    
+│   │   └── styles/
+│   │       └── style.css         
+│   └── package.json             
+│
+├── api/                        
+│   ├── app.py                  
+│   └── routes.py               
+│
+├── models/                     
+│   ├── user.py                 
+│   ├── repository.py           
+│
+├── docs/                       
+│   ├── architecture_diagram.png 
+│   ├── uml_diagram.png          
+│   ├── report.pdf               
+│
+└── dataset/                    
+    ├── raw_data.json           
+    ├── edges.csv               
+    ├── nodes.csv
+
 ## Features
 1. **Graph Visualization** - Displays real-time network graphs of developer interactions.
 2. **Influence Ranking** - Identifies key contributors using PageRank and HITS.
