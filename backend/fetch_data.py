@@ -1,36 +1,53 @@
-from github import Github
+import os
 import csv
-ACCESS_TOKEN = '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'
+from github import Github
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+ACCESS_TOKEN = os.getenv('GITHUB_TOKEN')
+
+# GitHub config
 USERNAME = 'savetree-1'
 REPO_NAME = 'OpenNutriTracker'
 client = Github(ACCESS_TOKEN)
 user = client.get_user(USERNAME)
 repo = user.get_repo(REPO_NAME)
+
 def fetch_followers(user):
-    followers = user.get_followers()
-    return [follower.login for follower in followers]
+    return [f.login for f in user.get_followers()]
+
 def fetch_stargazers(repo):
-    stargazers = repo.get_stargazers()
-    return [stargazer.login for stargazer in stargazers]
+    return [s.login for s in repo.get_stargazers()]
+
 def fetch_contributors(repo):
-    contributors = repo.get_contributors()
-    return [contributor.login for contributor in contributors]
+    return [c.login for c in repo.get_contributors()]
+
 def fetch_forks(repo):
-    forks = repo.get_forks()
-    return [fork.owner.login for fork in forks]
+    return [f.owner.login for f in repo.get_forks()]
+
 def save_to_csv(filename, data):
-    with open(filename, mode="w", newline="", encoding="utf-8") as file:
+    os.makedirs("dataset", exist_ok=True)
+    path = os.path.join("dataset", filename)
+    with open(path, mode="w", newline="", encoding="utf-8") as file:
         writer = csv.writer(file)
-        writer.writerow(["Source", "Target"])  
+        writer.writerow(["Source", "Target"])
         writer.writerows(data)
-    print(f"Data saved to {filename}")
+    print(f"✅ Data saved to {path}")
+
 if __name__ == "__main__":
+    print("🔄 Fetching GitHub network data...")
+
     followers = fetch_followers(user)
-    save_to_csv("followers.csv", [[USERNAME, follower] for follower in followers])
+    save_to_csv("followers.csv", [[USERNAME, f] for f in followers])
+
     stargazers = fetch_stargazers(repo)
-    save_to_csv("stargazers.csv", [[REPO_NAME, stargazer] for stargazer in stargazers])
+    save_to_csv("stargazers.csv", [[REPO_NAME, s] for s in stargazers])
+
     contributors = fetch_contributors(repo)
-    save_to_csv("contributors.csv", [[REPO_NAME, contributor] for contributor in contributors])
+    save_to_csv("contributors.csv", [[REPO_NAME, c] for c in contributors])
+
     forks = fetch_forks(repo)
-    save_to_csv("forks.csv", [[REPO_NAME, fork] for fork in forks])
-    print("GitHub data fetching completed!")
+    save_to_csv("forks.csv", [[REPO_NAME, f] for f in forks])
+
+    print("✅ GitHub data fetching completed successfully!")
