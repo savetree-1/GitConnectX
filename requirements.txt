@@ -1,5 +1,22 @@
-networkx
-flask
-requests
-pandas
-matplotlib
+# API and Backend
+Flask==2.3.2
+Flask-Cors==4.0.0
+requests==2.31.0
+PyGithub==1.59.0
+python-dotenv==1.0.0
+
+# Data Processing
+pandas==2.0.3
+numpy==1.25.0
+networkx==3.1
+
+# Graph Algorithms (for Python implementations)
+community==1.0.0b1
+scikit-learn==1.3.0
+
+# Testing
+pytest==7.3.1
+responses==0.23.1
+
+# Utilities
+tqdm==4.65.0
