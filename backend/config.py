@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # GitHub API Configuration
-GITHUB_ACCESS_TOKEN = os.getenv("GITHUB_ACCESS_TOKEN", "your_token_here")
+GITHUB_ACCESS_TOKEN = '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'
 GITHUB_API_BASE_URL = "https://api.github.com"
 API_REQUEST_DELAY = 1.0  # seconds between requests to avoid rate limiting
 
