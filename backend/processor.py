@@ -90,3 +90,50 @@ def process_data():
 
 if __name__ == "__main__":
     process_data()
+#!/usr/bin/env python3
+# """
+# graph.py - Graph model for GitConnectX
+
+# This module defines the Graph model for representing networks of GitHub users and repositories.
+# """
+
+# from dataclasses import dataclass, field
+# from typing import Dict, List, Set, Any, Union, Optional
+# import json
+# import os
+
+# # Import local models
+# from models.user import User
+# from models.repository import Repository
+# from models.edge import FollowEdge, CollaborationEdge, ContributionEdge
+
+# @dataclass
+# class Graph:
+#     """Represents a graph with nodes and edges."""
+    
+#     nodes: Dict[int, Union[User, Repository]] = field(default_factory=dict)
+#     edges: List[Union[FollowEdge, CollaborationEdge, ContributionEdge]] = field(default_factory=list)
+#     adjacency_list: Dict[int, Set[int]] = field(default_factory=lambda: {})
+    
+#     def add_node(self, node: Union[User, Repository]) -> None:
+#         """
+#         Add a node to the graph
+        
+#         Args:
+#             node: User or Repository instance
+#         """
+#         self.nodes[node.id] = node
+#         if node.id not in self.adjacency_list:
+#             self.adjacency_list[node.id] = set()
+    
+#     def add_edge(self, edge: Union[FollowEdge, CollaborationEdge, ContributionEdge]) -> None:
+#         """
+#         Add an edge to the graph
+        
+#         Args:
+#             edge: FollowEdge, CollaborationEdge, or ContributionEdge instance
+#         """
+#         self.edges.append(edge)
+        
+#         if isinstance(edge, FollowEdge):
+#             # Initialize nodes in adjacency list if they don'
