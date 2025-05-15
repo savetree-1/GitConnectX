@@ -10,7 +10,7 @@ const Features = () => {
   };
 
   return (
-    <div ref={featuresRef} className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 py-20">
+    <div ref={featuresRef} className="bg-[#1737A1] py-20">
       <div className="container mx-auto text-center px-6">
         <h1 className="text-5xl font-extrabold text-white mb-6 drop-shadow-lg">
           Features
@@ -19,39 +19,39 @@ const Features = () => {
           Discover the powerful features driving your GitHub social graph insights.
         </p>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Visualize Your Network</h3>
-            <p className="text-gray-700 text-center">
-              Clear view of your GitHub graph, showing connections and interactions.
-            </p>
-          </div>
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Parallel Processing</h3>
-            <p className="text-gray-700 text-center">
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+          <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Visualize Your Network</h3>
+          <p className="text-gray-700 text-left">
+            Clear view of your GitHub graph, showing connections and interactions.
+          </p>
+        </div>
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Parallel Processing</h3>
+            <p className="text-gray-700 text-left">
               Multi-threaded computation accelerates PageRank and clustering on big graphs.
             </p>
           </div>
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Influence Ranking</h3>
-            <p className="text-gray-700 text-center">
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Influence Ranking</h3>
+            <p className="text-gray-700 text-left">
               PageRank ranks developers by influence across the GitHub network.
             </p>
           </div>
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Community Detection</h3>
-            <p className="text-gray-700 text-center">
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Community Detection</h3>
+            <p className="text-gray-700 text-left">
               Louvain clustering uncovers tight-knit developer groups.
             </p>
           </div>
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Fast Query Processing</h3>
-            <p className="text-gray-700 text-center">
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Fast Query Processing</h3>
+            <p className="text-gray-700 text-left">
               Optimized algorithms handle large datasets efficiently.
             </p>
           </div>
-          <div className="bg-white bg-opacity-90 rounded-xl p-6 shadow-lg flex flex-col justify-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-center">Algorithm Trade-offs</h3>
-            <p className="text-gray-700 text-center">
+          <div className="bg-white bg-opacity-90 border-[#39C0F1] border-l-8 rounded-xl p-6 shadow-lg flex flex-col justify-center">
+            <h3 className="text-xl font-semibold text-gray-900 mb-2 text-left">Algorithm Trade-offs</h3>
+            <p className="text-gray-700 text-left">
               Compare Dijkstra vs. Floyd-Warshall, Louvain vs. Girvan-Newman for performance.
             </p>
           </div>

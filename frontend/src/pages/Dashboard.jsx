@@ -8,17 +8,17 @@ import Footer from '../components/Footer';
 
 const Dashboard = () => {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
       <Header />
-      <div className="flex flex-grow bg-gray-100">
+      <div className="flex flex-grow ">
         {/* Sidebar */}
-        <aside className="w-1/4 bg-white shadow-md rounded-2xl pt-18 ">
+        <aside className="w-1/4 shadow-md rounded-2xl pt-18 ">
           <ProfileSidebar />
         </aside>
 
         {/* Main Content */}
-        <main className="w-3/4 p-25 space-y-4 overflow-x-auto">
-          <section id="graph-visualization" className="min-w-full border-blue-500 border-2 rounded-2xl shadow-lg p-4">
+        <main className=" w-3/4 p-30 space-y-12 overflow-x-auto">
+          <section id="graph-visualization" className="min-w-full">
             <GraphVisualization />
           </section>
 

@@ -17,7 +17,7 @@ const Signup = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header/>
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
         <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Sign Up</h2>
         <form onSubmit={handleSignup}>

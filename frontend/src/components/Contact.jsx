@@ -6,10 +6,11 @@ const Contact = () => {
 
   return (
     <div
-      ref={contactRef}
-      className="bg-gray-50 py-20  max-w-6xl mx-auto"
-    >
-      <div className="container px-4 flex flex-col md:flex-row items-center justify-between">
+  ref={contactRef}
+  className="bg-[#DFE4E8] py-20 w-full flex justify-center"
+>
+
+<div className="container max-w-6xl px-4 flex flex-col md:flex-row items-center justify-between gap-12">
         <div className="md:w-1/2 mb-10 md:mb-0">
           <p className="text-green-600 text-sm mb-2">How can we help you?</p>
           <h1 className="text-4xl font-extrabold text-gray-800 mb-4">Contact us</h1>

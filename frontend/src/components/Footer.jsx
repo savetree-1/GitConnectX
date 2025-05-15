@@ -6,35 +6,35 @@ const Footer = () => {
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center space-x-2">
                 <img className="w-16 md:w-10" src={logo} alt="logo" />
-                <div className="text-xl font-bold text-blue-600">
+                <div className="text-xl font-bold text-[#1737A1]">
                     GitConnectX  © {new Date().getFullYear()}
                     
                 </div>
         </div>
         <div className="flex space-x-6">
           <a
-            href="https://github.com/your-repo"
+            href="https://github.com/savetree-1/GitConnectX"
             target="_blank"
             rel="noopener noreferrer"
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-[#1737A1] transition-colors"
           >
             GitHub Repo
           </a>
           <a
             href="/docs"
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-[#1737A1] transition-colors"
           >
             Documentation
           </a>
           <a
             href="/contributors"
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-[#1737A1] transition-colors"
           >
             Contributors
           </a>
           <a
             href="/privacy"
-            className="hover:text-blue-600 transition-colors"
+            className="hover:text-[#1737A1] transition-colors"
           >
             Privacy Policy
           </a>

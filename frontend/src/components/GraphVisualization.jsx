@@ -63,7 +63,7 @@ const GraphVisualization = () => {
       const svg = d3.select(d3Container.current)
 .attr('viewBox', `0 0 ${containerWidth} ${height + margin * 2 + 50}`)
         .attr('preserveAspectRatio', 'xMidYMid meet')
-        .style('background', 'transparent');
+        .style('background', 'white');
 
       const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
@@ -254,7 +254,7 @@ const GraphVisualization = () => {
   };
 
   return (
-    <div className="font-sans">
+    <div className="font-sans  bg-gray-100 border-blue-500 border-2 rounded-2xl shadow-lg p-4">
       <h1 className="text-3xl font-bold mb-4">GitHub Graph Overview</h1>
       <div className="flex items-center mb-4">
         <span className="mr-2 text-2xl">Comparison Mode:</span>
@@ -267,7 +267,7 @@ const GraphVisualization = () => {
         <h2 className="text-2xl font-semibold text-blue-700">My GitHub Network</h2>
         {comparisonMode && <h2 className="text-2xl font-semibold text-green-700">Friend's GitHub Network</h2>}
       </div>
-      <div className="flex justify-center border-blue-100 border-2 rounded-xl p-4">
+      <div className=" bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
         <div className="overflow-x-auto">
           <svg ref={d3Container} style={{
               width: comparisonMode ? `${2 * (width + margin * 2)}px` : `${width + margin * 2}px`,

@@ -7,29 +7,29 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
       <div className="container mx-auto flex justify-between items-center p-4">
         <div className="flex items-center space-x-2">
           <img className="w-10 md:w-10" src={logo} alt="logo" />
-          <div className="text-xl font-bold text-blue-600">
+          <div className="text-xl font-bold text-[#1737A1]">
             GitConnectX
           </div>
         </div>
         <nav className="space-x-6">
-          <a href="/" className="text-gray-700 hover:text-blue-600">
+          <a href="/" className="text-black hover:text-[#1737A1]">
             Home
           </a>
           <button
             onClick={scrollToFeatures}
-            className="text-gray-700 hover:text-blue-600 focus:outline-none"
+            className="text-black hover:text-[#1737A1] focus:outline-none"
           >
             Features
           </button>
           <button
             onClick={scrollToContact}
-            className="text-gray-700 hover:text-blue-600 focus:outline-none"
+            className="text-black hover:text-[#1737A1] focus:outline-none"
           >
             Contact Us
           </button>
           <a
             href="/login"
-            className="text-white bg-indigo-600 px-4 py-2 rounded w-full hover:bg-indigo-700 transition transform hover:-translate-y-1 hover:shadow-md"
+            className="text-white bg-[#1737A1] px-4 py-2 rounded w-full hover:bg-indigo-700 transition transform hover:-translate-y-1 hover:shadow-md"
           >
             Login / Signup
           </a>

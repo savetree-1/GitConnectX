@@ -14,15 +14,15 @@ export default function ProfileSidebar({
   graph = { nodes: 5, edges: 4, density: 40 },
 }) {
   return (
-    <div className="w-full h-full bg-white rounded-2xl shadow-lg p-25 flex flex-col items-center space-y-5 border-blue-500 border-2">
-      
+    <div className="w-full h-full bg-gray-100 rounded-2xl shadow-lg p-10 border-2 border-blue-500">
+      <div className="w-full h-full bg-white border-blue-200 rounded-2xl p-15 flex flex-col items-center space-y-6 border-2">
       {/* Avatar */}
-      <div className="w-50 h-50 rounded-full overflow-hidden border-4 border-blue-500">
+      <div className="w-50 h-50 rounded-full overflow-hidden border-4 border-indigo-800">
         {profilePicUrl ? (
           <img
-            src={profilePicUrl}
-            alt={name}
-            className="w-full h-full object-cover"
+          src={profilePicUrl}
+          alt={name}
+          className="w-full h-full object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl text-gray-600">
@@ -34,18 +34,17 @@ export default function ProfileSidebar({
       {/* Name & Username */}
       <div className="text-center">
         <h2 className="text-4xl font-bold text-gray-900">{name}</h2>
-        <p className="text-gray-500 text-2xl">@{username}</p>
+        <p className="text-gray-500 text-2xl mb-10">@{username}</p>
       </div>
 
       {/* Rank Badge */}
-      <span className="bg-blue-100 text-blue-800 text-3xl font-semibold px-3 py-1 rounded-full">
+      <span className="bg-blue-100 text-blue-800 text-3xl font-semibold px-6 py-1 rounded-full mb-10">
         {rankBadge}
       </span>
-
       {/* Stats Section */}
 <div className="w-full">
-  <div className="border-t border-gray-500 -mx-4 mb-4"></div> {/* Extended line */}
-  <div className="grid grid-cols-1 gap-5 text-xl text-gray-700 px-4">
+  <div className="border-t border-gray-500 -mx-4 mb-10"></div> {/* Extended line */}
+  <div className="grid grid-cols-1 gap-7 text-xl text-gray-700 px-4 mb-5" >
         <div className="flex items-center gap-2">
           <Folder className="w-8 h-8" />
           <span>{stats.repos} Repos</span>
@@ -63,18 +62,19 @@ export default function ProfileSidebar({
           <span>{stats.forks} Forks</span>
         </div>
       </div>
-      </div>
+</div>
 
       {/* Graph Summary */}
       <div className="w-full">
-  <div className="border-t border-gray-500 -mx-4 mb-4"></div> {/* Extended line */}
+  <div className="border-t border-gray-500 -mx-4 mb-8"></div> {/* Extended line */}
   <div className="text-xl text-center text-gray-700 space-y-2 px-4">
         <p className="font-semibold text-2xl text-gray-800">Graph Summary</p>
         <p>Nodes: {graph.nodes}</p>
         <p>Edges: {graph.edges}</p>
         <p>Density: {graph.density.toFixed(2)}</p>
+        </div>
       </div>
     </div>
-    </div>
+  </div>
   )
 }

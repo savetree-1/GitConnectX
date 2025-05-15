@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+import { Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, ResponsiveContainer, Legend, Tooltip } from 'recharts';
 
 const AnalyticsTabs = () => {
   const [selectedYear, setSelectedYear] = useState(2025);
@@ -74,11 +75,50 @@ const AnalyticsTabs = () => {
 
   const calendarData = generateCalendarData(selectedYear);
 
+  // GitHub Rank Radar Chart Data
+  const githubRankData = [
+    {
+      subject: 'Activity',
+      You: 85,
+      Friend: 65,
+      fullMark: 100,
+    },
+    {
+      subject: 'Popularity',
+      You: 70,
+      Friend: 90,
+      fullMark: 100,
+    },
+    {
+      subject: 'Collaboration',
+      You: 80,
+      Friend: 75,
+      fullMark: 100,
+    },
+    {
+      subject: 'Code Quality',
+      You: 90,
+      Friend: 70,
+      fullMark: 100,
+    },
+    {
+      subject: 'Impact',
+      You: 65,
+      Friend: 80,
+      fullMark: 100,
+    },
+    {
+      subject: 'Consistency',
+      You: 75,
+      Friend: 85,
+      fullMark: 100,
+    },
+  ];
+
   return (
     <div className="w-full bg-gray-100 rounded-2xl shadow-lg p-6 border-blue-500 border-2">
       <h2 className="text-3xl font-bold mb-6">Analytics Dashboard</h2>
       <div className='bg-white border-blue-200 border-2 rounded-2xl p-2 mb-5'>
-          <h3 className="text-xl font-bold ">Your Activity</h3>
       <div className="flex items-center space-x-4 mb-4">
         <span
           className={`cursor-pointer px-2 py-1 rounded ${selectedYear === 2024 ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 border border-blue-500'}`}
@@ -93,6 +133,7 @@ const AnalyticsTabs = () => {
           2025
         </span>
       </div>
+          <h3 className="text-xl font-bold ">Your Activity</h3>
 
       <div className="overflow-x-auto">
         <div className="min-w-max">
@@ -153,9 +194,39 @@ const AnalyticsTabs = () => {
           </div>
         </div>
         </div>
-              <div className='bg-white border-blue-200 border-2 rounded-xl p-2'>
-                      <h2 className='font-bold text-2xl'>Github Rank </h2>
+
+        <div className='bg-white border-blue-200 border-2 rounded-xl p-4'>
+          <h2 className='font-bold text-2xl mb-4'>GitHub Rank</h2>
+          <div className="flex items-center justify-center">
+            <div className="w-full h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart cx="50%" cy="50%" outerRadius="80%" data={githubRankData}>
+                  <PolarGrid stroke="#e2e8f0" />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#4a5568', fontSize: 12 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Radar name="You" dataKey="You" stroke="#fca5a5" fill="#fca5a5" fillOpacity={0.6} />
+                  <Radar name="Friend" dataKey="Friend" stroke="#93c5fd" fill="#93c5fd" fillOpacity={0.6} />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+          <div className="mt-4 flex justify-center space-x-8">
+            <div className="text-center">
+              <h3 className="font-semibold">Overall Rank</h3>
+              <div className="mt-2">
+                <span className="bg-red-100 text-red-800 font-medium px-3 py-1 rounded-full">You: 78/100</span>
               </div>
+            </div>
+            <div className="text-center">
+              <h3 className="font-semibold">Overall Rank</h3>
+              <div className="mt-2">
+                <span className="bg-blue-100 text-blue-800 font-medium px-3 py-1 rounded-full">Friend: 77/100</span>
+              </div>
+            </div>
+          </div>
+        </div>
     </div>
   );
 };

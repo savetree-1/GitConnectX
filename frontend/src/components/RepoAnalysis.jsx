@@ -35,7 +35,7 @@ const CustomTooltip = ({ active, payload }) => {
 const RepoAnalysis = () => {
   return (
     <div className="w-full bg-gray-100 rounded-2xl shadow-lg p-6 border-blue-500 border-2">
-      <h2 className="text-3xl font-bold mb-6">Repositories Analysis</h2>
+      <h2 className="text-3xl font-bold mb-6">Your Repositories Analysis</h2>
       <div className="flex flex-col md:flex-row gap-6">        
         {/* Pie Chart Section */}
         <div className="w-full md:w-1/2 bg-white rounded-2xl p-4 shadow border-2 border-blue-200">
