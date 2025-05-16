@@ -2,95 +2,147 @@
 #include <vector>
 #include <queue>
 #include <algorithm>
+#include <stdexcept>
+#include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 
 class KCore {
 public:
-    static std::vector<int> decompose(const Graph& graph) {
-        int n = graph.getNumVertices();
-        std::vector<int> degrees(n);
-        std::vector<int> coreNumbers(n);
-        std::vector<bool> removed(n, false);
-        
-        // Calculate initial degrees
-        for (int i = 0; i < n; ++i) {
-            degrees[i] = graph.getNeighbors(i).size();
+    struct Result {
+        std::vector<int> coreNumbers;
+        int maxCoreNumber;
+        std::unordered_map<int, int> coreSizes;
+
+        Result(const std::vector<int>& cores) : coreNumbers(cores) {
+            maxCoreNumber = cores.empty() ? 0 : *std::max_element(cores.begin(), cores.end());
+            for (int core : cores) coreSizes[core]++;
         }
-        
-        // Find minimum degree
-        int minDegree = *std::min_element(degrees.begin(), degrees.end());
-        int k = minDegree;
-        
-        while (true) {
-            std::queue<int> q;
-            
-            // Add all vertices with degree < k to the queue
-            for (int i = 0; i < n; ++i) {
-                if (!removed[i] && degrees[i] < k) {
-                    q.push(i);
-                }
+
+        std::string getSummary() const {
+            std::ostringstream oss;
+            oss << "K-Core Decomposition Results:\n";
+            oss << "Maximum core number: " << maxCoreNumber << "\n\n";
+            oss << "Core distribution:\n";
+            for (int k = 0; k <= maxCoreNumber; ++k) {
+                int size = coreSizes.count(k) ? coreSizes.at(k) : 0;
+                oss << "k = " << k << ": " << size << " vertices\n";
             }
-            
-            // Process the queue
-            while (!q.empty()) {
-                int v = q.front();
-                q.pop();
-                
-                if (removed[v]) continue;
-                
-                removed[v] = true;
-                coreNumbers[v] = k - 1;
-                
-                // Update degrees of neighbors
-                for (const auto& neighbor : graph.getNeighbors(v)) {
-                    if (!removed[neighbor.first]) {
-                        degrees[neighbor.first]--;
-                        if (degrees[neighbor.first] < k) {
-                            q.push(neighbor.first);
+            return oss.str();
+        }
+    };
+
+    static Result decompose(const Graph& graph) {
+        int n = graph.getNumVertices();
+        if (n == 0) throw std::invalid_argument("Graph is empty");
+
+        // Build reverse adjacency list for efficient in-degree computation
+        std::vector<std::unordered_set<int>> inNeighbors(n);
+        for (int u = 0; u < n; ++u) {
+            for (const auto& [v, _] : graph.getNeighbors(u)) {
+                inNeighbors[v].insert(u);
+            }
+        }
+
+        // Initialize degrees and core numbers
+        std::vector<int> inDegrees(n), outDegrees(n), coreNumbers(n);
+        for (int v = 0; v < n; ++v) {
+            inDegrees[v] = inNeighbors[v].size();
+            outDegrees[v] = graph.getNeighbors(v).size();
+            coreNumbers[v] = std::min(inDegrees[v], outDegrees[v]);
+        }
+
+        // Process vertices in non-decreasing order of degree
+        bool changed = true;
+        while (changed) {
+            changed = false;
+            for (int v = 0; v < n; ++v) {
+                int minDegree = std::min(inDegrees[v], outDegrees[v]);
+                if (minDegree < coreNumbers[v]) {
+                    coreNumbers[v] = minDegree;
+                    changed = true;
+
+                    // Update out-neighbors
+                    for (const auto& [u, _] : graph.getNeighbors(v)) {
+                        if (inDegrees[u] > minDegree) {
+                            inDegrees[u]--;
+                        }
+                    }
+
+                    // Update in-neighbors
+                    for (int u : inNeighbors[v]) {
+                        if (outDegrees[u] > minDegree) {
+                            outDegrees[u]--;
                         }
                     }
                 }
             }
+        }
+
+        return Result(coreNumbers);
+    }
+
+    static std::vector<std::vector<int>> getKCoreSubgraphs(const Graph& graph, const Result& result, int minK = 0) {
+        if (minK < 0) throw std::invalid_argument("Minimum k must be non-negative");
+
+        std::unordered_map<int, std::vector<int>> grouped;
+        for (size_t i = 0; i < result.coreNumbers.size(); ++i)
+            if (result.coreNumbers[i] >= minK)
+                grouped[result.coreNumbers[i]].push_back(static_cast<int>(i));
+
+        std::vector<int> cores;
+        for (const auto& [k, _] : grouped) cores.push_back(k);
+        std::sort(cores.begin(), cores.end());
+
+        std::vector<std::vector<int>> res;
+        for (int k : cores) res.push_back(grouped[k]);
+        return res;
+    }
+
+    static std::vector<int> getLargestKCore(const Result& result) {
+        std::vector<int> largestCore;
+        for (size_t i = 0; i < result.coreNumbers.size(); ++i) {
+            if (result.coreNumbers[i] == result.maxCoreNumber) {
+                largestCore.push_back(static_cast<int>(i));
+            }
+        }
+        return largestCore;
+    }
+
+    static std::vector<std::pair<int, int>> getKCoreHierarchy(const Result& result) {
+        std::vector<std::pair<int, int>> hierarchy(result.coreSizes.begin(), result.coreSizes.end());
+        std::sort(hierarchy.begin(), hierarchy.end());
+        return hierarchy;
+    }
+
+    static bool isKCore(const Graph& graph, const std::vector<int>& vertices, int k) {
+        if (k < 0) throw std::invalid_argument("k must be non-negative");
+        
+        std::unordered_set<int> vertexSet(vertices.begin(), vertices.end());
+        for (int v : vertices) {
+            if (!graph.hasVertex(v)) throw std::invalid_argument("Invalid vertex in subgraph");
             
-            // Check if all vertices are processed
-            bool allProcessed = true;
-            for (int i = 0; i < n; ++i) {
-                if (!removed[i]) {
-                    allProcessed = false;
-                    break;
+            // Count both in-degree and out-degree in the subgraph
+            int inDegree = 0, outDegree = 0;
+            
+            // Count out-degree
+            for (const auto& [u, _] : graph.getNeighbors(v)) {
+                if (vertexSet.count(u)) outDegree++;
+            }
+            
+            // Count in-degree
+            for (int u = 0; u < graph.getNumVertices(); ++u) {
+                if (!vertexSet.count(u)) continue;
+                for (const auto& [w, _] : graph.getNeighbors(u)) {
+                    if (w == v) {
+                        inDegree++;
+                        break;
+                    }
                 }
             }
             
-            if (allProcessed) break;
-            
-            k++;
+            if (std::min(inDegree, outDegree) < k) return false;
         }
-        
-        return coreNumbers;
+        return true;
     }
-    
-    static std::vector<std::vector<int>> getKCoreSubgraphs(
-        const Graph& graph, const std::vector<int>& coreNumbers) {
-        int maxK = *std::max_element(coreNumbers.begin(), coreNumbers.end());
-        std::vector<std::vector<int>> kCoreSubgraphs(maxK + 1);
-        
-        for (int i = 0; i < coreNumbers.size(); ++i) {
-            kCoreSubgraphs[coreNumbers[i]].push_back(i);
-        }
-        
-        return kCoreSubgraphs;
-    }
-    
-    static std::vector<int> getLargestKCore(
-        const Graph& graph, const std::vector<int>& coreNumbers) {
-        int maxK = *std::max_element(coreNumbers.begin(), coreNumbers.end());
-        std::vector<int> largestKCore;
-        
-        for (int i = 0; i < coreNumbers.size(); ++i) {
-            if (coreNumbers[i] == maxK) {
-                largestKCore.push_back(i);
-            }
-        }
-        
-        return largestKCore;
-    }
-}; 
+};

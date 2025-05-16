@@ -4,11 +4,25 @@ Flask-Cors==4.0.0
 requests==2.31.0
 PyGithub==1.59.0
 python-dotenv==1.0.0
+fastapi==0.104.1
+uvicorn==0.24.0.post1
+pydantic==2.4.2
+
+# Authentication
+PyJWT==2.8.0
+bcrypt==4.0.1
+
+# Database
+pymongo==4.5.0
+motor==3.3.1
+psycopg2-binary==2.9.9
+SQLAlchemy==2.0.23
 
 # Data Processing
 pandas==2.0.3
 numpy==1.25.0
 networkx==3.1
+scipy==1.11.3
 
 # Graph Algorithms (for Python implementations)
 community==1.0.0b1
@@ -20,3 +34,4 @@ responses==0.23.1
 
 # Utilities
 tqdm==4.65.0
+python-multipart==0.0.6

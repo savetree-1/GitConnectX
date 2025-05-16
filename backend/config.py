@@ -4,10 +4,44 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
+# API Configuration
+API_VERSION = '1.0.0'
+API_PREFIX = '/api/v1'
+
 # GitHub API Configuration
-GITHUB_ACCESS_TOKEN = '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'
-GITHUB_API_BASE_URL = "https://api.github.com"
-API_REQUEST_DELAY = 1.0  # seconds between requests to avoid rate limiting
+GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN')
+GITHUB_API_BASE_URL = 'https://api.github.com'
+
+# Database Configuration
+MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/gitconnectx')
+POSTGRES_URI = os.getenv('POSTGRES_URI', 'postgresql://postgres:postgres@localhost:5432/gitconnectx')
+
+# JWT Configuration for Authentication
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev_secret_key')
+JWT_ALGORITHM = 'HS256'
+JWT_EXPIRATION_DELTA = 24 * 60 * 60  # 24 hours in seconds
+
+# Application Settings
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
+
+# Cache Settings
+CACHE_TIMEOUT = 3600  # 1 hour in seconds
+
+# Graph Algorithm Settings
+PAGERANK_DAMPING = 0.85
+PAGERANK_ITERATIONS = 100
+LOUVAIN_RESOLUTION = 1.0
+
+# API Rate Limiting
+RATE_LIMIT_PER_MINUTE = 60
+
+# C++ Algorithm Binary Paths
+CPP_ALGORITHMS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cpp_algorithms')
+PAGERANK_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'pagerank')
+LOUVAIN_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'louvain')
+DIJKSTRA_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'dijkstra')
+HITS_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'hits')
 
 # Data Collection Parameters
 MAX_FOLLOWERS_TO_FETCH = 500
@@ -22,7 +56,6 @@ PROCESSED_DATA_DIR = "./processed_data"
 LOG_DIR = "./logs"
 
 # Graph Analysis Parameters
-PAGERANK_DAMPING = 0.85
 PAGERANK_MAX_ITERATIONS = 100
 PAGERANK_TOLERANCE = 1e-6
 

@@ -1,2 +1,46 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+*.dll
+*.out
+*.exe
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# Virtual environments
+venv/
+env/
 .env
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Logs
+*.log
+api_server.log
+
+# Compiled C++ binaries
+cpp_algorithms/pagerank
+cpp_algorithms/louvain
+cpp_algorithms/dijkstra
+cpp_algorithms/hits
+
+# Database files
+*.db
+*.sqlite3
+
+# Temporary files
+*.tmp
+.DS_Store
+
 node_modules

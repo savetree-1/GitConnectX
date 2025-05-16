@@ -2,6 +2,12 @@ import pandas as pd
 import networkx as nx
 import json
 import os
+import logging
+from typing import Dict, List, Any, Optional
+import numpy as np
+from datetime import datetime
+
+from backend import config
 
 def load_csv_data(directory="./"):
     """Load all CSV files into pandas DataFrames"""
@@ -90,50 +96,340 @@ def process_data():
 
 if __name__ == "__main__":
     process_data()
-#!/usr/bin/env python3
-# """
-# graph.py - Graph model for GitConnectX
 
-# This module defines the Graph model for representing networks of GitHub users and repositories.
-# """
-
-# from dataclasses import dataclass, field
-# from typing import Dict, List, Set, Any, Union, Optional
-# import json
-# import os
-
-# # Import local models
-# from models.user import User
-# from models.repository import Repository
-# from models.edge import FollowEdge, CollaborationEdge, ContributionEdge
-
-# @dataclass
-# class Graph:
-#     """Represents a graph with nodes and edges."""
+class DataProcessor:
+    """Service for processing GitHub data"""
     
-#     nodes: Dict[int, Union[User, Repository]] = field(default_factory=dict)
-#     edges: List[Union[FollowEdge, CollaborationEdge, ContributionEdge]] = field(default_factory=list)
-#     adjacency_list: Dict[int, Set[int]] = field(default_factory=lambda: {})
+    def __init__(self):
+        """Initialize the data processor"""
+        self.logger = logging.getLogger(__name__)
     
-#     def add_node(self, node: Union[User, Repository]) -> None:
-#         """
-#         Add a node to the graph
+    def process_user_data(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process user data for API response
         
-#         Args:
-#             node: User or Repository instance
-#         """
-#         self.nodes[node.id] = node
-#         if node.id not in self.adjacency_list:
-#             self.adjacency_list[node.id] = set()
+        Args:
+            user_data: Raw user data from GitHub API or database
+            
+        Returns:
+            Processed user data
+        """
+        try:
+            # For now, just return the user data as is
+            # In a real implementation, we might transform or enrich the data
+            return user_data
+            
+        except Exception as e:
+            self.logger.error(f"Error processing user data: {str(e)}")
+            return user_data
     
-#     def add_edge(self, edge: Union[FollowEdge, CollaborationEdge, ContributionEdge]) -> None:
-#         """
-#         Add an edge to the graph
+    def process_repository_data(self, repo_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process repository data for API response
         
-#         Args:
-#             edge: FollowEdge, CollaborationEdge, or ContributionEdge instance
-#         """
-#         self.edges.append(edge)
+        Args:
+            repo_data: Raw repository data from GitHub API or database
+            
+        Returns:
+            Processed repository data
+        """
+        try:
+            # For now, just return the repository data as is
+            # In a real implementation, we might transform or enrich the data
+            return repo_data
+            
+        except Exception as e:
+            self.logger.error(f"Error processing repository data: {str(e)}")
+            return repo_data
+    
+    def process_network_data(self, network_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process network data for visualization and analysis
         
-#         if isinstance(edge, FollowEdge):
-#             # Initialize nodes in adjacency list if they don'
+        Args:
+            network_data: Raw network data with nodes and edges
+            
+        Returns:
+            Processed network data
+        """
+        try:
+            # Calculate network statistics
+            nodes_count = len(network_data['nodes'])
+            edges_count = len(network_data['edges'])
+            
+            # Count node types
+            user_count = sum(1 for node in network_data['nodes'].values() if node['type'] == 'user')
+            repo_count = sum(1 for node in network_data['nodes'].values() if node['type'] == 'repository')
+            
+            # Count edge types
+            follows_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'follows')
+            owns_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'owns')
+            contributes_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'contributes')
+            
+            # Add statistics to network data
+            network_data['statistics'] = {
+                'nodes_count': nodes_count,
+                'edges_count': edges_count,
+                'user_count': user_count,
+                'repo_count': repo_count,
+                'follows_count': follows_count,
+                'owns_count': owns_count,
+                'contributes_count': contributes_count
+            }
+            
+            # Process nodes data for visualization
+            nodes_list = []
+            for node_id, node_data in network_data['nodes'].items():
+                node_type = node_data['type']
+                node_obj = {
+                    'id': node_id,
+                    'type': node_type,
+                    'label': node_id
+                }
+                
+                # Add type-specific properties
+                if node_type == 'user':
+                    node_obj['displayName'] = node_data['data'].get('name', node_id)
+                    node_obj['avatar'] = node_data['data'].get('avatar_url')
+                    node_obj['followers'] = node_data['data'].get('followers_count', 0)
+                    node_obj['group'] = 'user'
+                elif node_type == 'repository':
+                    node_obj['displayName'] = node_data['data'].get('name', node_id)
+                    node_obj['language'] = node_data['data'].get('language')
+                    node_obj['stars'] = node_data['data'].get('stargazers_count', 0)
+                    node_obj['group'] = 'repository'
+                
+                nodes_list.append(node_obj)
+            
+            # Process edges data for visualization
+            edges_list = []
+            for i, edge in enumerate(network_data['edges']):
+                edge_obj = {
+                    'id': str(i),
+                    'source': edge['source'],
+                    'target': edge['target'],
+                    'type': edge['type']
+                }
+                
+                # Add type-specific properties
+                if edge['type'] == 'follows':
+                    edge_obj['label'] = 'follows'
+                    edge_obj['color'] = '#0077B6'  # Blue
+                elif edge['type'] == 'owns':
+                    edge_obj['label'] = 'owns'
+                    edge_obj['color'] = '#00B74A'  # Green
+                elif edge['type'] == 'contributes':
+                    edge_obj['label'] = 'contributes'
+                    edge_obj['color'] = '#F93154'  # Red
+                
+                edges_list.append(edge_obj)
+            
+            # Replace nodes and edges with processed lists
+            processed_network = {
+                'statistics': network_data['statistics'],
+                'raw': {
+                    'nodes': network_data['nodes'],
+                    'edges': network_data['edges']
+                },
+                'visualization': {
+                    'nodes': nodes_list,
+                    'edges': edges_list
+                }
+            }
+            
+            return processed_network
+            
+        except Exception as e:
+            self.logger.error(f"Error processing network data: {str(e)}")
+            return network_data
+    
+    def process_pagerank_results(self, pagerank_results: Dict[str, float], network_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process PageRank results for API response
+        
+        Args:
+            pagerank_results: Dictionary mapping node IDs to PageRank scores
+            network_data: Network data with nodes information
+            
+        Returns:
+            Processed PageRank results
+        """
+        try:
+            # Convert to list of dictionaries with node information
+            results_list = []
+            for node_id, score in pagerank_results.items():
+                if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
+                    node_data = network_data['nodes'][node_id]['data']
+                    results_list.append({
+                        'id': node_id,
+                        'score': score,
+                        'name': node_data.get('name', node_id),
+                        'login': node_data.get('login', node_id),
+                        'avatar_url': node_data.get('avatar_url'),
+                        'followers_count': node_data.get('followers_count', 0),
+                        'following_count': node_data.get('following_count', 0)
+                    })
+            
+            # Sort by score in descending order
+            results_list.sort(key=lambda x: x['score'], reverse=True)
+            
+            return {
+                'algorithm': 'pagerank',
+                'description': 'PageRank measures the relative importance of nodes in the network',
+                'scores': results_list
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error processing PageRank results: {str(e)}")
+            return {
+                'algorithm': 'pagerank',
+                'error': str(e)
+            }
+    
+    def process_hits_results(self, hits_results: tuple, network_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process HITS results for API response
+        
+        Args:
+            hits_results: Tuple of (hubs, authorities) dictionaries
+            network_data: Network data with nodes information
+            
+        Returns:
+            Processed HITS results
+        """
+        try:
+            hubs, authorities = hits_results
+            
+            # Process hubs scores
+            hubs_list = []
+            for node_id, score in hubs.items():
+                if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
+                    node_data = network_data['nodes'][node_id]['data']
+                    hubs_list.append({
+                        'id': node_id,
+                        'score': score,
+                        'name': node_data.get('name', node_id),
+                        'login': node_data.get('login', node_id),
+                        'avatar_url': node_data.get('avatar_url')
+                    })
+            
+            # Sort by score in descending order
+            hubs_list.sort(key=lambda x: x['score'], reverse=True)
+            
+            # Process authorities scores
+            authorities_list = []
+            for node_id, score in authorities.items():
+                if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
+                    node_data = network_data['nodes'][node_id]['data']
+                    authorities_list.append({
+                        'id': node_id,
+                        'score': score,
+                        'name': node_data.get('name', node_id),
+                        'login': node_data.get('login', node_id),
+                        'avatar_url': node_data.get('avatar_url')
+                    })
+            
+            # Sort by score in descending order
+            authorities_list.sort(key=lambda x: x['score'], reverse=True)
+            
+            return {
+                'algorithm': 'hits',
+                'description': 'HITS calculates hub and authority scores for nodes in the network',
+                'hubs': hubs_list[:20],  # Limit to top 20
+                'authorities': authorities_list[:20]  # Limit to top 20
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error processing HITS results: {str(e)}")
+            return {
+                'algorithm': 'hits',
+                'error': str(e)
+            }
+    
+    def process_community_results(self, community_results: Dict[str, Any], network_data: Dict[str, Any]) -> Dict[str, Any]:
+        """Process community detection results for API response
+        
+        Args:
+            community_results: Dictionary with community detection results
+            network_data: Network data with nodes information
+            
+        Returns:
+            Processed community detection results
+        """
+        try:
+            # Get algorithm and communities from results
+            algorithm = community_results.get('algorithm', 'unknown')
+            
+            # Process based on algorithm type
+            if algorithm == 'louvain':
+                communities = community_results.get('community_groups', {})
+                
+                # Process communities
+                communities_list = []
+                for community_id, node_ids in communities.items():
+                    community = {
+                        'id': community_id,
+                        'size': len(node_ids),
+                        'members': []
+                    }
+                    
+                    # Add node information to community members
+                    for node_id in node_ids:
+                        if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
+                            node_data = network_data['nodes'][node_id]['data']
+                            community['members'].append({
+                                'id': node_id,
+                                'name': node_data.get('name', node_id),
+                                'login': node_data.get('login', node_id),
+                                'avatar_url': node_data.get('avatar_url')
+                            })
+                    
+                    communities_list.append(community)
+                
+                # Sort communities by size in descending order
+                communities_list.sort(key=lambda x: x['size'], reverse=True)
+                
+                return {
+                    'algorithm': 'louvain',
+                    'description': 'Louvain method for community detection based on modularity optimization',
+                    'communities': communities_list
+                }
+                
+            elif algorithm == 'kcore':
+                cores = community_results.get('core_groups', {})
+                
+                # Process cores
+                cores_list = []
+                for core_num, node_ids in cores.items():
+                    core = {
+                        'core': int(core_num),
+                        'size': len(node_ids),
+                        'members': []
+                    }
+                    
+                    # Add node information to core members
+                    for node_id in node_ids:
+                        if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
+                            node_data = network_data['nodes'][node_id]['data']
+                            core['members'].append({
+                                'id': node_id,
+                                'name': node_data.get('name', node_id),
+                                'login': node_data.get('login', node_id),
+                                'avatar_url': node_data.get('avatar_url')
+                            })
+                    
+                    cores_list.append(core)
+                
+                # Sort cores by core number in descending order
+                cores_list.sort(key=lambda x: x['core'], reverse=True)
+                
+                return {
+                    'algorithm': 'kcore',
+                    'description': 'k-core decomposition identifies nested subgraphs of increasingly connected nodes',
+                    'cores': cores_list
+                }
+                
+            else:
+                return community_results
+                
+        except Exception as e:
+            self.logger.error(f"Error processing community results: {str(e)}")
+            return {
+                'algorithm': community_results.get('algorithm', 'unknown'),
+                'error': str(e)
+            }

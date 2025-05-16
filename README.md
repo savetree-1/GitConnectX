@@ -1,65 +1,27 @@
-
 # GitConnectX
 
 ## Overview
 GitConnectX is a developer network analysis tool for GitHub that extracts and analyzes user interactions using graph-based models and social network analysis. It applies algorithms such as BFS, DFS, Dijkstra's, PageRank, and Louvain clustering to reveal insights into developer influence and collaboration dynamics.
 
-## Repo
-GitConnectX/
-│
-├── README.md
-├── LICENSE
-├── requirements.txt
-├── .gitignore
-│
-├── backend/                  
-│   ├── fetch_data.py          
-│   ├── save_edges.py          
-│   └── visualize_data.py      
-│
-├── cpp_algorithms/            
-│   ├── graph_build.cpp        
-│   ├── bfs_dfs.cpp            
-│   ├── dijkstra.cpp           
-│   ├── floyd_warshall.cpp     
-│   ├── pagerank.cpp           
-│   ├── hits.cpp               
-│   ├── kcore.cpp              
-│   └── louvain.cpp            
-│
-├── frontend/                  
-│   ├── public/
-│   │   └── index.html          
-│   ├── src/
-│   │   ├── App.js              
-│   │   ├── components/
-│   │   │   ├── GraphVisualization.js   
-│   │   │   ├── UserRanking.js           
-│   │   │   ├── CommunityDetection.js    
-│   │   │   ├── ShortestPathFinder.js    
-│   │   └── styles/
-│   │       └── style.css         
-│   └── package.json             
-│
-├── api/                        
-│   ├── app.py                  
-│   └── routes.py               
-│
-├── models/                     
-│   ├── user.py                 
-│   ├── repository.py           
-│
-├── docs/                       
-│   ├── architecture_diagram.png 
-│   ├── uml_diagram.png          
-│   ├── report.pdf               
-│
-└── dataset/                    
-    ├── raw_data.json           
-    ├── edges.csv               
-    ├── nodes.csv
+## Architecture
 
-## Features
+### Backend
+The backend is built with Flask and provides RESTful APIs to interact with GitHub data. It includes:
+
+- **GitHub Data Fetching**: Fetches user, repository, and connection data using PyGitHub
+- **Graph Analysis Algorithms**: Implements PageRank, Louvain clustering, and shortest path algorithms
+- **Database Integration**: Stores data in PostgreSQL (structured data) and MongoDB (graph data)
+- **API Endpoints**: Provides interfaces for network visualization, influence ranking, and community detection
+
+### C++ Algorithms (Optional)
+For performance optimization, computationally intensive graph algorithms can be implemented in C++:
+
+- PageRank for influence ranking
+- Louvain for community detection
+- Dijkstra's algorithm for shortest paths
+- HITS algorithm for hub and authority scores
+
+### Features
 1. **Graph Visualization** - Displays real-time network graphs of developer interactions.
 2. **Influence Ranking** - Identifies key contributors using PageRank and HITS.
 3. **Community Detection** - Groups developers into clusters using Louvain.
@@ -67,93 +29,96 @@ GitConnectX/
 5. **Database Storage** - Stores processed data for fast retrieval and analysis.
 6. **Interactive Web Dashboard** - Provides a user-friendly interface for exploring GitHub networks.
 
-## System Architecture
-1. **Data Collection & Processing**
-   - Fetches user and repository data via GitHub API.
-   - Constructs Follow Network (developer connections) and Commit Network (developer-repository relations).
-2. **Graph Analysis**
-   - Models interactions using NetworkX.
-   - Applies PageRank & HITS for user influence ranking.
-   - Uses Louvain clustering for community detection.
-3. **Visualization & Deployment**
-   - Interactive graphs with Matplotlib, D3.js, and Gephi.
-   - Web dashboard built using Flask/FastAPI & React.js.
-   - Data storage in PostgreSQL/MongoDB.
+## Setup Instructions
 
-## Data Structures & Algorithms Used
-- **Graph Representation** - Adjacency List & Adjacency Matrix.
-- **Traversal Algorithms** - BFS and DFS for exploring connections.
-- **Shortest Path Algorithm** - Dijkstra’s algorithm for measuring link strength.
-- **Influence Ranking** - PageRank and HITS to rank developers.
-- **Community Detection** - Louvain algorithm for clustering.
+### Prerequisites
+- Python 3.9+
+- PostgreSQL
+- MongoDB
+- Git
+- C++ compiler (optional, for C++ algorithm implementations)
 
----
+### Installation
 
-## ⚙️ Tech Stack
-- **Languages**: Python, JavaScript  
-- **Libraries**: PyGitHub, NetworkX, Pandas, NumPy, Matplotlib, D3.js  
-- **Frameworks**: Flask/FastAPI, React.js  
-- **Database**: PostgreSQL/MongoDB  
-- **Deployment**: Docker, AWS/GCP  
-
----
-
-## 📊 Algorithms Used (DAA & DS)
-- **Graph Traversal**: BFS, DFS  
-- **Shortest Path**: Dijkstra’s Algorithm  
-- **Influence Ranking**: PageRank, HITS  
-- **Community Detection**: Louvain Clustering  
-- **Data Structures**: Graphs, Hash Maps, Adjacency Lists  
-
----
-
-## 🛠️ Installation
+1. Clone the repository
 ```sh
-# Clone the repository
-git clone https://github.com/your-username/GitConnectX.git
+git clone https://github.com/yourusername/GitConnectX.git
 cd GitConnectX
-
-# Install dependencies
-npm install       # For frontend
-pip install -r requirements.txt   # For backend
-
-# Start the backend
-cd backend
-python app.py
-
-# Start the frontend
-cd frontend
-npm start
 ```
 
----
+2. Set up a virtual environment
+```sh
+python -m venv venv
+source venv/bin/activate  # On Windows, use: venv\Scripts\activate
+```
 
-## 📖 References
-1. L. Tang and H. Liu, *Community Detection in Social Networks*, Morgan & Claypool, 2010.  
-2. S. Brin and L. Page, "The Anatomy of a Large-Scale Hypertextual Web Search Engine," *Computer Networks*, vol. 30, no. 1, pp. 107-117, 1998.  
-3. M. Girvan and M. E. J. Newman, "Community Structure in Social and Biological Networks," *PNAS*, vol. 99, no. 12, pp. 7821-7826, 2002.  
+3. Install dependencies
+```sh
+pip install -r requirements.txt
+```
 
----
+4. Set up environment variables
+Copy the example environment file and modify it with your own settings:
+```sh
+cp backend/.env.example .env
+```
 
-## 👥 Who Are We?
-**Team Ananta** – A group of passionate developers and researchers dedicated to exploring GitHub's network and providing valuable insights.  
-### **Team Members:**
-- **Ankush Rawat**  
-- **Anika Dewari**  
-- **Akhil Nautiyal**  
-- **Ayush Negi**  
+You need to configure:
+- `GITHUB_API_TOKEN`: Your GitHub personal access token
+- Database connection strings
+- Security settings
 
----
+5. Initialize databases
+```sh
+# Create PostgreSQL database
+psql -c "CREATE DATABASE gitconnectx;"
 
-## 🌟 Contributing
-Want to contribute? Follow our guidelines and submit a PR! 🚀
+# MongoDB should automatically create the database on first use
+```
 
-📧 **Contact**: ankurawat8844@gmail.com 
-🔗 **GitHub**: [GitConnectX](https://github.com/your-username/GitConnectX)
+### Running the Application
 
----
+1. Start the API server
+```sh
+python -m api.app
+```
 
-**📌 License:** MIT 📜 | **🔗 Developed by**: Team Ananta  
+2. Access the API at http://localhost:5000
+
+## API Endpoints
+
+### User Data
+- GET `/api/user/<username>` - Fetch GitHub user data
+
+### Network Analysis
+- GET `/api/network/<username>` - Fetch a user's network (followers, following, repositories)
+- GET `/api/analyze/path` - Find shortest path between two developers
+- GET `/api/analyze/communities` - Detect communities in a user's network
+- GET `/api/analyze/rank` - Rank developers in a network using PageRank or HITS
+
+### Repository Data
+- GET `/api/repository/<owner>/<repo>` - Fetch repository data
+- GET `/api/analyze/languages/<username>` - Analyze programming languages used by a developer
+
+## Algorithms Used
+- **Graph Traversal**: BFS, DFS
+- **Shortest Path**: Dijkstra's Algorithm
+- **Influence Ranking**: PageRank, HITS
+- **Community Detection**: Louvain Clustering
+- **Data Structures**: Graphs, Hash Maps, Adjacency Lists
+
+## Contributing
+Want to contribute? Follow our guidelines and submit a PR!
+
+## License
+MIT
+
+## Team
+**Team Ananta**
+- Ankush Rawat
+- Anika Dewari
+- Akhil Nautiyal
+- Ayush Negi
 ```
 
 
