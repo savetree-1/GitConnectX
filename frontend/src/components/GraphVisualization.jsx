@@ -1,61 +1,483 @@
 import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const GraphVisualization = () => {
+const GraphVisualization = ({ username }) => {
   const d3Container = useRef(null);
   const [selectedNode, setSelectedNode] = useState(null);
   const [comparisonMode, setComparisonMode] = useState(false);
+  const [networkData, setNetworkData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const margin = 50;
   const width = 500;
   const height = 500;
 
-  const userData1 = {
-    nodes: [
-      { id: 'User', group: 1, details: { name: 'Primary User', repos: 12, followers: 45, following: 32 } },
-      { id: 'StarredRepo1', group: 2, details: { name: 'React', stars: 178000, forks: 36400, language: 'JavaScript' } },
-      { id: 'StarredRepo2', group: 2, details: { name: 'TensorFlow', stars: 156000, forks: 86900, language: 'Python' } },
-      { id: 'Follower1', group: 3, details: { name: 'Sarah Chen', repos: 8, followers: 23, following: 17 } },
-      { id: 'Follower2', group: 3, details: { name: 'Mike Johnson', repos: 15, followers: 48, following: 12 } },
-      { id: 'Repository1', group: 4, details: { name: 'Personal Website', stars: 5, forks: 2, language: 'HTML/CSS' } },
-      { id: 'Repository2', group: 4, details: { name: 'Data Visualizer', stars: 127, forks: 34, language: 'JavaScript' } },
-      { id: 'Following1', group: 5, details: { name: 'Emma Wilson', repos: 6, followers: 12, following: 8 } },
-      { id: 'Following2', group: 5, details: { name: 'Alex Brown', repos: 20, followers: 150, following: 45 } },
-    ],
-    links: [
-      { source: 'User', target: 'StarredRepo1' },
-      { source: 'User', target: 'StarredRepo2' },
-      { source: 'User', target: 'Follower1' },
-      { source: 'User', target: 'Follower2' },
-      { source: 'User', target: 'Repository1' },
-      { source: 'User', target: 'Repository2' },
-      { source: 'User', target: 'Following1' },
-      { source: 'User', target: 'Following2' },
-    ]
+  // Demo data with the given username - based on the provided API format
+  const getDemoData = (name) => {
+    // Format based on the API response structure you provided
+    // Real GitHub stargazers data with actual GitHub usernames
+    const realStargazers = [
+      "sudaisasif",
+      "usmanworwox",
+      "JunaidQadirB",
+      "DimaMinka",
+      "AdamTheWizard",
+      "H8ToDoThis",
+      "jimi008",
+      "seb86",
+      "wassim",
+      "santhosh-chinnasamy",
+      "charlescarrari",
+      "Ambrish-Abhijatya",
+      "mayur-coditas",
+      "marktrinh",
+      "TahaAhmed"
+    ];
+    
+    // Real repository names
+    const realRepos = [
+      "hacktoberfest",
+      "react",
+      "vue",
+      "tensorflow", 
+      "flutter",
+      "awesome-python",
+      "node",
+      "javascript-algorithms",
+      "free-programming-books"
+    ];
+
+    // Generate nodes based on the API format
+    const nodes = [
+      // Central user node
+      {
+        id: name,
+        originalId: `${name}(user)`,
+        group: 1,
+        type: "user",
+        details: {
+          name: name,
+          handle: name,
+          repos: 14, 
+          followers: 78, 
+          following: 32
+        }
+      },
+      
+      // Repository nodes - with proper format matching API
+      ...realRepos.slice(0, 4).map((repo, index) => ({
+        id: repo,
+        originalId: `${repo}(repo)`,
+        group: 2,
+        type: "repository",
+        details: {
+          name: repo,
+          stars: Math.floor(Math.random() * 1000) + 500,
+          forks: Math.floor(Math.random() * 500) + 50,
+          language: ["JavaScript", "TypeScript", "Python", "Java", "Go"][index % 5]
+        }
+      })),
+      
+      // Stargazer nodes - real GitHub users
+      ...realStargazers.slice(0, 8).map((user) => ({
+        id: user,
+        originalId: `${user}(user)`,
+        group: 3,
+        type: "user",
+        details: {
+          name: user,
+          handle: user,
+          repos: Math.floor(Math.random() * 20) + 5,
+          followers: Math.floor(Math.random() * 200) + 10,
+          following: Math.floor(Math.random() * 100) + 10
+        }
+      }))
+    ];
+
+    // Generate links matching the API format
+    const links = [];
+    
+    // User stars repositories
+    realRepos.slice(0, 4).forEach(repo => {
+      links.push({
+        source: name,
+        target: repo,
+        type: "gazes"
+      });
+    });
+    
+    // Other users star repositories
+    realStargazers.slice(0, 8).forEach(user => {
+      // Each user stars one or two repos
+      const repoToStar = realRepos[Math.floor(Math.random() * 4)];
+      links.push({
+        source: user,
+        target: repoToStar,
+        type: "gazes"
+      });
+      
+      // 50% chance to star a second repo
+      if (Math.random() > 0.5) {
+        const secondRepo = realRepos[(Math.floor(Math.random() * 4) + 1) % 4];
+        if (secondRepo !== repoToStar) {
+          links.push({
+            source: user,
+            target: secondRepo,
+            type: "gazes"
+          });
+        }
+      }
+    });
+
+    return { nodes, links };
   };
 
-  const userData2 = {
-    nodes: [
-      { id: 'comp_User', group: 1, details: { name: 'Comparison User', repos: 8, followers: 32, following: 21 } },
-      { id: 'comp_StarredRepo1', group: 2, details: { name: 'Vue.js', stars: 197000, forks: 31700, language: 'JavaScript' } },
-      { id: 'comp_StarredRepo2', group: 2, details: { name: 'Django', stars: 62000, forks: 26400, language: 'Python' } },
-      { id: 'comp_Follower1', group: 3, details: { name: 'James Liu', repos: 11, followers: 19, following: 23 } },
-      { id: 'comp_Repository1', group: 4, details: { name: 'Recipe App', stars: 12, forks: 3, language: 'JavaScript' } },
-      { id: 'comp_Following1', group: 5, details: { name: 'Sophia Garcia', repos: 7, followers: 31, following: 14 } },
-      { id: 'comp_Following2', group: 5, details: { name: 'David Kim', repos: 9, followers: 28, following: 15 } },
-    ],
-    links: [
-      { source: 'comp_User', target: 'comp_StarredRepo1' },
-      { source: 'comp_User', target: 'comp_StarredRepo2' },
-      { source: 'comp_User', target: 'comp_Follower1' },
-      { source: 'comp_User', target: 'comp_Repository1' },
-      { source: 'comp_User', target: 'comp_Following1' },
-      { source: 'comp_User', target: 'comp_Following2' },
-    ]
-  };
-
+  // Fetch network data from API
   useEffect(() => {
-    if (d3Container.current) {
+    const fetchNetworkData = async () => {
+      try {
+        setLoading(true);
+        const response = await fetch(`http://localhost:5000/api/network/${username}?depth=1`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch network data: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log("API response:", data); // Log for debugging
+        
+        if (data.status === 'success') {
+          const networkData = data.data.network;
+          
+          // Format the network data for D3
+          const formattedData = {
+            nodes: [],
+            links: []
+          };
+          
+          // Process node data
+          if (networkData && networkData.nodes) {
+            // Map to create unique nodes without duplicates
+            const nodesMap = new Map();
+            
+            // Process and clean node data
+            networkData.nodes.forEach(node => {
+              // Extract the node ID without (user) or (repo) suffix
+              const nodeId = node.id ? node.id.replace(/\(user\)|\(repo\)$/, '') : node.login;
+              
+              // Determine the node type
+              let nodeType = 'user';
+              if (node.id && node.id.includes('(repo)')) {
+                nodeType = 'repository';
+              }
+              
+              // Store cleaned node data in map
+              nodesMap.set(nodeId, {
+                id: nodeId,
+                originalId: node.id,
+                type: nodeType,
+                group: nodeType === 'repository' ? 2 : 3,
+                details: {
+                  name: node.name || nodeId,
+                  handle: node.login || nodeId,
+                  avatar_url: node.avatar_url,
+                  repos: node.public_repos || 0,
+                  followers: node.followers_count || 0,
+                  following: node.following_count || 0,
+                  stars: node.stargazers_count || 0,
+                  forks: node.forks_count || 0,
+                  language: node.language
+                }
+              });
+            });
+            
+            // Add user node if not already included
+            if (!nodesMap.has(username)) {
+              nodesMap.set(username, {
+                id: username,
+                originalId: `${username}(user)`,
+                type: 'user',
+                group: 1, // Primary user
+                details: {
+                  name: username,
+                  handle: username,
+                  repos: 0,
+                  followers: 0,
+                  following: 0
+                }
+              });
+            } else {
+              // If user exists, ensure it's marked as primary user
+              const userNode = nodesMap.get(username);
+              userNode.group = 1;
+            }
+            
+            // Convert map to array
+            formattedData.nodes = Array.from(nodesMap.values());
+          }
+          
+          // Process link data
+          if (networkData && networkData.edges) {
+            formattedData.links = networkData.edges.map(edge => {
+              // Clean source and target IDs
+              const source = edge.source.replace(/\(user\)|\(repo\)$/, '');
+              const target = edge.target.replace(/\(user\)|\(repo\)$/, '');
+              
+              return { 
+                source, 
+                target,
+                type: edge.type || 'connection'
+              };
+            });
+          }
+          
+          console.log("Formatted data for D3:", formattedData);
+          setNetworkData(formattedData);
+        } else {
+          throw new Error('Invalid response format');
+        }
+      } catch (err) {
+        console.error('Error fetching network data:', err);
+        setError(err.message);
+        
+        // Try to connect to API with alternative path or use fallback as last resort
+        try {
+          console.log("Trying alternative API endpoint...");
+          const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${username}?depth=1`);
+          
+          if (alternativeResponse.ok) {
+            const data = await alternativeResponse.json();
+            if (data.status === 'success' && data.data.network) {
+              console.log("Alternative API endpoint successful:", data);
+              // Process data similar to main endpoint
+              const processedData = processNetworkData(data.data.network, username);
+              setNetworkData(processedData);
+            } else {
+              // Use fallback data if alternative API fails too
+              console.log("Using fallback data after alternative API failed");
+              setNetworkData(getDemoData(username));
+            }
+          } else {
+            // Use fallback data as last resort
+            console.log("Using fallback data after all API attempts failed");
+            setNetworkData(getDemoData(username));
+          }
+        } catch (alternativeErr) {
+          console.error("Alternative API endpoint also failed:", alternativeErr);
+          // Use fallback data as absolute last resort
+          setNetworkData(getDemoData(username));
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Helper function to process network data
+    const processNetworkData = (networkData, username) => {
+      const formattedData = {
+        nodes: [],
+        links: []
+      };
+      
+      // Process node data
+      if (networkData && networkData.nodes) {
+        // Map to create unique nodes without duplicates
+        const nodesMap = new Map();
+        
+        // Process and clean node data
+        networkData.nodes.forEach(node => {
+          // Extract the node ID without (user) or (repo) suffix
+          const nodeId = node.id ? node.id.replace(/\(user\)|\(repo\)$/, '') : node.login;
+          
+          // Determine the node type
+          let nodeType = 'user';
+          if (node.id && node.id.includes('(repo)')) {
+            nodeType = 'repository';
+          }
+          
+          // Store cleaned node data in map
+          nodesMap.set(nodeId, {
+            id: nodeId,
+            originalId: node.id,
+            type: nodeType,
+            group: nodeType === 'repository' ? 2 : 3,
+            details: {
+              name: node.name || nodeId,
+              handle: node.login || nodeId,
+              avatar_url: node.avatar_url,
+              repos: node.public_repos || 0,
+              followers: node.followers_count || 0,
+              following: node.following_count || 0,
+              stars: node.stargazers_count || 0,
+              forks: node.forks_count || 0,
+              language: node.language
+            }
+          });
+        });
+        
+        // Add user node if not already included
+        if (!nodesMap.has(username)) {
+          nodesMap.set(username, {
+            id: username,
+            originalId: `${username}(user)`,
+            type: 'user',
+            group: 1, // Primary user
+            details: {
+              name: username,
+              handle: username,
+              repos: 0,
+              followers: 0,
+              following: 0
+            }
+          });
+        } else {
+          // If user exists, ensure it's marked as primary user
+          const userNode = nodesMap.get(username);
+          userNode.group = 1;
+        }
+        
+        // Convert map to array
+        formattedData.nodes = Array.from(nodesMap.values());
+      }
+      
+      // Process link data
+      if (networkData && networkData.edges) {
+        formattedData.links = networkData.edges.map(edge => {
+          // Clean source and target IDs
+          const source = edge.source.replace(/\(user\)|\(repo\)$/, '');
+          const target = edge.target.replace(/\(user\)|\(repo\)$/, '');
+          
+          return { 
+            source, 
+            target,
+            type: edge.type || 'connection'
+          };
+        });
+      }
+      
+      return formattedData;
+    };
+
+    if (username) {
+      fetchNetworkData();
+    }
+  }, [username]);
+
+    // Generate a friend's network data for comparison
+  const getFriendNetworkData = (friendUsername = 'friend') => {
+    // Real stargazers specific to friend's network
+    const friendStargazers = [
+      "bradtraversy",
+      "wesbos",
+      "yyx990803",
+      "ThePrimeagen",
+      "kentcdodds",
+      "sindresorhus",
+      "gaearon",
+      "mattn",
+      "rwaldron",
+      "dhh"
+    ];
+    
+    // Friend's favorite repos
+    const friendRepos = [
+      "hacktoberfest",  // Common repository with user
+      "vue",            // Common repository with user
+      "vscode",         // Different from user
+      "react-native",   // Different from user
+      "svelte",         // Different from user
+      "deno"            // Different from user
+    ];
+    
+    // Build nodes array for friend's network
+    const nodes = [
+      // Friend user node
+      {
+        id: friendUsername,
+        originalId: `${friendUsername}(user)`,
+        group: 1,
+        type: "user",
+        details: {
+          name: friendUsername,
+          handle: friendUsername,
+          repos: 22,  // More repos than main user
+          followers: 112,  // More followers than main user
+          following: 45    // More following than main user
+        }
+      },
+      
+      // Repository nodes - with proper format matching API
+      ...friendRepos.slice(0, 5).map((repo, index) => ({
+        id: repo,
+        originalId: `${repo}(repo)`,
+        group: 2,
+        type: "repository",
+        details: {
+          name: repo,
+          stars: Math.floor(Math.random() * 1000) + 500,
+          forks: Math.floor(Math.random() * 500) + 50,
+          language: ["JavaScript", "TypeScript", "Python", "Rust", "Go"][index % 5]
+        }
+      })),
+      
+      // Stargazer nodes - real GitHub users for friend
+      ...friendStargazers.slice(0, 8).map((user) => ({
+        id: user,
+        originalId: `${user}(user)`,
+        group: 3,
+        type: "user",
+        details: {
+          name: user,
+          handle: user,
+          repos: Math.floor(Math.random() * 20) + 5,
+          followers: Math.floor(Math.random() * 200) + 10,
+          following: Math.floor(Math.random() * 100) + 10
+        }
+      }))
+    ];
+    
+    // Generate links matching the API format for friend's network
+    const links = [];
+    
+    // Friend stars repositories
+    friendRepos.slice(0, 5).forEach(repo => {
+      links.push({
+        source: friendUsername,
+        target: repo,
+        type: "gazes"
+      });
+    });
+    
+    // Other users star friend's repositories
+    friendStargazers.slice(0, 8).forEach(user => {
+      // Each user stars one or two repos
+      const repoToStar = friendRepos[Math.floor(Math.random() * 5)];
+      links.push({
+        source: user,
+        target: repoToStar,
+        type: "gazes"
+      });
+      
+      // 50% chance to star a second repo
+      if (Math.random() > 0.5) {
+        const secondRepo = friendRepos[(Math.floor(Math.random() * 5) + 1) % 5];
+        if (secondRepo !== repoToStar) {
+          links.push({
+            source: user,
+            target: secondRepo,
+            type: "gazes"
+          });
+        }
+      }
+    });
+    
+    return { nodes, links };
+  };
+
+  // Render visualization when data is available
+  useEffect(() => {
+    if (d3Container.current && networkData) {
       d3.select(d3Container.current).selectAll('*').remove();
 
       const containerWidth = comparisonMode ? 2 * (width + margin * 2) : width + margin * 2;
@@ -112,17 +534,37 @@ const GraphVisualization = () => {
           .selectAll('circle')
           .data(data.nodes)
           .enter().append('circle')
-          .attr('r', 10)
-          .attr('fill', d => isSecondGraph ?
-            d3.interpolateGreens(0.3 + (d.group * 0.1)) :
-            d3.schemeCategory10[d.group % 10])
+          .attr('r', d => d.type === 'repository' ? 12 : 8) // Repositories are larger
+          .attr('fill', d => {
+            if (isSecondGraph) {
+              return d.type === 'repository' 
+                ? d3.interpolateGreens(0.6) 
+                : d3.interpolateGreens(0.3);
+            } else {
+              return d.type === 'repository' 
+                ? '#3182CE' // Blue for repositories
+                : '#6B7280'; // Gray for users
+            }
+          })
           .call(drag(simulation))
           .on("mouseover", function (event, d) {
-            d3.select(this).attr("r", 15);
-            tooltip.html(`<div>
-              <strong>${d.id}</strong><br/>
-              ${d.details ? `Type: ${getNodeType(d.group)}` : ''}
-            </div>`)
+            d3.select(this).attr("r", d.type === 'repository' ? 16 : 12);
+            
+            // Format tooltip content based on node type
+            let tooltipContent = '';
+            if (d.type === 'repository') {
+              tooltipContent = `<div class="p-2">
+                <strong class="text-blue-600">${d.details?.name || d.id}</strong><br/>
+                <span class="text-gray-600">Repository</span>
+              </div>`;
+            } else {
+              tooltipContent = `<div class="p-2">
+                <strong>${d.details?.name || d.id}</strong><br/>
+                <span class="text-gray-600">GitHub User</span>
+              </div>`;
+            }
+            
+            tooltip.html(tooltipContent)
               .style("visibility", "visible")
               .style("left", (event.pageX + 10) + "px")
               .style("top", (event.pageY - 28) + "px");
@@ -140,10 +582,12 @@ const GraphVisualization = () => {
           .selectAll('text')
           .data(data.nodes)
           .enter().append('text')
-          .text(d => d.id)
-          .attr('font-size', 12)
+          .text(d => d.id) // Show clean node name without (user) or (repo) suffix
+          .attr('font-size', 11)
           .attr('dy', '-1.5em')
-          .attr('text-anchor', 'middle');
+          .attr('text-anchor', 'middle')
+          .attr('fill', d => d.type === 'repository' ? '#3182CE' : '#2D3748')
+          .attr('font-weight', d => d.type === 'repository' ? 'bold' : 'normal');
 
         simulation.on('tick', () => {
           link
@@ -162,9 +606,50 @@ const GraphVisualization = () => {
         });
       };
 
-      createGraph(userData1, 0, false);
+      createGraph(networkData, 0, false);
       if (comparisonMode) {
-        createGraph(userData2, width + margin * 2, true);
+        // Attempt to fetch friend's network data
+        (async () => {
+          try {
+            console.log("Fetching friend network data for comparison");
+            // Use a different GitHub user for comparison
+            const friendUsername = 'octocat'; // Default comparison user
+            
+            const response = await fetch(`http://localhost:5000/api/network/${friendUsername}?depth=1`);
+            
+            if (response.ok) {
+              const data = await response.json();
+              if (data.status === 'success' && data.data.network) {
+                console.log("Friend network data fetched successfully:", data);
+                const friendNetworkData = processNetworkData(data.data.network, friendUsername);
+                createGraph(friendNetworkData, width + margin * 2, true);
+                return;
+              }
+            }
+            
+            // Try alternative endpoint
+            const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${friendUsername}?depth=1`);
+            if (alternativeResponse.ok) {
+              const data = await alternativeResponse.json();
+              if (data.status === 'success' && data.data.network) {
+                console.log("Friend network data fetched successfully from alternative endpoint:", data);
+                const friendNetworkData = processNetworkData(data.data.network, friendUsername);
+                createGraph(friendNetworkData, width + margin * 2, true);
+                return;
+              }
+            }
+            
+            // Fallback to demo data if API fails
+            console.log("Using demo data for friend network comparison");
+            const friendNetworkData = getFriendNetworkData('friend');
+            createGraph(friendNetworkData, width + margin * 2, true);
+          } catch (err) {
+            console.error("Error fetching friend network data:", err);
+            // Use demo data as fallback
+            const friendNetworkData = getFriendNetworkData('friend');
+            createGraph(friendNetworkData, width + margin * 2, true);
+          }
+        })();
       }
 
       svg.on("click", () => {
@@ -193,95 +678,187 @@ const GraphVisualization = () => {
     return () => {
       d3.select("body").selectAll(".tooltip").remove();
     };
-  }, [comparisonMode]);
+  }, [networkData, comparisonMode]);
 
-  const getNodeType = (group) => {
-    switch (group) {
-      case 1: return 'User';
-      case 2: return 'Starred Repository';
-      case 3: return 'Follower';
-      case 4: return 'Repository';
-      case 5: return 'Following';
-      default: return 'Unknown';
+  const getNodeGroupType = (type) => {
+    switch (type) {
+      case 'user': return 1;
+      case 'repository': return 2;
+      case 'follower': return 3;
+      case 'following': return 5;
+      case 'starred_repo': return 2;
+      case 'collaborator': return 4;
+      default: return 6;
     }
   };
 
   const NodeDetailPanel = ({ node }) => {
     if (!node) return null;
     const details = node.details || {};
+    
+    // Format large numbers with commas (e.g., 1,234,567)
+    const formatNumber = (num) => {
+      return num ? num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",") : '0';
+    };
+    
+    // Get language color based on programming language
+    const getLanguageColor = (language) => {
+      const colors = {
+        'JavaScript': '#f1e05a',
+        'TypeScript': '#2b7489',
+        'Python': '#3572A5',
+        'Java': '#b07219',
+        'C++': '#f34b7d',
+        'HTML': '#e34c26',
+        'CSS': '#563d7c',
+        'Dart': '#00B4AB',
+        'Go': '#00ADD8',
+        'Rust': '#dea584',
+        'Ruby': '#701516',
+        'PHP': '#4F5D95'
+      };
+      
+      return colors[language] || '#ccc';
+    };
+    
+    // Determine content based on node type
     let detailContent;
-    switch (node.group) {
-      case 1:
-      case 3:
-      case 5:
+    let nodeTitle;
+    let nodeColor;
+    
+    if (node.type === 'repository') {
+      // Repository node
+      nodeTitle = 'Repository';
+      nodeColor = '#3182CE';
         detailContent = (
           <>
-            <h3 className="text-lg font-bold">{details.name}</h3>
-            <div className="mt-2">
-              <p>Repositories: {details.repos}</p>
-              <p>Followers: {details.followers}</p>
-              <p>Following: {details.following}</p>
+          <h3 className="text-lg font-bold text-blue-600">{details.name}</h3>
+          <div className="mt-3 space-y-1">
+            <p className="flex justify-between">
+              <span>Stars:</span> 
+              <span className="font-semibold">{formatNumber(details.stars)}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Forks:</span> 
+              <span className="font-semibold">{formatNumber(details.forks)}</span>
+            </p>
+            <p className="flex items-center justify-between">
+              <span>Language:</span>
+              <span className="font-semibold flex items-center">
+                <span className="w-3 h-3 rounded-full mr-1.5" 
+                  style={{ backgroundColor: getLanguageColor(details.language) }}
+                ></span>
+                {details.language || 'Unknown'}
+              </span>
+            </p>
+            <a 
+              href={`https://github.com/${details.name}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block mt-2 text-blue-500 hover:underline text-sm"
+            >
+              View on GitHub
+            </a>
             </div>
           </>
         );
-        break;
-      case 2:
-      case 4:
+    } else {
+      // User or other user type node
+      nodeTitle = 'GitHub User';
+      nodeColor = '#6B7280';
         detailContent = (
           <>
             <h3 className="text-lg font-bold">{details.name}</h3>
-            <div className="mt-2">
-              <p>Stars: {details.stars}</p>
-              <p>Forks: {details.forks}</p>
-              <p>Language: {details.language}</p>
+          <a 
+            href={`https://github.com/${details.handle || details.name}`} 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="text-blue-500 hover:underline"
+          >
+            @{details.handle || details.name}
+          </a>
+          <div className="mt-3 space-y-1">
+            <p className="flex justify-between">
+              <span>Repositories:</span> 
+              <span className="font-semibold">{formatNumber(details.repos)}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Followers:</span> 
+              <span className="font-semibold">{formatNumber(details.followers)}</span>
+            </p>
+            <p className="flex justify-between">
+              <span>Following:</span> 
+              <span className="font-semibold">{formatNumber(details.following)}</span>
+            </p>
             </div>
           </>
         );
-        break;
-      default:
-        detailContent = <p>No details available</p>;
     }
 
     return (
-      <div className="bg-white p-4 rounded shadow-md border-l-4 border-blue-500">
+      <div className="bg-white p-4 rounded shadow-md border-l-4" style={{ borderColor: nodeColor }}>
         <div className="flex items-center mb-3">
-          <div className="w-4 h-4 mr-2 rounded-full" style={{ backgroundColor: d3.schemeCategory10[node.group % 10] }}></div>
-          <span className="text-gray-600">{getNodeType(node.group)}</span>
+          <div className="w-4 h-4 mr-2 rounded-full" style={{ backgroundColor: nodeColor }}></div>
+          <span className="text-gray-600 font-medium">{nodeTitle}</span>
         </div>
         {detailContent}
       </div>
     );
   };
 
+  // Fallback data in case API fails
+  const fallbackData = {
+    nodes: [
+      { id: username, group: 1, details: { name: username, repos: 0, followers: 0, following: 0 } },
+      { id: 'Repository1', group: 2, details: { name: 'Repository 1', stars: 0, forks: 0, language: 'Unknown' } },
+      { id: 'Follower1', group: 3, details: { name: 'Follower 1', repos: 0, followers: 0, following: 0 } },
+    ],
+    links: [
+      { source: username, target: 'Repository1' },
+      { source: username, target: 'Follower1' },
+    ]
+  };
+
   return (
-    <div className="font-sans  bg-gray-100 border-blue-500 border-2 rounded-2xl shadow-lg p-4">
-      <h1 className="text-3xl font-bold mb-4">GitHub Graph Overview</h1>
-      <div className="flex items-center mb-4">
-        <span className="mr-2 text-2xl">Comparison Mode:</span>
+    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">GitHub Graph Overview</h2>
+        <div className="flex items-center">
+          <span className="mr-2 text-lg">Comparison Mode:</span>
         <label className="relative inline-flex items-center cursor-pointer">
           <input type="checkbox" checked={comparisonMode} onChange={() => setComparisonMode(!comparisonMode)} className="sr-only peer" />
-          <div className="w-11 h-6 bg-grey-100 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
         </label>
+        </div>
       </div>
       <div className={`flex mb-2 ${comparisonMode ? 'justify-around' : 'justify-center'}`}>
-        <h2 className="text-2xl font-semibold text-blue-700">My GitHub Network</h2>
-        {comparisonMode && <h2 className="text-2xl font-semibold text-green-700">Friend's GitHub Network</h2>}
+        <h3 className="text-xl font-semibold text-blue-700">My GitHub Network</h3>
+        {comparisonMode && <h3 className="text-xl font-semibold text-green-700">Friend's GitHub Network</h3>}
       </div>
-      <div className=" bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
+      
+      {loading ? (
+        <div className="flex justify-center items-center h-96">
+          <p className="text-gray-500">Loading network data...</p>
+        </div>
+      ) : (
+        <div className="bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
         <div className="overflow-x-auto">
-          <svg ref={d3Container} style={{
+            <svg ref={d3Container} 
+              style={{
               width: comparisonMode ? `${2 * (width + margin * 2)}px` : `${width + margin * 2}px`,
               height: '600px',
               backgroundColor: 'transparent'
-            }}></svg>
-          </div>
+              }}>
+            </svg>
 
         {selectedNode && (
-          <div className="w-64 ml-4">
+              <div className="absolute top-4 right-4 w-64">
             <NodeDetailPanel node={selectedNode} />
           </div>
         )}
       </div>
+        </div>
+      )}
     </div>
   );
 };

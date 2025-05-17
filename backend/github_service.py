@@ -18,7 +18,7 @@ class GitHubDataFetcher:
             api_token: GitHub API token for authentication
         """
         self.api_token = api_token or config.GITHUB_API_TOKEN
-        self.client = Github(self.api_token)
+        self.client = Github(self.api_token, per_page=100)  # Set per_page to 100 for efficiency
         self.logger = logging.getLogger(__name__)
         
     def check_rate_limit(self) -> Dict[str, Any]:
@@ -53,10 +53,16 @@ class GitHubDataFetcher:
         try:
             user = self.client.get_user(username)
             
+            # Ensure user ID exists
+            if not user or not user.id:
+                self.logger.error(f"Invalid user data for {username}: Missing ID")
+                return None
+            
             # Fetch basic user information
             user_data = {
                 'login': user.login,
-                'id': user.id,
+                'github_id': user.id,  # Ensure we use github_id for storage
+                'id': user.id,  # Keep id for compatibility
                 'name': user.name,
                 'bio': user.bio,
                 'avatar_url': user.avatar_url,
@@ -100,9 +106,14 @@ class GitHubDataFetcher:
             for follower in user.get_followers():
                 if count >= max_count:
                     break
+                
+                # Skip followers without ID
+                if not follower.id:
+                    continue
                     
                 followers_data.append({
                     'login': follower.login,
+                    'github_id': follower.id,  # Use github_id for storage
                     'id': follower.id,
                     'avatar_url': follower.avatar_url,
                     'url': follower.html_url
@@ -137,9 +148,14 @@ class GitHubDataFetcher:
             for following in user.get_following():
                 if count >= max_count:
                     break
+                
+                # Skip users without ID
+                if not following.id:
+                    continue
                     
                 following_data.append({
                     'login': following.login,
+                    'github_id': following.id,  # Use github_id for storage
                     'id': following.id,
                     'avatar_url': following.avatar_url,
                     'url': following.html_url
@@ -177,6 +193,7 @@ class GitHubDataFetcher:
                     
                 repos_data.append({
                     'id': repo.id,
+                    'github_id': repo.id,  # Use github_id for storage
                     'name': repo.name,
                     'full_name': repo.full_name,
                     'description': repo.description,
@@ -196,6 +213,50 @@ class GitHubDataFetcher:
             
         except GithubException as e:
             self.logger.error(f"Error fetching repositories for {username}: {str(e)}")
+            return []
+        except Exception as e:
+            self.logger.error(f"Unexpected error: {str(e)}")
+            return []
+    
+    def fetch_repository_stargazers(self, owner: str, repo: str, max_count: int = 100) -> List[Dict[str, Any]]:
+        """Fetch users who starred a repository
+        
+        Args:
+            owner: Repository owner username
+            repo: Repository name
+            max_count: Maximum number of stargazers to fetch
+            
+        Returns:
+            List of dictionaries with stargazer data
+        """
+        try:
+            repository = self.client.get_repo(f"{owner}/{repo}")
+            stargazers_data = []
+            
+            count = 0
+            for stargazer in repository.get_stargazers():
+                if count >= max_count:
+                    break
+                
+                # Skip users without ID
+                if not stargazer.id:
+                    continue
+                
+                stargazers_data.append({
+                    'login': stargazer.login,
+                    'github_id': stargazer.id,
+                    'id': stargazer.id,
+                    'avatar_url': stargazer.avatar_url,
+                    'url': stargazer.html_url
+                })
+                
+                count += 1
+                
+            self.logger.info(f"Fetched {len(stargazers_data)} stargazers for {owner}/{repo}")
+            return stargazers_data
+            
+        except GithubException as e:
+            self.logger.error(f"Error fetching stargazers for {owner}/{repo}: {str(e)}")
             return []
         except Exception as e:
             self.logger.error(f"Unexpected error: {str(e)}")

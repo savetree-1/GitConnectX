@@ -5,55 +5,53 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # API Configuration
-API_VERSION = '1.0.0'
-API_PREFIX = '/api/v1'
+API_VERSION = os.getenv('API_VERSION', '1.0.0')
+API_PREFIX = os.getenv('API_PREFIX', '/api/v1')
 
 # GitHub API Configuration
 GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN')
 GITHUB_API_BASE_URL = 'https://api.github.com'
+GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
+GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
+GITHUB_REDIRECT_URI = os.getenv('GITHUB_REDIRECT_URI', 'http://localhost:5000/api/auth/github/callback')
+
+# Frontend URL for redirects
+FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
 # Database Configuration
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/gitconnectx')
-POSTGRES_URI = os.getenv('POSTGRES_URI', 'postgresql://postgres:postgres@localhost:5432/gitconnectx')
 
 # JWT Configuration for Authentication
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev_secret_key')
-JWT_ALGORITHM = 'HS256'
-JWT_EXPIRATION_DELTA = 24 * 60 * 60  # 24 hours in seconds
+JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
+JWT_EXPIRATION_DELTA = int(os.getenv('JWT_EXPIRATION_DELTA', '86400'))  # 24 hours in seconds
 
 # Application Settings
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
 
 # Cache Settings
-CACHE_TIMEOUT = 3600  # 1 hour in seconds
+CACHE_TIMEOUT = int(os.getenv('CACHE_TIMEOUT', '3600'))  # 1 hour in seconds
 
 # Graph Algorithm Settings
-PAGERANK_DAMPING = 0.85
-PAGERANK_ITERATIONS = 100
-LOUVAIN_RESOLUTION = 1.0
+PAGERANK_DAMPING = float(os.getenv('PAGERANK_DAMPING', '0.85'))
+PAGERANK_ITERATIONS = int(os.getenv('PAGERANK_ITERATIONS', '100'))
+LOUVAIN_RESOLUTION = float(os.getenv('LOUVAIN_RESOLUTION', '1.0'))
 
 # API Rate Limiting
-RATE_LIMIT_PER_MINUTE = 60
-
-# C++ Algorithm Binary Paths
-CPP_ALGORITHMS_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cpp_algorithms')
-PAGERANK_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'pagerank')
-LOUVAIN_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'louvain')
-DIJKSTRA_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'dijkstra')
-HITS_BINARY = os.path.join(CPP_ALGORITHMS_DIR, 'hits')
+RATE_LIMIT_PER_MINUTE = int(os.getenv('RATE_LIMIT_PER_MINUTE', '60'))
 
 # Data Collection Parameters
-MAX_FOLLOWERS_TO_FETCH = 500
-MAX_FOLLOWING_TO_FETCH = 500
-MAX_REPOS_TO_FETCH = 100
-MAX_CONTRIBUTORS_TO_FETCH = 100
-MAX_STARGAZERS_TO_FETCH = 100
+MAX_FOLLOWERS_TO_FETCH = int(os.getenv('MAX_FOLLOWERS_TO_FETCH', '500'))
+MAX_FOLLOWING_TO_FETCH = int(os.getenv('MAX_FOLLOWING_TO_FETCH', '500'))
+MAX_REPOS_TO_FETCH = int(os.getenv('MAX_REPOS_TO_FETCH', '100'))
+MAX_CONTRIBUTORS_TO_FETCH = int(os.getenv('MAX_CONTRIBUTORS_TO_FETCH', '100'))
+MAX_STARGAZERS_TO_FETCH = int(os.getenv('MAX_STARGAZERS_TO_FETCH', '100'))
 
 # File Paths
-DATA_DIR = "./data"
-PROCESSED_DATA_DIR = "./processed_data"
-LOG_DIR = "./logs"
+DATA_DIR = os.getenv('DATA_DIR', './data')
+PROCESSED_DATA_DIR = os.getenv('PROCESSED_DATA_DIR', './processed_data')
+LOG_DIR = os.getenv('LOG_DIR', './logs')
 
 # Graph Analysis Parameters
 PAGERANK_MAX_ITERATIONS = 100

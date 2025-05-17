@@ -15,6 +15,11 @@ const Home = () => {
   const contactRef = useRef(null);
   
   const handleAnalyze = () => {
+    if (!username) {
+      alert('Please enter a GitHub username');
+      return;
+    }
+    
     console.log('Analyzing:', username, compare ? friendUsername : null);
     navigate('/dashboard', {
       state: {
@@ -30,11 +35,10 @@ const Home = () => {
         scrollToFeatures={() => featuresRef.current.scrollIntoView({ behavior: 'smooth' })}
         scrollToContact={() => contactRef.current.scrollIntoView({ behavior: 'smooth' })}
       />      
-ogbg
-      <div  className="w-full h-[525px] bg-no-repeat bg-cover bg-center p-10" style={{ backgroundImage: `url(${ogbg})` }}>
+      <div className="w-full h-[525px] bg-no-repeat bg-cover bg-center p-10" style={{ backgroundImage: `url(${ogbg})` }}>
         <div className="container flex  flex-col items-end justify-center px-4 mt-15">
           <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow-lg">
-            Welcome to GithConnectX
+            Welcome to GitConnectX
           </h1>
           <h1 className="text-5xl font-extrabold text-white mb-4 drop-shadow-lg">
             Explore Your GitHub Social Graph
