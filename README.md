@@ -13,6 +13,13 @@ The backend is built with Flask and provides RESTful APIs to interact with GitHu
 - **Database Integration**: Stores data in PostgreSQL (structured data) and MongoDB (graph data)
 - **API Endpoints**: Provides interfaces for network visualization, influence ranking, and community detection
 
+### Frontend
+The frontend is built with React and provides an interactive UI for exploring GitHub networks:
+
+- **Network Visualization**: Interactive D3.js graph visualizations
+- **User Profile Display**: Shows GitHub user stats and summaries
+- **Comparison Mode**: Compare networks between different users
+
 ### C++ Algorithms (Optional)
 For performance optimization, computationally intensive graph algorithms can be implemented in C++:
 
@@ -29,61 +36,38 @@ For performance optimization, computationally intensive graph algorithms can be 
 5. **Database Storage** - Stores processed data for fast retrieval and analysis.
 6. **Interactive Web Dashboard** - Provides a user-friendly interface for exploring GitHub networks.
 
-## Setup Instructions
+## Quick Start
 
-### Prerequisites
+### Windows
+```sh
+# To start both backend and frontend with one command:
+start_app.bat
+
+# To start only the API server:
+start_api.bat
+
+# If you encounter issues, restart the API:
+restart_api.bat
+```
+
+### Linux/macOS
+```sh
+# To start both backend and frontend with one command:
+chmod +x start_app.sh
+./start_app.sh
+
+# To start only the API server:
+source venv/bin/activate
+python run_app.py
+```
+
+For detailed setup instructions, refer to [SETUP.md](SETUP.md).
+
+## Prerequisites
 - Python 3.9+
-- PostgreSQL
-- MongoDB
+- Node.js 14+
+- MongoDB (optional, falls back to in-memory mode)
 - Git
-- C++ compiler (optional, for C++ algorithm implementations)
-
-### Installation
-
-1. Clone the repository
-```sh
-git clone https://github.com/yourusername/GitConnectX.git
-cd GitConnectX
-```
-
-2. Set up a virtual environment
-```sh
-python -m venv venv
-source venv/bin/activate  # On Windows, use: venv\Scripts\activate
-```
-
-3. Install dependencies
-```sh
-pip install -r requirements.txt
-```
-
-4. Set up environment variables
-Copy the example environment file and modify it with your own settings:
-```sh
-cp backend/.env.example .env
-```
-
-You need to configure:
-- `GITHUB_API_TOKEN`: Your GitHub personal access token
-- Database connection strings
-- Security settings
-
-5. Initialize databases
-```sh
-# Create PostgreSQL database
-psql -c "CREATE DATABASE gitconnectx;"
-
-# MongoDB should automatically create the database on first use
-```
-
-### Running the Application
-
-1. Start the API server
-```sh
-python -m api.app
-```
-
-2. Access the API at http://localhost:5000
 
 ## API Endpoints
 
@@ -120,5 +104,3 @@ MIT
 - Akhil Nautiyal
 - Ayush Negi
 ```
-
-
