@@ -13,131 +13,12 @@ const GraphVisualization = ({ username }) => {
   const width = 500;
   const height = 500;
 
-  // Demo data with the given username - based on the provided API format
-  const getDemoData = (name) => {
-    // Format based on the API response structure you provided
-    // Real GitHub stargazers data with actual GitHub usernames
-    const realStargazers = [
-      "sudaisasif",
-      "usmanworwox",
-      "JunaidQadirB",
-      "DimaMinka",
-      "AdamTheWizard",
-      "H8ToDoThis",
-      "jimi008",
-      "seb86",
-      "wassim",
-      "santhosh-chinnasamy",
-      "charlescarrari",
-      "Ambrish-Abhijatya",
-      "mayur-coditas",
-      "marktrinh",
-      "TahaAhmed"
-    ];
-    
-    // Real repository names
-    const realRepos = [
-      "hacktoberfest",
-      "react",
-      "vue",
-      "tensorflow", 
-      "flutter",
-      "awesome-python",
-      "node",
-      "javascript-algorithms",
-      "free-programming-books"
-    ];
-
-    // Generate nodes based on the API format
-    const nodes = [
-      // Central user node
-      {
-        id: name,
-        originalId: `${name}(user)`,
-        group: 1,
-        type: "user",
-        details: {
-          name: name,
-          handle: name,
-          repos: 14, 
-          followers: 78, 
-          following: 32
-        }
-      },
-      
-      // Repository nodes - with proper format matching API
-      ...realRepos.slice(0, 4).map((repo, index) => ({
-        id: repo,
-        originalId: `${repo}(repo)`,
-        group: 2,
-        type: "repository",
-        details: {
-          name: repo,
-          stars: Math.floor(Math.random() * 1000) + 500,
-          forks: Math.floor(Math.random() * 500) + 50,
-          language: ["JavaScript", "TypeScript", "Python", "Java", "Go"][index % 5]
-        }
-      })),
-      
-      // Stargazer nodes - real GitHub users
-      ...realStargazers.slice(0, 8).map((user) => ({
-        id: user,
-        originalId: `${user}(user)`,
-        group: 3,
-        type: "user",
-        details: {
-          name: user,
-          handle: user,
-          repos: Math.floor(Math.random() * 20) + 5,
-          followers: Math.floor(Math.random() * 200) + 10,
-          following: Math.floor(Math.random() * 100) + 10
-        }
-      }))
-    ];
-
-    // Generate links matching the API format
-    const links = [];
-    
-    // User stars repositories
-    realRepos.slice(0, 4).forEach(repo => {
-      links.push({
-        source: name,
-        target: repo,
-        type: "gazes"
-      });
-    });
-    
-    // Other users star repositories
-    realStargazers.slice(0, 8).forEach(user => {
-      // Each user stars one or two repos
-      const repoToStar = realRepos[Math.floor(Math.random() * 4)];
-      links.push({
-        source: user,
-        target: repoToStar,
-        type: "gazes"
-      });
-      
-      // 50% chance to star a second repo
-      if (Math.random() > 0.5) {
-        const secondRepo = realRepos[(Math.floor(Math.random() * 4) + 1) % 4];
-        if (secondRepo !== repoToStar) {
-          links.push({
-            source: user,
-            target: secondRepo,
-            type: "gazes"
-          });
-        }
-      }
-    });
-
-    return { nodes, links };
-  };
-
   // Fetch network data from API
   useEffect(() => {
     const fetchNetworkData = async () => {
       try {
         setLoading(true);
+        setError(null);
         const response = await fetch(`http://localhost:5000/api/network/${username}?depth=1`);
         
         if (!response.ok) {
@@ -241,7 +122,7 @@ const GraphVisualization = ({ username }) => {
         console.error('Error fetching network data:', err);
         setError(err.message);
         
-        // Try to connect to API with alternative path or use fallback as last resort
+        // Try to connect to API with alternative path
         try {
           console.log("Trying alternative API endpoint...");
           const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${username}?depth=1`);
@@ -253,20 +134,16 @@ const GraphVisualization = ({ username }) => {
               // Process data similar to main endpoint
               const processedData = processNetworkData(data.data.network, username);
               setNetworkData(processedData);
+              setError(null);
             } else {
-              // Use fallback data if alternative API fails too
-              console.log("Using fallback data after alternative API failed");
-              setNetworkData(getDemoData(username));
+              setError("Could not fetch network data. Please check the API server is running.");
             }
           } else {
-            // Use fallback data as last resort
-            console.log("Using fallback data after all API attempts failed");
-            setNetworkData(getDemoData(username));
+            setError("API server not available. Please start the backend server.");
           }
         } catch (alternativeErr) {
           console.error("Alternative API endpoint also failed:", alternativeErr);
-          // Use fallback data as absolute last resort
-          setNetworkData(getDemoData(username));
+          setError("Could not connect to the API server. Please make sure the backend is running.");
         }
       } finally {
         setLoading(false);
@@ -363,117 +240,6 @@ const GraphVisualization = ({ username }) => {
       fetchNetworkData();
     }
   }, [username]);
-
-    // Generate a friend's network data for comparison
-  const getFriendNetworkData = (friendUsername = 'friend') => {
-    // Real stargazers specific to friend's network
-    const friendStargazers = [
-      "bradtraversy",
-      "wesbos",
-      "yyx990803",
-      "ThePrimeagen",
-      "kentcdodds",
-      "sindresorhus",
-      "gaearon",
-      "mattn",
-      "rwaldron",
-      "dhh"
-    ];
-    
-    // Friend's favorite repos
-    const friendRepos = [
-      "hacktoberfest",  // Common repository with user
-      "vue",            // Common repository with user
-      "vscode",         // Different from user
-      "react-native",   // Different from user
-      "svelte",         // Different from user
-      "deno"            // Different from user
-    ];
-    
-    // Build nodes array for friend's network
-    const nodes = [
-      // Friend user node
-      {
-        id: friendUsername,
-        originalId: `${friendUsername}(user)`,
-        group: 1,
-        type: "user",
-        details: {
-          name: friendUsername,
-          handle: friendUsername,
-          repos: 22,  // More repos than main user
-          followers: 112,  // More followers than main user
-          following: 45    // More following than main user
-        }
-      },
-      
-      // Repository nodes - with proper format matching API
-      ...friendRepos.slice(0, 5).map((repo, index) => ({
-        id: repo,
-        originalId: `${repo}(repo)`,
-        group: 2,
-        type: "repository",
-        details: {
-          name: repo,
-          stars: Math.floor(Math.random() * 1000) + 500,
-          forks: Math.floor(Math.random() * 500) + 50,
-          language: ["JavaScript", "TypeScript", "Python", "Rust", "Go"][index % 5]
-        }
-      })),
-      
-      // Stargazer nodes - real GitHub users for friend
-      ...friendStargazers.slice(0, 8).map((user) => ({
-        id: user,
-        originalId: `${user}(user)`,
-        group: 3,
-        type: "user",
-        details: {
-          name: user,
-          handle: user,
-          repos: Math.floor(Math.random() * 20) + 5,
-          followers: Math.floor(Math.random() * 200) + 10,
-          following: Math.floor(Math.random() * 100) + 10
-        }
-      }))
-    ];
-    
-    // Generate links matching the API format for friend's network
-    const links = [];
-    
-    // Friend stars repositories
-    friendRepos.slice(0, 5).forEach(repo => {
-      links.push({
-        source: friendUsername,
-        target: repo,
-        type: "gazes"
-      });
-    });
-    
-    // Other users star friend's repositories
-    friendStargazers.slice(0, 8).forEach(user => {
-      // Each user stars one or two repos
-      const repoToStar = friendRepos[Math.floor(Math.random() * 5)];
-      links.push({
-        source: user,
-        target: repoToStar,
-        type: "gazes"
-      });
-      
-      // 50% chance to star a second repo
-      if (Math.random() > 0.5) {
-        const secondRepo = friendRepos[(Math.floor(Math.random() * 5) + 1) % 5];
-        if (secondRepo !== repoToStar) {
-          links.push({
-            source: user,
-            target: secondRepo,
-            type: "gazes"
-          });
-        }
-      }
-    });
-    
-    return { nodes, links };
-  };
 
   // Render visualization when data is available
   useEffect(() => {
@@ -608,48 +374,14 @@ const GraphVisualization = ({ username }) => {
 
       createGraph(networkData, 0, false);
       if (comparisonMode) {
-        // Attempt to fetch friend's network data
-        (async () => {
-          try {
-            console.log("Fetching friend network data for comparison");
-            // Use a different GitHub user for comparison
-            const friendUsername = 'octocat'; // Default comparison user
-            
-            const response = await fetch(`http://localhost:5000/api/network/${friendUsername}?depth=1`);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.status === 'success' && data.data.network) {
-                console.log("Friend network data fetched successfully:", data);
-                const friendNetworkData = processNetworkData(data.data.network, friendUsername);
-                createGraph(friendNetworkData, width + margin * 2, true);
-                return;
-              }
-            }
-            
-            // Try alternative endpoint
-            const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${friendUsername}?depth=1`);
-            if (alternativeResponse.ok) {
-              const data = await alternativeResponse.json();
-              if (data.status === 'success' && data.data.network) {
-                console.log("Friend network data fetched successfully from alternative endpoint:", data);
-                const friendNetworkData = processNetworkData(data.data.network, friendUsername);
-                createGraph(friendNetworkData, width + margin * 2, true);
-                return;
-              }
-            }
-            
-            // Fallback to demo data if API fails
-            console.log("Using demo data for friend network comparison");
-            const friendNetworkData = getFriendNetworkData('friend');
-            createGraph(friendNetworkData, width + margin * 2, true);
-          } catch (err) {
-            console.error("Error fetching friend network data:", err);
-            // Use demo data as fallback
-            const friendNetworkData = getFriendNetworkData('friend');
-            createGraph(friendNetworkData, width + margin * 2, true);
-          }
-        })();
+        // Get a message that comparison mode requires the API
+        const emptyComparisonData = {
+          nodes: [
+            { id: 'API Required', group: 1, type: 'user', details: { name: 'API Required' }}
+          ],
+          links: []
+        };
+        createGraph(emptyComparisonData, width + margin * 2, true);
       }
 
       svg.on("click", () => {
@@ -806,19 +538,6 @@ const GraphVisualization = ({ username }) => {
     );
   };
 
-  // Fallback data in case API fails
-  const fallbackData = {
-    nodes: [
-      { id: username, group: 1, details: { name: username, repos: 0, followers: 0, following: 0 } },
-      { id: 'Repository1', group: 2, details: { name: 'Repository 1', stars: 0, forks: 0, language: 'Unknown' } },
-      { id: 'Follower1', group: 3, details: { name: 'Follower 1', repos: 0, followers: 0, following: 0 } },
-    ],
-    links: [
-      { source: username, target: 'Repository1' },
-      { source: username, target: 'Follower1' },
-    ]
-  };
-
   return (
     <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
       <div className="flex items-center justify-between mb-4">
@@ -840,19 +559,25 @@ const GraphVisualization = ({ username }) => {
         <div className="flex justify-center items-center h-96">
           <p className="text-gray-500">Loading network data...</p>
         </div>
+      ) : error ? (
+        <div className="flex justify-center items-center flex-col h-96">
+          <p className="text-red-500 text-xl mb-4">{error}</p>
+          <p className="text-gray-600">Please ensure the API server is running.</p>
+          <p className="text-gray-600 mt-2">Run <code className="bg-gray-100 px-2 py-1 rounded">start_api.bat</code> to start the server.</p>
+        </div>
       ) : (
         <div className="bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
         <div className="overflow-x-auto">
-            <svg ref={d3Container} 
-              style={{
+              <svg ref={d3Container} 
+                style={{
               width: comparisonMode ? `${2 * (width + margin * 2)}px` : `${width + margin * 2}px`,
               height: '600px',
               backgroundColor: 'transparent'
-              }}>
-            </svg>
+                }}>
+              </svg>
 
         {selectedNode && (
-              <div className="absolute top-4 right-4 w-64">
+                <div className="absolute top-4 right-4 w-64">
             <NodeDetailPanel node={selectedNode} />
           </div>
         )}
