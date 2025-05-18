@@ -19,7 +19,7 @@ const GraphVisualization = ({ username }) => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:5000/api/network/${username}?depth=1`);
+        const response = await fetch(`http://localhost:5000/api/network/followers/${username}`);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch network data: ${response.statusText}`);
@@ -29,7 +29,10 @@ const GraphVisualization = ({ username }) => {
         console.log("API response:", data); // Log for debugging
         
         if (data.status === 'success') {
-          const networkData = data.data.network;
+          const networkData = {
+            nodes: Object.values(data.data.nodes),
+            edges: data.data.edges
+          };
           
           // Format the network data for D3
           const formattedData = {
@@ -125,14 +128,18 @@ const GraphVisualization = ({ username }) => {
         // Try to connect to API with alternative path
         try {
           console.log("Trying alternative API endpoint...");
-          const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${username}?depth=1`);
+          const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/followers/${username}`);
           
           if (alternativeResponse.ok) {
             const data = await alternativeResponse.json();
-            if (data.status === 'success' && data.data.network) {
+            if (data.data) {
               console.log("Alternative API endpoint successful:", data);
               // Process data similar to main endpoint
-              const processedData = processNetworkData(data.data.network, username);
+              const networkData = {
+                nodes: Object.values(data.data.nodes),
+                edges: data.data.edges
+              };
+              const processedData = processNetworkData(networkData, username);
               setNetworkData(processedData);
               setError(null);
             } else {
