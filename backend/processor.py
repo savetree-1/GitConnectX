@@ -10,7 +10,7 @@ from datetime import datetime
 from backend import config
 
 def load_csv_data(directory="./"):
-    """Load all CSV files into pandas DataFrames"""
+    # ::::: load csv data
     data = {}
     for filename in ["followers.csv", "stargazers.csv", "contributors.csv", "forks.csv"]:
         filepath = os.path.join(directory, filename)
@@ -19,25 +19,25 @@ def load_csv_data(directory="./"):
     return data
 
 def create_follow_network(data):
-    """Create the Follow Network from followers data"""
+    # ::::: create follow network
     G = nx.DiGraph()
     if "followers" in data and not data["followers"].empty:
         for _, row in data["followers"].iterrows():
-            # Direction: follower -> user
+            # ::::: Direction: follower -> user
             G.add_edge(row["Target"], row["Source"])
     return G
 
 def create_commit_network(data):
-    """Create bipartite Commit Network from contributors data"""
+    # ::::: create commit network
     G = nx.Graph()
     if "contributors" in data and not data["contributors"].empty:
         for _, row in data["contributors"].iterrows():
-            # Bipartite graph: repo -- contributor
+            # ::::: Direction: contributor -> repository
             G.add_edge(row["Source"], row["Target"], type="contribution")
     return G
 
 def enrich_networks(follow_network, commit_network, data):
-    """Add additional relationship data to the networks"""
+    # ::::: enrich networks with additional relationship data
     if "stargazers" in data and not data["stargazers"].empty:
         for _, row in data["stargazers"].iterrows():
             commit_network.add_edge(row["Source"], row["Target"], type="star")
@@ -49,10 +49,10 @@ def enrich_networks(follow_network, commit_network, data):
     return follow_network, commit_network
 
 def export_graph_data(follow_network, commit_network, output_dir="./processed_data"):
-    """Export graph data in formats suitable for C++ processing"""
+    # ::::: export graph data
     os.makedirs(output_dir, exist_ok=True)
 
-    # Export as adjacency lists
+    # ::::: Export as adjacency lists
     with open(os.path.join(output_dir, "follow_network.adjlist"), "w") as f:
         for line in nx.generate_adjlist(follow_network):
             f.write(line + "\n")
@@ -61,7 +61,7 @@ def export_graph_data(follow_network, commit_network, output_dir="./processed_da
         for line in nx.generate_adjlist(commit_network):
             f.write(line + "\n")
 
-    # Export as JSON for web visualization
+    # ::::: Export as JSON
     follow_data = nx.node_link_data(follow_network)
     commit_data = nx.node_link_data(commit_network)
 
@@ -74,7 +74,7 @@ def export_graph_data(follow_network, commit_network, output_dir="./processed_da
     print(f"✅ Graph data exported to {output_dir}")
 
 def process_data():
-    """Main function to process the GitHub data"""
+    # ::::: Main function to process data
     print("Loading data from CSVs...")
     data = load_csv_data()
 
@@ -98,24 +98,15 @@ if __name__ == "__main__":
     process_data()
 
 class DataProcessor:
-    """Service for processing GitHub data"""
+    # ::::: handler for processing data
     
     def __init__(self):
-        """Initialize the data processor"""
+        # :::::Initialize the processor
         self.logger = logging.getLogger(__name__)
     
     def process_user_data(self, user_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process user data for API response
-        
-        Args:
-            user_data: Raw user data from GitHub API or database
-            
-        Returns:
-            Processed user data
-        """
+        # ::::: Process user data for API response
         try:
-            # For now, just return the user data as is
-            # In a real implementation, we might transform or enrich the data
             return user_data
             
         except Exception as e:
@@ -123,17 +114,8 @@ class DataProcessor:
             return user_data
     
     def process_repository_data(self, repo_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process repository data for API response
-        
-        Args:
-            repo_data: Raw repository data from GitHub API or database
-            
-        Returns:
-            Processed repository data
-        """
+        # ::::: Process repository data for API response
         try:
-            # For now, just return the repository data as is
-            # In a real implementation, we might transform or enrich the data
             return repo_data
             
         except Exception as e:
@@ -141,29 +123,22 @@ class DataProcessor:
             return repo_data
     
     def process_network_data(self, network_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process network data for visualization and analysis
-        
-        Args:
-            network_data: Raw network data with nodes and edges
-            
-        Returns:
-            Processed network data
-        """
+        # ::::: Process network data for API response
         try:
-            # Calculate network statistics
+            # ::::: Calculate network statistics
             nodes_count = len(network_data['nodes'])
             edges_count = len(network_data['edges'])
             
-            # Count node types
+            # ::::: Count node types
             user_count = sum(1 for node in network_data['nodes'].values() if node['type'] == 'user')
             repo_count = sum(1 for node in network_data['nodes'].values() if node['type'] == 'repository')
             
-            # Count edge types
+            # ::::: Count edge types
             follows_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'follows')
             owns_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'owns')
             contributes_count = sum(1 for edge in network_data['edges'] if edge['type'] == 'contributes')
             
-            # Add statistics to network data
+            # ::::: add statistics to network data
             network_data['statistics'] = {
                 'nodes_count': nodes_count,
                 'edges_count': edges_count,
@@ -174,7 +149,7 @@ class DataProcessor:
                 'contributes_count': contributes_count
             }
             
-            # Process nodes data for visualization
+            # ::::: Process nodes data for visualization
             nodes_list = []
             for node_id, node_data in network_data['nodes'].items():
                 node_type = node_data['type']
@@ -184,7 +159,7 @@ class DataProcessor:
                     'label': node_id
                 }
                 
-                # Add type-specific properties
+                # ::::: Add type-specific properties
                 if node_type == 'user':
                     node_obj['displayName'] = node_data['data'].get('name', node_id)
                     node_obj['avatar'] = node_data['data'].get('avatar_url')
@@ -198,7 +173,7 @@ class DataProcessor:
                 
                 nodes_list.append(node_obj)
             
-            # Process edges data for visualization
+            # ::::: Process edges data for visualization
             edges_list = []
             for i, edge in enumerate(network_data['edges']):
                 edge_obj = {
@@ -208,7 +183,7 @@ class DataProcessor:
                     'type': edge['type']
                 }
                 
-                # Add type-specific properties
+                # ::::: Add type-specific properties
                 if edge['type'] == 'follows':
                     edge_obj['label'] = 'follows'
                     edge_obj['color'] = '#0077B6'  # Blue
@@ -221,7 +196,7 @@ class DataProcessor:
                 
                 edges_list.append(edge_obj)
             
-            # Replace nodes and edges with processed lists
+            # ::::: Replace nodes and edges with processed lists
             processed_network = {
                 'statistics': network_data['statistics'],
                 'raw': {
@@ -241,17 +216,9 @@ class DataProcessor:
             return network_data
     
     def process_pagerank_results(self, pagerank_results: Dict[str, float], network_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process PageRank results for API response
-        
-        Args:
-            pagerank_results: Dictionary mapping node IDs to PageRank scores
-            network_data: Network data with nodes information
-            
-        Returns:
-            Processed PageRank results
-        """
+        # ::::: Process PageRank results for API response
         try:
-            # Convert to list of dictionaries with node information
+            # ::::: Process PageRank scores
             results_list = []
             for node_id, score in pagerank_results.items():
                 if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
@@ -266,7 +233,7 @@ class DataProcessor:
                         'following_count': node_data.get('following_count', 0)
                     })
             
-            # Sort by score in descending order
+            # ::::: Sort by score in descending order
             results_list.sort(key=lambda x: x['score'], reverse=True)
             
             return {
@@ -283,19 +250,11 @@ class DataProcessor:
             }
     
     def process_hits_results(self, hits_results: tuple, network_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process HITS results for API response
-        
-        Args:
-            hits_results: Tuple of (hubs, authorities) dictionaries
-            network_data: Network data with nodes information
-            
-        Returns:
-            Processed HITS results
-        """
+        # ::::: Process HITS results for API response
         try:
             hubs, authorities = hits_results
             
-            # Process hubs scores
+            # ::::: Process hubs scores
             hubs_list = []
             for node_id, score in hubs.items():
                 if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
@@ -308,10 +267,10 @@ class DataProcessor:
                         'avatar_url': node_data.get('avatar_url')
                     })
             
-            # Sort by score in descending order
+            # ::::: Sort by score in descending order
             hubs_list.sort(key=lambda x: x['score'], reverse=True)
             
-            # Process authorities scores
+            # ::::: Process authorities scores
             authorities_list = []
             for node_id, score in authorities.items():
                 if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
@@ -324,14 +283,14 @@ class DataProcessor:
                         'avatar_url': node_data.get('avatar_url')
                     })
             
-            # Sort by score in descending order
+            # ::::: sort by score in descending order
             authorities_list.sort(key=lambda x: x['score'], reverse=True)
             
             return {
                 'algorithm': 'hits',
                 'description': 'HITS calculates hub and authority scores for nodes in the network',
-                'hubs': hubs_list[:20],  # Limit to top 20
-                'authorities': authorities_list[:20]  # Limit to top 20
+                'hubs': hubs_list[:20],  # ::::: Limit to top 20
+                'authorities': authorities_list[:20]  # ::::: Limit to top 20
             }
             
         except Exception as e:
@@ -342,24 +301,16 @@ class DataProcessor:
             }
     
     def process_community_results(self, community_results: Dict[str, Any], network_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Process community detection results for API response
-        
-        Args:
-            community_results: Dictionary with community detection results
-            network_data: Network data with nodes information
-            
-        Returns:
-            Processed community detection results
-        """
+        # ::::: Process community detection results for API response
         try:
-            # Get algorithm and communities from results
+            # ::::: Get algorithm and communities from results
             algorithm = community_results.get('algorithm', 'unknown')
             
-            # Process based on algorithm type
+            # ::::: Process based on algorithm type
             if algorithm == 'louvain':
                 communities = community_results.get('community_groups', {})
                 
-                # Process communities
+                # ::::: Process communities
                 communities_list = []
                 for community_id, node_ids in communities.items():
                     community = {
@@ -368,7 +319,7 @@ class DataProcessor:
                         'members': []
                     }
                     
-                    # Add node information to community members
+                    # ::::: Add node information to community members
                     for node_id in node_ids:
                         if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
                             node_data = network_data['nodes'][node_id]['data']
@@ -381,7 +332,7 @@ class DataProcessor:
                     
                     communities_list.append(community)
                 
-                # Sort communities by size in descending order
+                # ::::: Sort communities by size in descending order
                 communities_list.sort(key=lambda x: x['size'], reverse=True)
                 
                 return {
@@ -393,7 +344,7 @@ class DataProcessor:
             elif algorithm == 'kcore':
                 cores = community_results.get('core_groups', {})
                 
-                # Process cores
+                # ::::: Process cores
                 cores_list = []
                 for core_num, node_ids in cores.items():
                     core = {
@@ -402,7 +353,7 @@ class DataProcessor:
                         'members': []
                     }
                     
-                    # Add node information to core members
+                    # ::::: Add node information to core members
                     for node_id in node_ids:
                         if node_id in network_data['nodes'] and network_data['nodes'][node_id]['type'] == 'user':
                             node_data = network_data['nodes'][node_id]['data']
@@ -415,7 +366,7 @@ class DataProcessor:
                     
                     cores_list.append(core)
                 
-                # Sort cores by core number in descending order
+                # ::::: Sort cores by size in descending order
                 cores_list.sort(key=lambda x: x['core'], reverse=True)
                 
                 return {

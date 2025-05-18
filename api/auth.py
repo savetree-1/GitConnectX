@@ -8,19 +8,19 @@ import sys
 from datetime import datetime, timedelta
 from urllib.parse import urlencode
 
-# Add project root to path for imports
+# ::::: Add project root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import configuration
+# ::::: Import configuration
 import config
 
-# Set up logging
+# ::::: Set up logging
 logger = logging.getLogger(__name__)
 
-# Create auth blueprint
+# ::::::::: Blueprint setup
 auth_bp = Blueprint('auth', __name__)
 
-# GitHub OAuth URLs
+# :::::::::::: GitHub OAuth URLs
 GITHUB_AUTH_URL = 'https://github.com/login/oauth/authorize'
 GITHUB_TOKEN_URL = 'https://github.com/login/oauth/access_token'
 GITHUB_API_URL = 'https://api.github.com'
@@ -32,15 +32,15 @@ def get_github_auth_url():
     Returns:
         str: The authorization URL
     """
-    # Generate a random state for CSRF protection
+    # ::::: Generate random state parameter
     state = secrets.token_hex(16)
     session['oauth_state'] = state
     
-    # Set the session expiry for the state
+    # ::::: Set session expiry
     session.permanent = True
     current_app.permanent_session_lifetime = timedelta(minutes=10)
     
-    # Define the OAuth parameters
+    # ::::: Prepare parameters for auth
     params = {
         'client_id': config.GITHUB_CLIENT_ID,
         'redirect_uri': config.GITHUB_REDIRECT_URI,
@@ -49,7 +49,7 @@ def get_github_auth_url():
         'allow_signup': 'true'
     }
     
-    # Build the authorization URL
+    # ::::: Generate the authorization URL
     auth_url = f"{GITHUB_AUTH_URL}?{urlencode(params)}"
     logger.info(f"Generated GitHub auth URL with state {state[:4]}...")
     
@@ -74,27 +74,27 @@ def callback():
     Returns:
         Redirect to frontend with token or error
     """
-    # Get the code and state from GitHub
+    # ::::: Get the code and state
     code = request.args.get('code')
     state = request.args.get('state')
     
-    # Error handling
+    # ::::: Error handling
     if not code:
         error_msg = "No code provided by GitHub"
         logger.error(error_msg)
         return redirect(f"{config.FRONTEND_URL}/auth-error?error={error_msg}")
     
-    # Verify state to prevent CSRF attacks
+    # ::::: Validate state parameter
     if 'oauth_state' not in session or state != session['oauth_state']:
         error_msg = "Invalid state parameter"
         logger.error(error_msg)
         return redirect(f"{config.FRONTEND_URL}/auth-error?error={error_msg}")
     
-    # Clean up the session
+    # ::::: Clear the state 
     session.pop('oauth_state', None)
     
     try:
-        # Exchange code for access token
+        # ::::: Exchange code for access token
         token_data = exchange_code_for_token(code)
         
         if 'access_token' not in token_data:
@@ -102,10 +102,10 @@ def callback():
             logger.error(f"GitHub token exchange failed: {error_msg}")
             return redirect(f"{config.FRONTEND_URL}/auth-error?error={error_msg}")
         
-        # Get the access token
+        # ::::: Extract access token
         access_token = token_data['access_token']
         
-        # Get user data from GitHub API
+        # ::::: Get user data 
         user_data = get_github_user(access_token)
         
         if not user_data or 'login' not in user_data:
@@ -113,20 +113,20 @@ def callback():
             logger.error(error_msg)
             return redirect(f"{config.FRONTEND_URL}/auth-error?error={error_msg}")
         
-        # Store user info in session
+        # ::::: Store user data
         session['github_token'] = access_token
         session['username'] = user_data['login']
         session['user_id'] = user_data['id']
         session['avatar_url'] = user_data['avatar_url']
         session['auth_time'] = datetime.now().isoformat()
         
-        # Set session expiry
+        # ::::: Set session expiry
         session.permanent = True
-        current_app.permanent_session_lifetime = timedelta(days=7)  # Token valid for 7 days
+        current_app.permanent_session_lifetime = timedelta(days=7)  # ::::: valid for 7 days
         
         logger.info(f"User {user_data['login']} successfully authenticated")
         
-        # Redirect to frontend with success
+        # ::::: Redirect to frontend
         return redirect(f"{config.FRONTEND_URL}/dashboard?auth=success")
         
     except Exception as e:
@@ -186,7 +186,7 @@ def logout():
     """
     username = session.get('username')
     
-    # Clear the session
+    # ::::: Clear session data
     session.clear()
     
     if username:
@@ -236,23 +236,23 @@ def refresh_token():
         }), 401
     
     try:
-        # Check if token is still valid by making a request to GitHub API
+        # :::: current access token
         user_data = get_github_user(session['github_token'])
         
         if not user_data or 'login' not in user_data:
-            # Token is invalid, clear session
+            # ::::: Token expired or invalid
             session.clear()
             return jsonify({
                 'status': 'error',
                 'message': 'Session expired'
             }), 401
         
-        # Update session with latest user data
+        # ::::: Update with new user data
         session['username'] = user_data['login']
         session['avatar_url'] = user_data['avatar_url']
         session['auth_time'] = datetime.now().isoformat()
         
-        # Extend session expiry
+        # ::::: extend session expiry
         session.permanent = True
         current_app.permanent_session_lifetime = timedelta(days=7)
         
@@ -275,7 +275,7 @@ def refresh_token():
             'message': str(e)
         }), 500
 
-# Helper function to check authentication
+# ::::: Decorator for authentication 
 def require_auth(f):
     """
     Decorator to require authentication for routes

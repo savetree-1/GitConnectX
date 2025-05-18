@@ -1,27 +1,27 @@
 from flask import Blueprint
 
-# Import blueprints from other modules
+# ::::: Import blueprints
 from api.auth import auth_bp
 from api.routes import routes_bp
 
-# Create the main API blueprint
+# ::::: Create main API blueprint
 api_bp = Blueprint('api', __name__)
 
-# Register the imported blueprints
+# ::::: Register blueprints
 api_bp.register_blueprint(auth_bp, url_prefix='/auth')
 api_bp.register_blueprint(routes_bp)
 
-# Expose the main blueprint for use in app.py
+# ::::: Route for GitHub OAuth login
 __all__ = ['api_bp']
 
 import os
 import logging
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# ::::: Initialize environment variables
 load_dotenv()
 
-# Configure logging
+# ::::: Set up logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -36,7 +36,7 @@ def init_app():
     """Initialize the application"""
     from api.app import app
     
-    # Configure app settings
+    # ::::: Configure app settings
     app.config['JSON_SORT_KEYS'] = False
     
     logger.info("Application initialized")

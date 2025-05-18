@@ -6,25 +6,25 @@ import json
 import logging
 from datetime import datetime
 
-# Add project root to path for imports
+# ::::: Add Root Path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import backend modules
+# ::::: backend modules
 from backend.github_service import GitHubDataFetcher
 from backend.processor import DataProcessor
 from backend.graph_service import GraphService
 from backend.database import DatabaseService
 from backend import config
 
-# Initialize Flask app
+# ::::: Flask app
 app = Flask(__name__)
 app.secret_key = config.SECRET_KEY
 app.config['JSON_SORT_KEYS'] = False
 
-# Enable CORS for frontend integration
+# ::::: frontend integration
 CORS(app, supports_credentials=True)
 
-# Configure logging
+# ::::: Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -35,7 +35,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# Initialize services
+# ::::: Initialize services
 github_fetcher = GitHubDataFetcher(api_token=config.GITHUB_API_TOKEN)
 data_processor = DataProcessor()
 graph_service = GraphService()
@@ -63,25 +63,25 @@ def fetch_user(username):
     try:
         logger.info(f"Fetching data for user: {username}")
         
-        # Check if user data exists in database
+        # ::::: Check database for user data
         cached_user = db_service.get_user(username)
         
         if cached_user:
-            # Use cached data if it exists
+            # ::::: if the data exists
             user_data = cached_user
             logger.info(f"Retrieved user {username} from database")
         else:
-            # Fetch from GitHub API
-        user_data = github_fetcher.fetch_user_data(username)
+            # ::::: Fetch from GitHub API
+            user_data = github_fetcher.fetch_user_data(username)
         
         if not user_data:
             return jsonify({'error': f'User {username} not found'}), 404
                 
-            # Save to database
+            # ::::: Save to database
             db_service.save_user(user_data)
             logger.info(f"Saved user {username} to database")
             
-        # Process fetched data
+        # ::::: Process fetched data
         processed_data = data_processor.process_user_data(user_data)
         
         return jsonify({
@@ -110,7 +110,7 @@ def fetch_network(username):
         
         logger.info(f"Fetching network for {username} with depth {depth}, include_repos={include_repos}, use_cache={use_cache}")
         
-        # Check if network data exists in database
+        # ::::: Check for cached network data
         if use_cache:
             cached_network = db_service.get_network(username)
             
@@ -118,7 +118,7 @@ def fetch_network(username):
                 network_data = cached_network['network_data']
                 logger.info(f"Retrieved network for {username} from database")
                 
-                # Process the network data
+                # ::::: Process cached data
                 processed_network = data_processor.process_network_data(network_data)
                 
                 return jsonify({
@@ -129,23 +129,23 @@ def fetch_network(username):
                     }
                 })
         
-        # Fetch user to verify existence
+        # ::::: Fetch user data to verify existence
         user_data = github_fetcher.fetch_user_data(username)
         if not user_data:
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Fetch the network (followers, following, collaborators)
+        # :::: Fetch user network
         network_data = github_fetcher.fetch_user_network(
             username, 
             depth=depth, 
             include_repositories=include_repos
         )
         
-        # Save to database
+        # ::::: Save to database
         db_service.save_network(username, network_data)
         logger.info(f"Saved network for {username} to database")
         
-        # Process the network data
+        # ::::: Process network data
         processed_network = data_processor.process_network_data(network_data)
         
         return jsonify({
@@ -180,17 +180,16 @@ def find_path():
             
         logger.info(f"Finding path between {source} and {target}")
         
-        # Fetch the source user's network
-        # First check if it's in the database
+        # ::::: Check for cached path data
         cached_network = db_service.get_network(source)
         
         if cached_network and 'network_data' in cached_network:
             network_data = cached_network['network_data']
         else:
-            # Fetch from GitHub API with sufficient depth
+            # :::: Fetch user data to verify existence
             network_data = github_fetcher.fetch_user_network(source, depth=2)
             
-        # Find the path
+        # ::::: Find the path
         path_result = graph_service.find_shortest_path(network_data, source, target)
         
         return jsonify({
@@ -223,7 +222,7 @@ def detect_communities():
             
         logger.info(f"Detecting communities for {username} using {algorithm}")
         
-        # Check for cached results
+        # ::::: Check for cached results
         if use_cache:
             cached_result = db_service.get_graph_result(username, f'community_{algorithm}')
             
@@ -235,24 +234,24 @@ def detect_communities():
                     'source': 'cache'
                 })
         
-        # Fetch user network
+        # ::::: Fetch user network
         cached_network = db_service.get_network(username)
         
         if cached_network and 'network_data' in cached_network:
             network_data = cached_network['network_data']
         else:
-            # Fetch from GitHub API
+            # ::::: Fetch from GitHub API
             network_data = github_fetcher.fetch_user_network(username, depth=2)
-            # Save to database
+            # ::::: Save to database
             db_service.save_network(username, network_data)
         
-        # Detect communities
+        # ::::: Detect communities
         communities = graph_service.detect_communities(network_data, algorithm=algorithm)
         
-        # Process results
+        # ::::: Process results
         processed_results = data_processor.process_community_results(communities, network_data)
         
-        # Save results
+        # ::::: Save results
         db_service.save_graph_result(username, f'community_{algorithm}', processed_results)
         
         return jsonify({
@@ -286,7 +285,7 @@ def rank_developers():
             
         logger.info(f"Ranking developers for {username} using {algorithm}")
         
-        # Check for cached results
+        # ::::: Check for cached results
         if use_cache:
             cached_result = db_service.get_graph_result(username, algorithm)
             
@@ -298,21 +297,21 @@ def rank_developers():
                     'source': 'cache'
                 })
         
-        # Fetch user network
+        # ::::: Fetch user network
         cached_network = db_service.get_network(username)
         
         if cached_network and 'network_data' in cached_network:
             network_data = cached_network['network_data']
         else:
-            # Fetch from GitHub API
-        network_data = github_fetcher.fetch_user_network(username, depth=2)
-            # Save to database
+            # ::::: Fetch from GitHub API
+            network_data = github_fetcher.fetch_user_network(username, depth=2)
+            # ::::: Save to database
             db_service.save_network(username, network_data)
         
-        # Build the graph
+        # ::::: Build the graph
         follow_graph = graph_service.build_follow_graph(network_data)
         
-        # Run the ranking algorithm
+        # :::: Rank developers
         if algorithm == 'pagerank':
             result = graph_service.run_pagerank(follow_graph)
             processed_results = data_processor.process_pagerank_results(result, network_data)
@@ -322,7 +321,7 @@ def rank_developers():
         else:
             return jsonify({'error': f'Unsupported algorithm: {algorithm}'}), 400
         
-        # Save results
+        # ::::: Save results
         db_service.save_graph_result(username, algorithm, processed_results)
         
         return jsonify({
@@ -349,35 +348,35 @@ def fetch_repository(owner, repo):
     try:
         logger.info(f"Fetching repository data for {owner}/{repo}")
         
-        # Check if repository exists in database
+        # ::::: Check database for repository data
         full_name = f"{owner}/{repo}"
         cached_repo = db_service.get_repository(full_name)
         
         if cached_repo:
-            # Use cached data
+            # ::::: Use cached data
             repo_data = cached_repo
             logger.info(f"Retrieved repository {full_name} from database")
         else:
-            # Fetch user to verify existence
+            # :::: Fetch from GitHub API
             user_data = github_fetcher.fetch_user_data(owner)
             if not user_data:
                 return jsonify({'error': f'User {owner} not found'}), 404
         
-        # Fetch repository data
+        # ::::: Fetch repository data
             repository = github_fetcher.fetch_user_repositories(owner)
             repo_data = next((r for r in repository if r['name'] == repo), None)
         
         if not repo_data:
             return jsonify({'error': f'Repository {owner}/{repo} not found'}), 404
             
-            # Save to database
+            # ::::: Save to database
             db_service.save_repository(repo_data, owner)
             logger.info(f"Saved repository {full_name} to database")
         
-        # Fetch contributors
+        # ::::: Fetch contributors
         contributors = github_fetcher.fetch_repository_contributors(owner, repo)
         
-        # Process data
+        # ::::: Process data
         processed_data = data_processor.process_repository_data(repo_data)
         processed_data['contributors'] = contributors
         
@@ -403,15 +402,15 @@ def analyze_languages(username):
     try:
         logger.info(f"Analyzing languages for user: {username}")
         
-        # Fetch user to verify existence
+        # ::::: Check database for user data
         user_data = github_fetcher.fetch_user_data(username)
         if not user_data:
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Fetch user's repositories
+        # :::: Fetch user repositories
         repositories = github_fetcher.fetch_user_repositories(username)
         
-        # Analyze languages
+        # ::::: Analyze languages
         language_count = {}
         language_stars = {}
         language_repos = {}
@@ -419,14 +418,14 @@ def analyze_languages(username):
         for repo in repositories:
             language = repo.get('language')
             if language:
-                # Count repositories by language
+                # ::::: Count repositories
                 language_count[language] = language_count.get(language, 0) + 1
                 
-                # Count stars by language
+                # ::::: Count stars 
                 stars = repo.get('stargazers_count', 0)
                 language_stars[language] = language_stars.get(language, 0) + stars
                 
-                # Track repositories by language
+                # ::::: Track repositories 
                 if language not in language_repos:
                     language_repos[language] = []
                 language_repos[language].append({
@@ -436,21 +435,21 @@ def analyze_languages(username):
                     'url': repo.get('url')
                 })
         
-        # Sort repositories by stars within each language
+        # :::: Sort repositories 
         for language in language_repos:
             language_repos[language].sort(key=lambda x: x.get('stars', 0), reverse=True)
         
-        # Prepare results
+        # ::::: Prepare results
         languages = []
         for language, count in language_count.items():
             languages.append({
                 'name': language,
                 'repository_count': count,
                 'star_count': language_stars.get(language, 0),
-                'top_repositories': language_repos.get(language, [])[:5]  # Top 5 repos by stars
+                'top_repositories': language_repos.get(language, [])[:5]  # ::::: Top 5 repos
             })
         
-        # Sort languages by repository count
+        # :::: Sort languages by repository count
         languages.sort(key=lambda x: x['repository_count'], reverse=True)
         
         return jsonify({

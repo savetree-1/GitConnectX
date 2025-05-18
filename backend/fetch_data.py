@@ -2,10 +2,10 @@ from github import Github
 from github.GithubException import GithubException
 import csv
 
-# GitHub Access Token (⚠️ For security, don't hardcode this in production)
+# ::::: GitHub API Access Token
 ACCESS_TOKEN = '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'
 
-# Fetch Followers
+# ::::: Fetch Followers
 def fetch_followers(user):
     try:
         print("Fetching followers...")
@@ -20,7 +20,7 @@ def fetch_followers(user):
         print(f"Error fetching followers: {e}")
         return []
 
-# Fetch Stargazers
+# ::::: Fetch Stargazers
 def fetch_stargazers(repo):
     try:
         print("Fetching stargazers...")
@@ -35,7 +35,7 @@ def fetch_stargazers(repo):
         print(f"Error fetching stargazers: {e}")
         return []
 
-# Fetch Contributors
+# ::::: Fetch Contributors
 def fetch_contributors(repo):
     try:
         print("Fetching contributors...")
@@ -50,7 +50,7 @@ def fetch_contributors(repo):
         print(f"Error fetching contributors: {e}")
         return []
 
-# Fetch Forks
+# ::::: Fetch Forks
 def fetch_forks(repo):
     try:
         print("Fetching forks...")
@@ -65,7 +65,7 @@ def fetch_forks(repo):
         print(f"Error fetching forks: {e}")
         return []
 
-# Save Data to CSV
+# ::::: Save Data to CSV
 def save_to_csv(filename, data):
     if not data:
         print(f"No data to save for {filename}. Skipping...")
@@ -76,7 +76,7 @@ def save_to_csv(filename, data):
         writer.writerows(data)
     print(f"Data saved to {filename}")
 
-# Main Data Fetch Function
+# ::::: Main Data Fetch Function
 def fetch_data(username, repo_name):
     try:
         print("Connecting to GitHub...")
@@ -111,7 +111,7 @@ def fetch_data(username, repo_name):
     except Exception as e:
         print(f"Unhandled error: {e}")
 
-# Entry Point
+# ::::: Entry Point
 if __name__ == "__main__":
-    # You can change the user and repo name here
+    # ::::: Example usage
     fetch_data("torvalds", "linux")

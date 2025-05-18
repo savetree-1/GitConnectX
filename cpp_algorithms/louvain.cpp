@@ -117,7 +117,7 @@ public:
             oss << "Iterations: " << iterations;
             oss << (converged ? " (converged)" : " (max iterations reached)") << "\n\n";
             
-            // Get community sizes
+            // ::::: Get community sizes
             std::vector<size_t> sizes(numCommunities, 0);
             for (size_t comm : communities) {
                 sizes[comm]++;
@@ -147,7 +147,7 @@ public:
         std::vector<size_t> communities(n);
         std::vector<Community> communityStructs;
         
-        // Initialize each node as its own community
+        // ::::: Initialize each node as its own community
         for (size_t i = 0; i < n; ++i) {
             communities[i] = i;
             Community c;
@@ -155,12 +155,12 @@ public:
             communityStructs.push_back(c);
         }
         
-        // Calculate total weight
+        // ::::: Calculate total weight
         double totalWeight = 0.0;
         for (const auto& community : communityStructs) {
             totalWeight += community.totalWeight;
         }
-        totalWeight /= 2.0;  // Each edge is counted twice
+        totalWeight /= 2.0;  // ::::: Each edge is counted twice
         
         if (totalWeight <= 0.0) {
             throw std::runtime_error("Graph has no edges");
@@ -173,13 +173,13 @@ public:
         do {
             improved = false;
             
-            // Try to move each node to a different community
+            // ::::: Try to move each node to a different community
             for (size_t node = 0; node < n; ++node) {
                 size_t currentCommunity = communities[node];
                 double bestDeltaModularity = 0.0;
                 size_t bestCommunity = currentCommunity;
                 
-                // Try moving to each neighboring community
+                // ::::: Try moving to each neighboring community
                 for (const auto& neighbor : graph.getNeighbors(static_cast<int>(node))) {
                     size_t neighborCommunity = communities[static_cast<size_t>(neighbor.first)];
                     if (neighborCommunity != currentCommunity) {
@@ -193,12 +193,12 @@ public:
                     }
                 }
                 
-                // Move node if improvement found
+                // ::::: Move node if improvement found
                 if (bestCommunity != currentCommunity) {
-                    // Remove from current community
+                    // ::::: Remove from current community
                     communityStructs[currentCommunity].removeNode(node, graph);
                     
-                    // Add to new community
+                    // ::::: Add to new community
                     communityStructs[bestCommunity].addNode(node, graph);
                     communities[node] = bestCommunity;
                     
@@ -208,7 +208,7 @@ public:
             
             iteration++;
             
-            // Update modularity
+            // ::::: Update modularity
             if (improved) {
                 currentModularity = calculateModularity(communityStructs, graph, totalWeight);
             }
@@ -245,7 +245,7 @@ public:
             }
         }
         
-        // Remove duplicates
+        // ::::: Remove duplicates
         std::sort(edges.begin(), edges.end());
         edges.erase(std::unique(edges.begin(), edges.end()), edges.end());
         

@@ -1,11 +1,11 @@
 #include "graph.h"
 
-// Add an edge between src and dest
+// ::::: Add an edge between src and dest
 void Graph::addEdge(const std::string& src, const std::string& dest) {
-    adjList[src].push_back(dest); // Add destination node to the adjacency list of the source node
+    adjList[src].push_back(dest); // ::::: Add edge from src to dest
 }
 
-// Print the graph
+// ::::: Print the graph
 void Graph::printGraph() {
     for (const auto& pair : adjList) {
         std::cout << pair.first << " -> ";
@@ -16,7 +16,7 @@ void Graph::printGraph() {
     }
 }
 
-// Retrieve the adjacency list
+// ::::: Retrieve the adjacency list
 std::unordered_map<std::string, std::vector<std::string>> Graph::getAdjList() {
     return adjList;
 }

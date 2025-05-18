@@ -9,24 +9,16 @@ import pandas as pd
 from backend import config
 
 class GitHubDataFetcher:
-    """Service for fetching data from GitHub API"""
+    # ::::: GitHub Data Fetcher 
     
     def __init__(self, api_token: Optional[str] = None):
-        """Initialize the GitHub API client
-        
-        Args:
-            api_token: GitHub API token for authentication
-        """
+        # ::::: Initialize GitHub client
         self.api_token = api_token or config.GITHUB_API_TOKEN
         self.client = Github(self.api_token, per_page=100)  # Set per_page to 100 for efficiency
         self.logger = logging.getLogger(__name__)
         
     def check_rate_limit(self) -> Dict[str, Any]:
-        """Check the current rate limit status
-        
-        Returns:
-            Dict with rate limit information
-        """
+        # ::::: Check GitHub API rate limit
         rate_limit = self.client.get_rate_limit()
         return {
             'core': {
@@ -42,27 +34,20 @@ class GitHubDataFetcher:
         }
     
     def fetch_user_data(self, username: str) -> Optional[Dict[str, Any]]:
-        """Fetch user data from GitHub
-        
-        Args:
-            username: GitHub username
-            
-        Returns:
-            Dictionary with user data or None if user not found
-        """
+        # ::::: Fetch user data from GitHub
         try:
             user = self.client.get_user(username)
             
-            # Ensure user ID exists
+            # ::::: Ensure user ID exists
             if not user or not user.id:
                 self.logger.error(f"Invalid user data for {username}: Missing ID")
                 return None
             
-            # Fetch basic user information
+            # ::::: Fetch basic user information
             user_data = {
                 'login': user.login,
-                'github_id': user.id,  # Ensure we use github_id for storage
-                'id': user.id,  # Keep id for compatibility
+                'github_id': user.id,  # ::::: Ensure we use github_id for storage
+                'id': user.id,  # ::::: Keep id for compatibility
                 'name': user.name,
                 'bio': user.bio,
                 'avatar_url': user.avatar_url,
@@ -107,13 +92,13 @@ class GitHubDataFetcher:
                 if count >= max_count:
                     break
                 
-                # Skip followers without ID
+                # ::::: Skip followers without ID
                 if not follower.id:
                     continue
                     
                 followers_data.append({
                     'login': follower.login,
-                    'github_id': follower.id,  # Use github_id for storage
+                    'github_id': follower.id,  # ::::: Use github_id for storage
                     'id': follower.id,
                     'avatar_url': follower.avatar_url,
                     'url': follower.html_url
@@ -131,15 +116,7 @@ class GitHubDataFetcher:
             return []
     
     def fetch_user_following(self, username: str, max_count: int = 100) -> List[Dict[str, Any]]:
-        """Fetch users followed by a GitHub user
-        
-        Args:
-            username: GitHub username
-            max_count: Maximum number of followed users to fetch
-            
-        Returns:
-            List of dictionaries with following data
-        """
+        # ::::: Fetch following users of a GitHub user
         try:
             user = self.client.get_user(username)
             following_data = []
@@ -149,13 +126,13 @@ class GitHubDataFetcher:
                 if count >= max_count:
                     break
                 
-                # Skip users without ID
+                # ::::: Skip following users without ID
                 if not following.id:
                     continue
                     
                 following_data.append({
                     'login': following.login,
-                    'github_id': following.id,  # Use github_id for storage
+                    'github_id': following.id,  # ::::: Use github_id for storage
                     'id': following.id,
                     'avatar_url': following.avatar_url,
                     'url': following.html_url
@@ -173,15 +150,7 @@ class GitHubDataFetcher:
             return []
     
     def fetch_user_repositories(self, username: str, max_count: int = 100) -> List[Dict[str, Any]]:
-        """Fetch repositories owned by a GitHub user
-        
-        Args:
-            username: GitHub username
-            max_count: Maximum number of repositories to fetch
-            
-        Returns:
-            List of dictionaries with repository data
-        """
+        # ::::: Fetch repositories of a GitHub user
         try:
             user = self.client.get_user(username)
             repos_data = []
@@ -219,16 +188,7 @@ class GitHubDataFetcher:
             return []
     
     def fetch_repository_stargazers(self, owner: str, repo: str, max_count: int = 100) -> List[Dict[str, Any]]:
-        """Fetch users who starred a repository
-        
-        Args:
-            owner: Repository owner username
-            repo: Repository name
-            max_count: Maximum number of stargazers to fetch
-            
-        Returns:
-            List of dictionaries with stargazer data
-        """
+        # ::::: Fetch stargazers of a GitHub repository
         try:
             repository = self.client.get_repo(f"{owner}/{repo}")
             stargazers_data = []
@@ -238,7 +198,7 @@ class GitHubDataFetcher:
                 if count >= max_count:
                     break
                 
-                # Skip users without ID
+                # ::::: Skip users without ID
                 if not stargazer.id:
                     continue
                 
@@ -263,15 +223,7 @@ class GitHubDataFetcher:
             return []
     
     def fetch_repository_contributors(self, owner: str, repo: str) -> List[Dict[str, Any]]:
-        """Fetch contributors to a GitHub repository
-        
-        Args:
-            owner: Owner of the repository
-            repo: Repository name
-            
-        Returns:
-            List of dictionaries with contributor data
-        """
+        # ::::: Fetch contributors of a GitHub repository
         try:
             repository = self.client.get_repo(f"{owner}/{repo}")
             contributors_data = []
@@ -295,24 +247,15 @@ class GitHubDataFetcher:
             return []
     
     def fetch_user_network(self, username: str, depth: int = 1, include_repositories: bool = True) -> Dict[str, Any]:
-        """Fetch a user's network including followers, following, and repositories
-        
-        Args:
-            username: GitHub username
-            depth: How many levels of connections to fetch (1 = direct connections only)
-            include_repositories: Whether to include repository data
-            
-        Returns:
-            Dictionary with network data
-        """
+        # ::::: Fetch user network data
         try:
-            # Initialize network data
+            # ::::: Initialize network data
             network = {
                 'nodes': {},
                 'edges': []
             }
             
-            # Add root user
+            # ::::: Add root user
             user_data = self.fetch_user_data(username)
             if not user_data:
                 return network
@@ -322,7 +265,7 @@ class GitHubDataFetcher:
                 'data': user_data
             }
             
-            # Process direct connections (depth 1)
+            # ::::: Process direct connections (depth 1)
             self._process_user_connections(username, network, current_depth=1, max_depth=depth, include_repos=include_repositories)
             
             return network
@@ -332,78 +275,70 @@ class GitHubDataFetcher:
             return {'nodes': {}, 'edges': []}
     
     def _process_user_connections(self, username: str, network: Dict[str, Any], current_depth: int, max_depth: int, include_repos: bool):
-        """Process user connections recursively up to the specified depth
-        
-        Args:
-            username: GitHub username
-            network: Network data structure to update
-            current_depth: Current depth in the network
-            max_depth: Maximum depth to traverse
-            include_repos: Whether to include repository data
-        """
+        # ::::: process user connections
         if current_depth > max_depth:
             return
             
-        # Fetch followers
+        # ::::: Fetch followers
         followers = self.fetch_user_followers(username)
         for follower in followers:
             follower_login = follower['login']
             
-            # Add to network if not already present
+            # ::::: Add to network if not already present
             if follower_login not in network['nodes']:
                 network['nodes'][follower_login] = {
                     'type': 'user',
                     'data': follower
                 }
                 
-            # Add edge: follower -> user
+            # ::::: Add edge: follower -> user
             network['edges'].append({
                 'source': follower_login,
                 'target': username,
                 'type': 'follows'
             })
             
-            # Process next level if not at max depth
+            # ::::: Process next level if not at max depth
             if current_depth < max_depth:
                 self._process_user_connections(follower_login, network, current_depth + 1, max_depth, include_repos)
         
-        # Fetch following
+        # ::::: Fetch following
         following = self.fetch_user_following(username)
         for follow in following:
             follow_login = follow['login']
             
-            # Add to network if not already present
+            # ::::: Add to network if not already present
             if follow_login not in network['nodes']:
                 network['nodes'][follow_login] = {
                     'type': 'user',
                     'data': follow
                 }
                 
-            # Add edge: user -> follow
+            # ::::: Add edge: user -> follow
             network['edges'].append({
                 'source': username,
                 'target': follow_login,
                 'type': 'follows'
             })
             
-            # Process next level if not at max depth
+            # ::::: Process next level if not at max depth
             if current_depth < max_depth:
                 self._process_user_connections(follow_login, network, current_depth + 1, max_depth, include_repos)
         
-        # Fetch repositories if requested
+        # ::::: Fetch repositories if requested
         if include_repos:
             repositories = self.fetch_user_repositories(username)
             for repo in repositories:
                 repo_name = repo['full_name']
                 
-                # Add to network if not already present
+                # ::::: Add to network if not already present
                 if repo_name not in network['nodes']:
                     network['nodes'][repo_name] = {
                         'type': 'repository',
                         'data': repo
                     }
                     
-                # Add edge: user -> repository (owns)
+                # ::::: Add edge: user -> repository (owns)
                 network['edges'].append({
                     'source': username,
                     'target': repo_name,

@@ -8,7 +8,7 @@
 
 class GraphBuilder {
 public:
-    // Build a graph from an edge list file
+    // ::::: Build a graph from an edge list file
     static Graph buildFromEdgeList(const std::string& filename, bool directed = false) {
         Graph graph(directed);
         std::ifstream file(filename);
@@ -24,7 +24,7 @@ public:
             double weight = 1.0;
             
             if (iss >> from >> to) {
-                iss >> weight; // Optional weight
+                iss >> weight; // ::::: Optional weight
                 graph.addEdge(from, to, weight);
             }
         }
@@ -32,7 +32,7 @@ public:
         return graph;
     }
     
-    // Build a graph from an adjacency matrix
+    // ::::: Build a graph from an adjacency matrix
     static Graph buildFromAdjacencyMatrix(const std::vector<std::vector<double>>& matrix, bool directed = false) {
         Graph graph(directed);
         int n = matrix.size();
@@ -48,7 +48,7 @@ public:
         return graph;
     }
     
-    // Build a graph from an adjacency list
+    // ::::: Build a graph from an adjacency list
     static Graph buildFromAdjacencyList(const std::vector<std::vector<std::pair<int, double>>>& adjList, bool directed = false) {
         Graph graph(directed);
         
@@ -61,7 +61,7 @@ public:
         return graph;
     }
     
-    // Create a complete graph
+    // ::::: Create a complete graph
     static Graph createCompleteGraph(int n, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         
@@ -76,7 +76,7 @@ public:
         return graph;
     }
     
-    // Create a cycle graph
+    // ::::: Create a cycle graph
     static Graph createCycleGraph(int n, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         
@@ -87,7 +87,7 @@ public:
         return graph;
     }
     
-    // Create a star graph
+    // ::::: Create a star graph
     static Graph createStarGraph(int n, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         
@@ -98,7 +98,7 @@ public:
         return graph;
     }
     
-    // Create a path graph
+    // ::::: Create a path graph
     static Graph createPathGraph(int n, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         
@@ -109,7 +109,7 @@ public:
         return graph;
     }
     
-    // Create a grid graph
+    // ::::: Create a grid graph
     static Graph createGridGraph(int rows, int cols, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         
@@ -117,12 +117,12 @@ public:
             for (int j = 0; j < cols; ++j) {
                 int current = i * cols + j;
                 
-                // Add right edge
+                // ::::: Add right edge
                 if (j < cols - 1) {
                     graph.addEdge(current, current + 1, weight);
                 }
                 
-                // Add down edge
+                // ::::: Add down edge
                 if (i < rows - 1) {
                     graph.addEdge(current, current + cols, weight);
                 }
@@ -132,7 +132,7 @@ public:
         return graph;
     }
     
-    // Create a random graph with given edge probability
+    // ::::: Create a random graph
     static Graph createRandomGraph(int n, double edgeProbability, double weight = 1.0, bool directed = false) {
         Graph graph(directed);
         

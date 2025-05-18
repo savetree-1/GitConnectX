@@ -11,14 +11,14 @@ from datetime import datetime
 
 from backend import config
 
-# Setup logging
+# ::::: Setup logging
 logger = logging.getLogger(__name__)
 
-# SQLAlchemy setup for PostgreSQL
+# ::::: SQLAlchemy setup
 Base = declarative_base()
 
 class User(Base):
-    """User model for storing GitHub user data"""
+    # ::::: User model for storing GitHub user data
     __tablename__ = 'users'
     
     id = Column(Integer, primary_key=True)
@@ -42,7 +42,7 @@ class User(Base):
     repositories = relationship('Repository', back_populates='owner')
 
 class Repository(Base):
-    """Repository model for storing GitHub repository data"""
+    # ::::: Repository model for storing GitHub repository data
     __tablename__ = 'repositories'
     
     id = Column(Integer, primary_key=True)
@@ -64,21 +64,21 @@ class Repository(Base):
     owner = relationship('User', back_populates='repositories')
 
 class DatabaseService:
-    """Service for handling database connections and operations"""
+    # ::::: DatabaseService class for managing database connections and operations
     
     def __init__(self):
         """Initialize database connections"""
         try:
-            # Initialize PostgreSQL connection
+            # ::::: Initialize PostgreSQL connection
             self.pg_engine = create_engine(config.POSTGRES_URI)
             Base.metadata.create_all(self.pg_engine)
             self.Session = sessionmaker(bind=self.pg_engine)
             
-            # Initialize MongoDB connection
+            # ::::: Initialize MongoDB connection
             self.mongo_client = MongoClient(config.MONGODB_URI)
             self.mongo_db = self.mongo_client['gitconnectx']
             
-            # MongoDB collections
+            # ::::: MongoDB collections
             self.networks_collection = self.mongo_db['networks']
             self.graph_results_collection = self.mongo_db['graph_results']
             
@@ -89,32 +89,25 @@ class DatabaseService:
             raise
     
     def close(self):
-        """Close database connections"""
+        # ::::: Close database connections
         try:
             self.mongo_client.close()
             logger.info("Database connections closed")
         except Exception as e:
             logger.error(f"Error closing database connections: {str(e)}")
     
-    # PostgreSQL operations (users and repositories)
+    # ::::: PostgreSQL operations
     
     def save_user(self, user_data: Dict[str, Any]) -> User:
-        """Save or update a user in PostgreSQL
-        
-        Args:
-            user_data: Dictionary with user data
-            
-        Returns:
-            User model instance
-        """
+        # ::::: Save or update a user in PostgreSQL
         try:
             session = self.Session()
             
-            # Check if user already exists
+            # ::::: Check if user already exists
             user = session.query(User).filter_by(login=user_data['login']).first()
             
             if user:
-                # Update existing user
+                # ::::: Update existing user
                 for key, value in user_data.items():
                     if key in ['created_at', 'updated_at'] and value:
                         value = datetime.fromisoformat(value)
@@ -122,7 +115,7 @@ class DatabaseService:
                         setattr(user, key, value)
                 user.last_fetched = datetime.utcnow()
             else:
-                # Create new user
+                # ::::: Create new user
                 user_dict = {}
                 for key, value in user_data.items():
                     if key in ['created_at', 'updated_at'] and value:
@@ -143,29 +136,21 @@ class DatabaseService:
             raise
     
     def save_repository(self, repo_data: Dict[str, Any], owner_login: str) -> Repository:
-        """Save or update a repository in PostgreSQL
-        
-        Args:
-            repo_data: Dictionary with repository data
-            owner_login: GitHub login of the repository owner
-            
-        Returns:
-            Repository model instance
-        """
+        # ::::: Save or update a repository in PostgreSQL
         try:
             session = self.Session()
             
-            # Get owner user
+            # ::::: Get owner user
             owner = session.query(User).filter_by(login=owner_login).first()
             if not owner:
                 session.close()
                 raise ValueError(f"Owner user {owner_login} not found")
             
-            # Check if repository already exists
+            # ::::: Check if repository already exists
             repo = session.query(Repository).filter_by(full_name=repo_data['full_name']).first()
             
             if repo:
-                # Update existing repository
+                # ::::: Update existing repository
                 for key, value in repo_data.items():
                     if key in ['created_at', 'updated_at'] and value:
                         value = datetime.fromisoformat(value)
@@ -173,7 +158,7 @@ class DatabaseService:
                         setattr(repo, key, value)
                 repo.last_fetched = datetime.utcnow()
             else:
-                # Create new repository
+                # ::::: Create new repository
                 repo_dict = {}
                 for key, value in repo_data.items():
                     if key in ['created_at', 'updated_at'] and value:
@@ -194,14 +179,7 @@ class DatabaseService:
             raise
     
     def get_user(self, login: str) -> Optional[Dict[str, Any]]:
-        """Get user data from PostgreSQL
-        
-        Args:
-            login: GitHub login username
-            
-        Returns:
-            Dictionary with user data or None if not found
-        """
+        # ::::: Get user data from PostgreSQL
         try:
             session = self.Session()
             user = session.query(User).filter_by(login=login).first()
@@ -210,7 +188,7 @@ class DatabaseService:
                 session.close()
                 return None
             
-            # Convert SQLAlchemy model to dictionary
+            # ::::: SQLAlchemy model to dictionary
             user_dict = {}
             for column in User.__table__.columns:
                 value = getattr(user, column.name)
@@ -227,14 +205,7 @@ class DatabaseService:
             return None
     
     def get_repository(self, full_name: str) -> Optional[Dict[str, Any]]:
-        """Get repository data from PostgreSQL
-        
-        Args:
-            full_name: Full name of the repository (owner/repo)
-            
-        Returns:
-            Dictionary with repository data or None if not found
-        """
+        # ::::: Get repository data from PostgreSQL
         try:
             session = self.Session()
             repo = session.query(Repository).filter_by(full_name=full_name).first()
@@ -243,7 +214,7 @@ class DatabaseService:
                 session.close()
                 return None
             
-            # Convert SQLAlchemy model to dictionary
+            # ::::: SQLAlchemy model to dictionary
             repo_dict = {}
             for column in Repository.__table__.columns:
                 value = getattr(repo, column.name)
@@ -259,20 +230,12 @@ class DatabaseService:
             session.close()
             return None
     
-    # MongoDB operations (networks and graph results)
+    # ::::: MongoDB operations
     
     def save_network(self, username: str, network_data: Dict[str, Any]) -> str:
-        """Save a network to MongoDB
-        
-        Args:
-            username: GitHub username
-            network_data: Network data with nodes and edges
-            
-        Returns:
-            MongoDB document ID
-        """
+        # ::::: Save a network to MongoDB
         try:
-            # Prepare document
+            # ::::: Prepare document
             document = {
                 'username': username,
                 'network_data': network_data,
@@ -280,7 +243,7 @@ class DatabaseService:
                 'updated_at': datetime.utcnow()
             }
             
-            # Save to MongoDB
+            # ::::: Save to MongoDB
             result = self.networks_collection.update_one(
                 {'username': username},
                 {'$set': document},
@@ -290,7 +253,7 @@ class DatabaseService:
             if result.upserted_id:
                 return str(result.upserted_id)
             else:
-                # Get the existing document ID
+                # ::::: Get the existing document ID
                 doc = self.networks_collection.find_one({'username': username})
                 return str(doc['_id'])
                 
@@ -299,21 +262,14 @@ class DatabaseService:
             raise
     
     def get_network(self, username: str) -> Optional[Dict[str, Any]]:
-        """Get a network from MongoDB
-        
-        Args:
-            username: GitHub username
-            
-        Returns:
-            Dictionary with network data or None if not found
-        """
+        # ::::: Get the latest network data from MongoDB
         try:
             document = self.networks_collection.find_one({'username': username})
             
             if not document:
                 return None
                 
-            # Remove MongoDB _id from result
+            # ::::: Remove MongoDB _id
             if '_id' in document:
                 document['_id'] = str(document['_id'])
                 
@@ -324,18 +280,9 @@ class DatabaseService:
             return None
     
     def save_graph_result(self, username: str, algorithm: str, result_data: Dict[str, Any]) -> str:
-        """Save graph algorithm results to MongoDB
-        
-        Args:
-            username: GitHub username
-            algorithm: Algorithm name (e.g., 'pagerank', 'louvain')
-            result_data: Algorithm results
-            
-        Returns:
-            MongoDB document ID
-        """
+        # ::::: Save graph algorithm result to MongoDB
         try:
-            # Prepare document
+            # ::::: Prepare document
             document = {
                 'username': username,
                 'algorithm': algorithm,
@@ -343,7 +290,7 @@ class DatabaseService:
                 'created_at': datetime.utcnow()
             }
             
-            # Save to MongoDB
+            # ::::: Save to MongoDB
             result = self.graph_results_collection.insert_one(document)
             return str(result.inserted_id)
                 
@@ -352,15 +299,7 @@ class DatabaseService:
             raise
     
     def get_graph_result(self, username: str, algorithm: str) -> Optional[Dict[str, Any]]:
-        """Get the latest graph algorithm result from MongoDB
-        
-        Args:
-            username: GitHub username
-            algorithm: Algorithm name (e.g., 'pagerank', 'louvain')
-            
-        Returns:
-            Dictionary with algorithm results or None if not found
-        """
+        # ::::: Get the latest graph algorithm result from MongoDB
         try:
             document = self.graph_results_collection.find_one(
                 {'username': username, 'algorithm': algorithm},
@@ -370,7 +309,7 @@ class DatabaseService:
             if not document:
                 return None
                 
-            # Remove MongoDB _id from result
+            # ::::: Remove MongoDB _id
             if '_id' in document:
                 document['_id'] = str(document['_id'])
                 

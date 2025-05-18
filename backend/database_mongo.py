@@ -6,7 +6,7 @@ from datetime import datetime
 import os
 import sys
 
-# Add project root to path for imports
+# ::::: Add project root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from backend import config
@@ -14,36 +14,36 @@ from backend import config
 logger = logging.getLogger(__name__)
 
 class MongoDBService:
-    """Service for handling MongoDB operations"""
+    # ::::: MongoDB connection
     
     def __init__(self):
-        """Initialize MongoDB connection"""
+        # ::::: Initialize MongoDB connection
         try:
-            # Ensure no trailing spaces in MongoDB URI
+            # ::::: MongoDB connection string
             mongodb_uri = config.MONGODB_URI.strip() if config.MONGODB_URI else "mongodb://localhost:27017/gitconnectx"
             
             self.client = MongoClient(mongodb_uri)
             self.db = self.client['gitconnectx']
             
-            # Create collections
+            # ::::: Create collections
             self.local_users = self.db['local_users']
             self.github_users = self.db['github_users']
             self.github_repos = self.db['github_repos']
             self.follows = self.db['follows']
             self.contributions = self.db['contributions']
-            self.stargazing = self.db['stargazing']  # New collection for star relationships
+            self.stargazing = self.db['stargazing'] 
             
-            # Drop existing indexes to avoid conflicts
+            # ::::: Drop existing indexes
             try:
-                # Try to drop existing indexes that might conflict
+                # ::::: Try to drop existing indexes
                 self.github_users.drop_index("github_id_1")
                 self.github_repos.drop_index("github_id_1")
                 logger.info("Dropped existing indexes to avoid conflicts")
             except Exception as e:
-                # Ignore errors if indexes don't exist
+                # ::::: Ignore errors 
                 logger.debug(f"No indexes to drop or error dropping: {str(e)}")
             
-            # Create indexes with explicit names to avoid conflicts
+            # ::::: Create indexes with explicit names
             self.local_users.create_index("username", unique=True, name="username_unique")
             self.local_users.create_index("email", unique=True, name="email_unique")
             self.github_users.create_index("login", unique=True, name="login_unique")
@@ -60,33 +60,25 @@ class MongoDBService:
         """Close MongoDB connection"""
         self.client.close()
     
-    # User methods
+    # ::::: User methods
     
     def save_local_user(self, user_data):
-        """
-        Save or update local user
-        
-        Args:
-            user_data (dict): User data to save
-            
-        Returns:
-            dict: Saved user data
-        """
+        # ::::: Save or update local user
         try:
-            # Add timestamps
+            # ::::: Add timestamps
             now = datetime.utcnow()
             if '_id' not in user_data:
                 user_data['created_at'] = now
             user_data['updated_at'] = now
             
-            # Insert or update
+            # :::::Insert or update
             result = self.local_users.update_one(
                 {"username": user_data['username']},
                 {"$set": user_data},
                 upsert=True
             )
             
-            # Get the updated document
+            # ::::: Get the updated document
             saved_user = self.local_users.find_one({"username": user_data['username']})
             return saved_user
         except Exception as e:
@@ -94,16 +86,7 @@ class MongoDBService:
             raise
     
     def get_local_user(self, username=None, email=None):
-        """
-        Get local user by username or email
-        
-        Args:
-            username (str): Username to search for
-            email (str): Email to search for
-            
-        Returns:
-            dict: User document or None
-        """
+        # ::::: Get local user by username or email
         try:
             if username:
                 return self.local_users.find_one({"username": username})
@@ -114,43 +97,35 @@ class MongoDBService:
             logger.error(f"Error getting local user: {str(e)}")
             return None
     
-    # GitHub user methods
+    # ::::: GitHub user methods
     
     def save_github_user(self, user_data):
-        """
-        Save or update GitHub user
-        
-        Args:
-            user_data (dict): GitHub user data
-            
-        Returns:
-            dict: Saved user data
-        """
+        # 
         try:
-            # Add timestamps and ensure login exists
+            # ::::: ensure login exists
             now = datetime.utcnow()
             if 'login' not in user_data:
                 raise ValueError("GitHub user must have a login")
             
-            # Ensure github_id is present
+            # ::::: ensure github id exists 
             if 'github_id' not in user_data and 'id' in user_data:
                 user_data['github_id'] = user_data['id']
             
-            # Skip if github_id is None or missing
+            # ::::: skip if id is missing
             if not user_data.get('github_id'):
                 logger.warning(f"Skipping user with missing github_id: {user_data.get('login')}")
                 return None
                 
             user_data['fetched_at'] = now
             
-            # Insert or update
+            # ::::: Insert or update
             result = self.github_users.update_one(
                 {"login": user_data['login']},
                 {"$set": user_data},
                 upsert=True
             )
             
-            # Get the updated document
+            # ::::: Get the updated document
             saved_user = self.github_users.find_one({"login": user_data['login']})
             return saved_user
         except Exception as e:
@@ -158,53 +133,37 @@ class MongoDBService:
             raise
     
     def get_github_user(self, login):
-        """
-        Get GitHub user by login
-        
-        Args:
-            login (str): GitHub login
-            
-        Returns:
-            dict: User document or None
-        """
+        # ::::: Get GitHub user by login
         try:
             return self.github_users.find_one({"login": login})
         except Exception as e:
             logger.error(f"Error getting GitHub user: {str(e)}")
             return None
     
-    # Repository methods
+    # ::::: Repository methods
     
     def save_github_repo(self, repo_data):
-        """
-        Save or update GitHub repository
-        
-        Args:
-            repo_data (dict): Repository data
-            
-        Returns:
-            dict: Saved repository data
-        """
+        # ::::: Save or update GitHub repository
         try:
-            # Add timestamps and ensure full_name exists
+            # ::::: ensure full_name exists
             now = datetime.utcnow()
             if 'full_name' not in repo_data:
                 raise ValueError("GitHub repo must have a full_name")
             
-            # Ensure github_id is present
+            # ::::: Ensure github_id exists
             if 'github_id' not in repo_data and 'id' in repo_data:
                 repo_data['github_id'] = repo_data['id']
             
             repo_data['fetched_at'] = now
             
-            # Insert or update
+            # ::::: Insert or update
             result = self.github_repos.update_one(
                 {"full_name": repo_data['full_name']},
                 {"$set": repo_data},
                 upsert=True
             )
             
-            # Get the updated document
+            # ::::: Get the updated document
             saved_repo = self.github_repos.find_one({"full_name": repo_data['full_name']})
             return saved_repo
         except Exception as e:
@@ -212,34 +171,17 @@ class MongoDBService:
             raise
     
     def get_github_repo(self, full_name):
-        """
-        Get GitHub repository by full name
-        
-        Args:
-            full_name (str): Repository full name (owner/repo)
-            
-        Returns:
-            dict: Repository document or None
-        """
+        # ::::: Get GitHub repository by full name
         try:
             return self.github_repos.find_one({"full_name": full_name})
         except Exception as e:
             logger.error(f"Error getting GitHub repo: {str(e)}")
             return None
     
-    # Relationship methods
+    # ::::: Relationship methods
     
     def save_follow_relationship(self, follower, followed):
-        """
-        Save follow relationship between GitHub users
-        
-        Args:
-            follower (str): Follower's GitHub login
-            followed (str): Followed user's GitHub login
-            
-        Returns:
-            bool: Success status
-        """
+        # ::::: Save follow relationship between GitHub users
         try:
             now = datetime.utcnow()
             result = self.follows.update_one(
@@ -253,16 +195,7 @@ class MongoDBService:
             return False
     
     def save_stargazer_relationship(self, user_login, repo_full_name):
-        """
-        Save star relationship between GitHub user and repository
-        
-        Args:
-            user_login (str): User's GitHub login
-            repo_full_name (str): Repository full name (owner/repo)
-            
-        Returns:
-            bool: Success status
-        """
+        # ::::: Save stargazer relationship between GitHub user and repository
         try:
             now = datetime.utcnow()
             result = self.stargazing.update_one(
@@ -276,15 +209,7 @@ class MongoDBService:
             return False
     
     def get_followers(self, login):
-        """
-        Get followers of a GitHub user
-        
-        Args:
-            login (str): GitHub login
-            
-        Returns:
-            list: List of follower logins
-        """
+        # ::::: Get followers of a GitHub user
         try:
             cursor = self.follows.find({"followed": login})
             return [doc["follower"] for doc in cursor]
@@ -293,15 +218,7 @@ class MongoDBService:
             return []
     
     def get_following(self, login):
-        """
-        Get users followed by a GitHub user
-        
-        Args:
-            login (str): GitHub login
-            
-        Returns:
-            list: List of followed user logins
-        """
+        # ::::: Get users followed by a GitHub user
         try:
             cursor = self.follows.find({"follower": login})
             return [doc["followed"] for doc in cursor]
@@ -310,17 +227,7 @@ class MongoDBService:
             return []
     
     def save_contribution(self, user_login, repo_full_name, commits_count=1):
-        """
-        Save contribution relationship
-        
-        Args:
-            user_login (str): Contributor's GitHub login
-            repo_full_name (str): Repository full name
-            commits_count (int): Number of commits
-            
-        Returns:
-            bool: Success status
-        """
+        # ::::: Save contribution of a GitHub user to a repository
         try:
             now = datetime.utcnow()
             result = self.contributions.update_one(
@@ -334,15 +241,7 @@ class MongoDBService:
             return False
     
     def get_user_repos(self, login):
-        """
-        Get repositories owned by a user
-        
-        Args:
-            login (str): GitHub login
-            
-        Returns:
-            list: List of repository documents
-        """
+        # ::::: Get repositories owned by a GitHub user
         try:
             return list(self.github_repos.find({"owner_login": login}))
         except Exception as e:
@@ -350,15 +249,7 @@ class MongoDBService:
             return []
     
     def get_repo_contributors(self, repo_full_name):
-        """
-        Get contributors to a repository
-        
-        Args:
-            repo_full_name (str): Repository full name
-            
-        Returns:
-            list: List of contributor logins
-        """
+        # ::::: Get contributors to a GitHub repository
         try:
             cursor = self.contributions.find({"repo_full_name": repo_full_name})
             return [doc["user_login"] for doc in cursor]
@@ -367,15 +258,7 @@ class MongoDBService:
             return []
     
     def get_user_contributed_repos(self, login):
-        """
-        Get repositories contributed to by a user
-        
-        Args:
-            login (str): GitHub login
-            
-        Returns:
-            list: List of repository full names
-        """
+        # ::::: Get repositories contributed to by a GitHub user
         try:
             cursor = self.contributions.find({"user_login": login})
             return [doc["repo_full_name"] for doc in cursor]

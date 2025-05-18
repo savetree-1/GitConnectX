@@ -10,7 +10,7 @@
 #include <string>
 #include <cassert>
 
-// Helper functions for printing results
+// ::::: Helper functions for printing results
 void printVector(const std::vector<int>& vec, const std::string& name) {
     std::cout << name << ": ";
     for (int val : vec) {
@@ -31,7 +31,7 @@ void printSeparator() {
     std::cout << "\n" << std::string(50, '-') << "\n\n";
 }
 
-// Test case verification functions
+// ::::: Test case verification functions
 void verifyBFS(const Graph& graph, int startVertex, const std::vector<int>& expectedDistances) {
     auto [traversal, distances] = GraphTraversal::bfs(graph, startVertex);
     std::cout << "BFS Test from vertex " << startVertex << ":\n";
@@ -45,7 +45,7 @@ void verifyDijkstra(const Graph& graph, int startVertex, const std::vector<doubl
     auto result = Dijkstra::shortestPath(graph, startVertex);
     std::cout << "\nDijkstra Test from vertex " << startVertex << ":\n";
     
-    // Debug output
+    // ::::: Debug output
     std::cout << "Graph structure:\n";
     for (int v = 0; v < graph.getNumVertices(); ++v) {
         std::cout << "Vertex " << v << " edges: ";
@@ -136,18 +136,14 @@ int main() {
         std::cout << "Graph Algorithms Test Suite\n";
         printSeparator();
 
-        // Test Case 1: Simple directed cycle
+        // ::::: Test Case 1: Simple directed cycle
         std::cout << "Test Case 1: Simple directed cycle\n";
         Graph cyclicGraph(true);
-        // Create a cycle: 0 -> 1 -> 2 -> 0
-        cyclicGraph.addEdge(0, 1, 1.0);  // 0->1 weight 1
-        cyclicGraph.addEdge(1, 2, 1.0);  // 1->2 weight 1
-        cyclicGraph.addEdge(2, 0, 1.0);  // 2->0 weight 1
+        // ::::: Create a cycle: 0 -> 1 -> 2 -> 0
+        cyclicGraph.addEdge(0, 1, 1.0);  
+        cyclicGraph.addEdge(1, 2, 1.0); 
+        cyclicGraph.addEdge(2, 0, 1.0); 
         
-        // From vertex 0:
-        // - To 0: 0 (start vertex)
-        // - To 1: 1 (direct edge 0->1)
-        // - To 2: 2 (path 0->1->2)
         verifyBFS(cyclicGraph, 0, {0, 1, 2});
         verifyDijkstra(cyclicGraph, 0, {0.0, 1.0, 2.0});
         verifyHITS(cyclicGraph, 0.5774, 0.5774);
@@ -155,17 +151,14 @@ int main() {
         verifyLouvain(cyclicGraph, 1);
         printSeparator();
 
-        // Test Case 2: Star graph (directed outward)
+        // ::::: Test Case 2: Star graph (directed outward)
         std::cout << "Test Case 2: Star graph\n";
-        Graph starGraph(true);
-        // Create edges from center (0) to all leaves (1,2,3,4)
+        Graph starGraph(true);-
         for (int i = 1; i < 5; ++i) {
-            starGraph.addEdge(0, i, 1.0);  // All edges weight 1
+            starGraph.addEdge(0, i, 1.0);  =
         }
         
-        // From vertex 0:
-        // - To 0: 0 (start vertex)
-        // - To 1,2,3,4: 1 (direct edges from center)
+        =
         verifyBFS(starGraph, 0, {0, 1, 1, 1, 1});
         verifyDijkstra(starGraph, 0, {0.0, 1.0, 1.0, 1.0, 1.0});
         verifyHITS(starGraph, 0.9999, 0.5);
@@ -173,16 +166,12 @@ int main() {
         verifyLouvain(starGraph, 1);
         printSeparator();
 
-        // Test Case 3: Disconnected components
+        // ::::: Test Case 3: Disconnected components
         std::cout << "Test Case 3: Disconnected components\n";
         Graph disconnectedGraph(true);
-        disconnectedGraph.addEdge(0, 1, 1.0);  // First component: 0->1
-        disconnectedGraph.addEdge(2, 3, 1.0);  // Second component: 2->3 (unreachable from 0)
-        
-        // From vertex 0:
-        // - To 0: 0 (start vertex)
-        // - To 1: 1 (direct edge)
-        // - To 2,3: infinity (no path exists)
+        disconnectedGraph.addEdge(0, 1, 1.0); 
+        disconnectedGraph.addEdge(2, 3, 1.0); 
+
         verifyBFS(disconnectedGraph, 0, {0, 1, -1, -1});
         verifyDijkstra(disconnectedGraph, 0, {0.0, 1.0, std::numeric_limits<double>::infinity(), std::numeric_limits<double>::infinity()});
         verifyHITS(disconnectedGraph, 0.7071, 0.7071);
@@ -190,18 +179,14 @@ int main() {
         verifyLouvain(disconnectedGraph, 2);
         printSeparator();
 
-        // Test Case 4: Strongly connected weighted graph
+        // ::::: Test Case 4: Strongly connected weighted graph
         std::cout << "Test Case 4: Strongly connected weighted graph\n";
         Graph weightedGraph(true);
-        weightedGraph.addEdge(0, 1, 2.0);  // Direct edge to 1
-        weightedGraph.addEdge(1, 2, 3.0);  // Edge from 1 to 2
-        weightedGraph.addEdge(2, 0, 1.0);  // Edge back to 0
-        weightedGraph.addEdge(0, 2, 10.0); // Alternative direct path to 2
+        weightedGraph.addEdge(0, 1, 2.0);  
+        weightedGraph.addEdge(1, 2, 3.0);  
+        weightedGraph.addEdge(2, 0, 1.0);  
+        weightedGraph.addEdge(0, 2, 10.0); =
         
-        // From vertex 0:
-        // - To 0: 0 (start vertex)
-        // - To 1: 2 (direct edge weight 2)
-        // - To 2: min(10, 2+3) = 5 (shorter path through vertex 1)
         verifyDijkstra(weightedGraph, 0, {0.0, 2.0, 5.0});
         verifyHITS(weightedGraph, 0.8165, 0.7071);
         verifyKCore(weightedGraph, 1);

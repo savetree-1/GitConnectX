@@ -19,11 +19,11 @@ void printVector(const std::vector<double>& vec, const std::string& name) {
 }
 
 int main() {
-    // Create a sample graph
-    Graph graph(true);  // Directed graph
+    // ::::: Create a sample graph
+    Graph graph(true);  // ::::: Directed graph
     
-    // Add edges (example: a small social network)
-    graph.addEdge(0, 1);  // User 0 follows User 1
+    // ::::: Add edges (example: a small social network)
+    graph.addEdge(0, 1);  
     graph.addEdge(1, 2);
     graph.addEdge(2, 0);
     graph.addEdge(2, 3);
@@ -31,38 +31,38 @@ int main() {
     graph.addEdge(3, 4);
     graph.addEdge(4, 2);
     
-    // Test BFS
+    // ::::: Test BFS
     std::cout << "Testing BFS:\n";
     auto bfsResult = GraphTraversal::bfs(graph, 0);
     printVector(bfsResult, "BFS traversal");
     
-    // Test DFS
+    // ::::: Test DFS
     std::cout << "\nTesting DFS:\n";
     auto dfsResult = GraphTraversal::dfs(graph, 0);
     printVector(dfsResult, "DFS traversal");
     
-    // Test Dijkstra's
+    // ::::: Test Dijkstra's
     std::cout << "\nTesting Dijkstra's Algorithm:\n";
     auto dijkstraResult = Dijkstra::shortestPath(graph, 0);
     printVector(dijkstraResult.distances, "Distances");
     
-    // Test PageRank
+    // ::::: Test PageRank
     std::cout << "\nTesting PageRank:\n";
     auto pagerankResult = PageRank::calculate(graph);
     printVector(pagerankResult, "PageRank scores");
     
-    // Test HITS
+    // ::::: Test HITS
     std::cout << "\nTesting HITS:\n";
     auto hitsResult = HITS::calculate(graph);
     printVector(hitsResult.hubScores, "Hub scores");
     printVector(hitsResult.authorityScores, "Authority scores");
     
-    // Test K-Core
+    // ::::: Test K-Core
     std::cout << "\nTesting K-Core Decomposition:\n";
     auto kcoreResult = KCore::decompose(graph);
     printVector(kcoreResult, "K-Core numbers");
     
-    // Test Louvain
+    // ::::: Test Louvain
     std::cout << "\nTesting Louvain Community Detection:\n";
     auto louvainResult = Louvain::detectCommunities(graph);
     printVector(louvainResult, "Community assignments");
