@@ -1,10 +1,6 @@
-import {
-  Users,
-  Star,
-  GitBranch,
-  Folder,
-} from "lucide-react"
-import { useState, useEffect } from "react"
+import React, { useEffect, useState } from "react";
+import { Users, Star, GitBranch, Folder } from "lucide-react";
+import Sunset from "../assets/sunset.png";
 
 export default function ProfileSidebar({
   profilePicUrl = "",
@@ -15,7 +11,6 @@ export default function ProfileSidebar({
   graph = { nodes: 0, edges: 0, density: 0 },
 }) {
   const [networkStats, setNetworkStats] = useState(graph);
-  
   // Fetch network stats from API
   useEffect(() => {
     const fetchNetworkStats = async () => {
@@ -99,67 +94,77 @@ export default function ProfileSidebar({
   };
 
   return (
-    <div className="w-full h-full bg-gray-100 rounded-2xl shadow-lg p-10 border-2 border-blue-500">
-      <div className="w-full h-full bg-white border-blue-200 rounded-2xl p-15 flex flex-col items-center space-y-6 border-2">
-      {/* Avatar */}
-      <div className="w-50 h-50 rounded-full overflow-hidden border-4 border-indigo-800">
-        {profilePicUrl ? (
-          <img
-          src={profilePicUrl}
-          alt={name}
-          className="w-full h-full object-cover"
-          />
-        ) : (
-          <div className="w-full h-full bg-gray-200 flex items-center justify-center text-4xl text-gray-600">
-            {name ? name.slice(0, 2).toUpperCase() : username.slice(0, 2).toUpperCase()}
-          </div>
-        )}
-      </div>
+    <div className="fixed top-30 w-[12rem] left-6  md:w-[32rem] h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500  z-50">
+      {/* Background banner image */}
+      <div className="relative w-full">
+        <div
+          className="w-full h-50 rounded-t-2xl bg-cover bg-center"
+          style={{ backgroundImage: `url(${Sunset})` }}
+        ></div>
 
-      {/* Name & Username */}
-      <div className="text-center">
-        <h2 className="text-4xl font-bold text-gray-900">{name}</h2>
-        <p className="text-gray-500 text-2xl mb-10">@{username}</p>
-      </div>
-
-      {/* Rank Badge */}
-      <span className="bg-blue-100 text-blue-800 text-3xl font-semibold px-6 py-1 rounded-full mb-10">
-        {getUserRank()}
-      </span>
-      {/* Stats Section */}
-      <div className="w-full">
-        <div className="border-t border-gray-500 -mx-4 mb-10"></div> {/* Extended line */}
-        <div className="grid grid-cols-1 gap-7 text-xl text-gray-700 px-4 mb-5" >
-          <div className="flex items-center gap-2">
-            <Folder className="w-8 h-8" />
-            <span>{stats.repos} Repos</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Users className="w-8 h-8" />
-            <span>{stats.followers} Followers</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <Star className="w-8 h-8" />
-            <span>{stats.stars} Stars</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <GitBranch className="w-8 h-8" />
-            <span>{stats.forks} Forks</span>
-          </div>
+        {/* Avatar overlapping the image and aligned to the left */}
+        <div className="absolute -bottom-12 left-6 w-30 h-30 rounded-full overflow-hidden border-4 border-white shadow-md bg-gray-200">
+          {profilePicUrl ? (
+            <img
+              src={profilePicUrl}
+              alt={name}
+              className="w-full h-full object-cover"
+            />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center text-3xl text-gray-600">
+              {name ? name.slice(0, 2).toUpperCase() : username.slice(0, 2).toUpperCase()}
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Graph Summary */}
-      <div className="w-full">
-        <div className="border-t border-gray-500 -mx-4 mb-8"></div> {/* Extended line */}
-        <div className="text-xl text-center text-gray-700 space-y-2 px-4">
-          <p className="font-semibold text-2xl text-gray-800">Graph Summary</p>
-          <p>Nodes: {networkStats.nodes}</p>
-          <p>Edges: {networkStats.edges}</p>
-          <p>Density: {networkStats.density.toFixed(2)}</p>
+      {/* Profile content */}
+      <div className="pt-13 pb-6 px-6 space-y-3">
+        {/* Name & Username */}
+        <div className="flex flex-col items-start text-left">
+          <h2 className="text-2xl font-bold text-gray-900">{name}</h2>
+          <p className="text-gray-500 text-lg">@{username}</p>
+        </div>
+
+        {/* Rank Badge */}
+        <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-4 py-1 rounded-full">
+          {getUserRank()}
+        </span>
+
+        {/* Stats Section */}
+        <div>
+          <div className="border-t border-gray-300 my-4" />
+          <div className="space-y-4 text-gray-700 text-sm">
+            <div className="flex items-center gap-2">
+              <Folder className="w-5 h-5" />
+              <span>{stats.repos} Repos</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <span>{stats.followers} Followers</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Star className="w-5 h-5" />
+              <span>{stats.stars} Stars</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <GitBranch className="w-5 h-5" />
+              <span>{stats.forks} Forks</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Graph Summary */}
+        <div>
+          <div className="border-t border-gray-300 my-4" />
+          <div className="text-left text-gray-700 space-y-1">
+            <p className="font-semibold text-lg text-gray-800">Graph Summary</p>
+            <p>Nodes: {networkStats.nodes}</p>
+            <p>Edges: {networkStats.edges}</p>
+            <p>Density: {networkStats.density.toFixed(2)}</p>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  )
+  );
 }

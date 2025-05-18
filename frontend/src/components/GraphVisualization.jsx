@@ -281,18 +281,6 @@ const GraphVisualization = ({ username }) => {
 
         const graphGroup = svg.append('g')
 .attr('transform', `translate(${xOffset}, ${margin / 2})`);
-
-        graphGroup.append('rect')
-          .attr('x', margin / 2)
-          .attr('y', margin / 2)
-          .attr('width', width + margin)
-          .attr('height', height + margin)
-          .attr('rx', 10)
-          .attr('ry', 10)
-          .attr('fill', isSecondGraph ? 'rgba(74, 222, 128, 0.05)' : 'rgba(59, 130, 246, 0.05)')
-          .attr('stroke', isSecondGraph ? 'rgba(74, 222, 128, 0.3)' : 'rgba(59, 130, 246, 0.3)')
-          .attr('stroke-width', 1);
-
         const link = graphGroup.append('g')
           .attr('stroke', isSecondGraph ? '#4b7265' : '#6b7280')
           .attr('stroke-opacity', 0.6)
@@ -547,8 +535,8 @@ const GraphVisualization = ({ username }) => {
 
   return (
     <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
-      <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-gray-800">GitHub Graph Overview</h2>
+      <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <span className="mr-2 text-lg">Comparison Mode:</span>
         <label className="relative inline-flex items-center cursor-pointer">
@@ -574,7 +562,7 @@ const GraphVisualization = ({ username }) => {
         </div>
       ) : (
         <div className="bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto relative">
               <svg ref={d3Container} 
                 style={{
               width: comparisonMode ? `${2 * (width + margin * 2)}px` : `${width + margin * 2}px`,
@@ -584,7 +572,7 @@ const GraphVisualization = ({ username }) => {
               </svg>
 
         {selectedNode && (
-                <div className="absolute top-4 right-4 w-64">
+                <div className="absolute top-4 right-4 w-64 z-10">
             <NodeDetailPanel node={selectedNode} />
           </div>
         )}
