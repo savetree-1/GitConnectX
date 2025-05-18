@@ -1,55 +1,40 @@
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth0 } from '@auth0/auth0-react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const navigate = useNavigate();
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    console.log('Logging in with', email, password);
-    navigate('/');
-  };
+const Login = () => {
+  const navigate = useNavigate();
+  const { loginWithRedirect, isAuthenticated } = useAuth0();
+
+  // Redirect to home if already authenticated
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate('/');
+    }
+  }, [isAuthenticated, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen">
       <Header/>
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-        <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Login</h2>
-        <form onSubmit={handleLogin}>
-          <input
-            type="email"
-            placeholder="Email"
-            className="mb-4 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="mb-4 w-full px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-indigo-400"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-          <button
-            type="submit"
-            className="w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 transition"
-          >
-            Login
-          </button>
-        </form>
-        <p className="mt-4 text-center text-sm">
-          Don’t have an account?{' '}
-          <Link to="/signup" className="text-indigo-600 font-semibold hover:underline">
-            Sign up
-          </Link>
-        </p>
+      <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
+        <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
+          <h2 className="text-3xl font-extrabold mb-6 text-center text-gray-800">Welcome Back!</h2>
+          <div className="flex flex-col items-center space-y-4">
+            <button
+              onClick={() => loginWithRedirect()}
+              className="w-full bg-[#1737A1] text-white py-3 rounded-lg hover:bg-indigo-700 transition transform hover:-translate-y-1 hover:shadow-md focus:outline-none font-semibold"
+            >
+              Continue with Auth0
+            </button>
+            <p className="text-sm text-gray-600">
+              Secure login powered by Auth0
+            </p>
+          </div>
+        </div>
       </div>
-    </div>
-    <Footer/>
+      <Footer/>
     </div>
   );
 };
