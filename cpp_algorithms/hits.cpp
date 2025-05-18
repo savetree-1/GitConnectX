@@ -27,7 +27,7 @@ public:
             oss << "Iterations: " << iterations;
             oss << (converged ? " (converged)" : " (max iterations reached)") << "\n\n";
             
-            // Top hubs
+            // ::::: Top hubs
             oss << "Top " << topK << " Hubs:\n";
             auto topHubs = HITS::getTopHubs(hubScores, topK);
             for (const auto& [node, score] : topHubs) {
@@ -35,7 +35,7 @@ public:
             }
             oss << "\n";
             
-            // Top authorities
+            // ::::: Top authorities
             oss << "Top " << topK << " Authorities:\n";
             auto topAuths = HITS::getTopAuthorities(authorityScores, topK);
             for (const auto& [node, score] : topAuths) {
@@ -72,7 +72,7 @@ public:
         int actualIterations = 0;
 
         for (int iter = 0; iter < maxIterations; ++iter) {
-            // Calculate authority scores
+            // ::::: Calculate authority scores
             std::fill(newAuthScores.begin(), newAuthScores.end(), 0.0);
             for (int i = 0; i < n; ++i) {
                 for (const auto& neighbor : graph.getNeighbors(i)) {
@@ -80,7 +80,7 @@ public:
                 }
             }
 
-            // Calculate hub scores
+            // ::::: Calculate hub scores
             std::fill(newHubScores.begin(), newHubScores.end(), 0.0);
             for (int i = 0; i < n; ++i) {
                 for (const auto& neighbor : graph.getNeighbors(i)) {
@@ -88,14 +88,14 @@ public:
                 }
             }
 
-            // Normalize scores
+            // ::::: Normalize scores
             double authSum = 0.0, hubSum = 0.0;
             for (int i = 0; i < n; ++i) {
                 authSum += newAuthScores[i] * newAuthScores[i];
                 hubSum += newHubScores[i] * newHubScores[i];
             }
             
-            // Handle zero sums (disconnected nodes)
+            // ::::: Handle zero sums 
             if (authSum < std::numeric_limits<double>::epsilon()) {
                 std::fill(newAuthScores.begin(), newAuthScores.end(), 1.0 / n);
             } else {
@@ -114,7 +114,7 @@ public:
                 }
             }
 
-            // Check convergence
+            // ::::: Check convergence
             double authDiff = 0.0, hubDiff = 0.0;
             for (int i = 0; i < n; ++i) {
                 authDiff += std::abs(newAuthScores[i] - authScores[i]);

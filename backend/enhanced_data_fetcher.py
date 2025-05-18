@@ -11,14 +11,14 @@ class GitHubDataFetcher:
         self.rate_limit_remaining = self.check_rate_limit()
     
     def check_rate_limit(self):
-        """Check GitHub API rate limit and return remaining requests"""
+        # ::::: Check API rate limit
         rate = self.client.get_rate_limit()
         remaining = rate.core.remaining
         print(f"API rate limit: {remaining} requests remaining")
         return remaining
     
     def fetch_user_data(self, username):
-        """Fetch comprehensive user data"""
+        # ::::: Fetch user data
         try:
             user = self.client.get_user(username)
             user_data = {
@@ -33,7 +33,7 @@ class GitHubDataFetcher:
                 "updated_at": user.updated_at.isoformat() if user.updated_at else None
             }
             
-            # Fetch followers and following
+            # ::::: Fetch followers and following
             followers = self.fetch_followers(user)
             following = self.fetch_following(user)
             repositories = self.fetch_repositories(user)
@@ -50,7 +50,7 @@ class GitHubDataFetcher:
             return None
     
     def fetch_followers(self, user, limit=MAX_FOLLOWERS_TO_FETCH):
-        """Fetch user's followers"""
+        # ::::: Fetch followers
         followers = []
         try:
             for count, follower in enumerate(user.get_followers(), 1):
@@ -71,7 +71,7 @@ class GitHubDataFetcher:
             return followers
     
     def fetch_following(self, user, limit=MAX_FOLLOWING_TO_FETCH):
-        """Fetch users that this user follows"""
+        # ::::: Fetch following
         following = []
         try:
             for count, followed_user in enumerate(user.get_following(), 1):
@@ -92,7 +92,7 @@ class GitHubDataFetcher:
             return following
     
     def fetch_repositories(self, user, limit=MAX_REPOS_TO_FETCH):
-        """Fetch user's repositories with detailed information"""
+        # ::::: Fetch repositories
         repositories = []
         try:
             for count, repo in enumerate(user.get_repos(), 1):
@@ -111,7 +111,7 @@ class GitHubDataFetcher:
                     "updated_at": repo.updated_at.isoformat() if repo.updated_at else None
                 }
                 
-                # Optionally fetch more detailed data for each repo
+                # ::::: Fetch additional data if available
                 if repo.stargazers_count > 0:
                     repo_data["stargazers"] = self.fetch_stargazers(repo)
                 
@@ -129,24 +129,24 @@ class GitHubDataFetcher:
             print(f"Error fetching repositories: {e}")
             return repositories
     
-    # Include your existing methods for stargazers, contributors, forks
+    # ::::: Fetch stargazers and contributors
     def fetch_stargazers(self, repo):
-        # Your existing implementation
+        # ::::: Fetch stargazers
         pass
     
     def fetch_contributors(self, repo):
-        # Your existing implementation
+        # ::::: Fetch contributors
         pass
     
     def fetch_forks(self, repo):
-        # Your existing implementation
+        # ::::: Fetch forkers
         pass
     
     def save_to_csv(self, data_dict, output_dir=DATA_DIR):
-        """Save all data to CSV files"""
+        # ::::: Save data to CSV
         os.makedirs(output_dir, exist_ok=True)
         
-        # Save user info
+        # ::::: Save user info
         if "user_info" in data_dict:
             user_info = data_dict["user_info"]
             with open(os.path.join(output_dir, "user_info.csv"), "w", newline="", encoding="utf-8") as f:
@@ -154,25 +154,25 @@ class GitHubDataFetcher:
                 writer.writeheader()
                 writer.writerow(user_info)
         
-        # Save followers
+        # ::::: Save followers
         if "followers" in data_dict and data_dict["followers"]:
             with open(os.path.join(output_dir, "followers.csv"), "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=data_dict["followers"][0].keys())
                 writer.writeheader()
                 writer.writerows(data_dict["followers"])
-        # Save following
+        # ::::: Save following
         if "following" in data_dict and data_dict["following"]:
             with open(os.path.join(output_dir, "following.csv"), "w", newline="", encoding="utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=data_dict["following"][0].keys())
                 writer.writeheader()
                 writer.writerows(data_dict["following"])
-        # Save repositories (summary)
+        # ::::: Save repositories
         if "repositories" in data_dict and data_dict["repositories"]:
-            # Extract basic repo info
+            # ::::: Extract basic repo info
             basic_repo_info = []
             for repo in data_dict["repositories"]:
                 repo_copy = repo.copy()
-                # Remove nested data
+                # ::::: Remove nested data
                 if "stargazers" in repo_copy:
                     del repo_copy["stargazers"]
                 if "forkers" in repo_copy:

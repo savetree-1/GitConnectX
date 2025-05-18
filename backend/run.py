@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""
-Run script for GitConnectX backend
-"""
+
 
 import os
 import sys
 import logging
 from backend.api.app import app
 
-# Configure logging
+# ::::: Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -21,10 +19,10 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 if __name__ == "__main__":
-    # Ensure logs directory exists
+    # ::::: Ensure logs directory exists
     os.makedirs("logs", exist_ok=True)
     
-    # Get configuration from environment or use defaults
+    # ::::: Check for required environment variables
     port = int(os.environ.get("PORT", 5000))
     host = os.environ.get("HOST", "0.0.0.0")
     debug = os.environ.get("DEBUG", "True").lower() == "true"

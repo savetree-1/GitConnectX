@@ -9,17 +9,6 @@
 #include <stdexcept>
 #include <iomanip>
 
-/**
- * PageRank algorithm implementation
- * 
- * Input file format:
- * First line: number_of_nodes number_of_edges
- * Following lines: source_node target_node (one edge per line)
- * 
- * Output file format:
- * node_id pagerank_score (one node per line)
- */
-
 struct Edge {
     int source;
     int target;
@@ -76,7 +65,7 @@ public:
             throw std::out_of_range("Target node ID out of range");
         }
         
-        // Check if edge already exists
+        // ::::: Check if edge already exists
         if (std::find(outgoing_links[source].begin(), outgoing_links[source].end(), target) 
             == outgoing_links[source].end()) {
             outgoing_links[source].push_back(target);
@@ -90,37 +79,37 @@ public:
         int actual_iterations = 0;
         
         for (int iteration = 0; iteration < max_iterations; ++iteration) {
-            // Reset new scores
+            // ::::: Reset new scores
             std::fill(new_scores.begin(), new_scores.end(), 0.0);
             
-            // Calculate new scores
+            // ::::: Calculate new scores
             for (int node = 0; node < num_nodes; ++node) {
-                // Add base score (random jump probability)
+                // ::::: Add base score
                 new_scores[node] = base_score;
                 
-                // Add score from incoming links
+                // ::::: Add score from incoming links
                 for (int incoming : incoming_links[node]) {
                     int out_degree = outgoing_links[incoming].size();
                     if (out_degree > 0) {
                         new_scores[node] += damping_factor * scores[incoming] / out_degree;
                     } else {
-                        // Handle dangling nodes (no outgoing links)
+                        // ::::: Handle dangling nodes
                         new_scores[node] += damping_factor * scores[incoming] / num_nodes;
                     }
                 }
             }
             
-            // Check for convergence
+            // ::::: Check for convergence
             double diff = 0.0;
             for (int node = 0; node < num_nodes; ++node) {
                 diff += std::abs(new_scores[node] - scores[node]);
             }
             
-            // Update scores
+            // ::::: Update scores
             scores = new_scores;
             actual_iterations = iteration + 1;
             
-            // If converged, stop early
+            // ::::: If converged, stop early
             if (diff < convergence_threshold) {
                 std::cout << "Converged after " << actual_iterations << " iterations." << std::endl;
                 break;
@@ -131,7 +120,7 @@ public:
             std::cout << "Warning: Maximum iterations reached without convergence." << std::endl;
         }
         
-        // Normalize scores
+        // ::::: Normalize scores
         double sum = 0.0;
         for (double score : scores) {
             sum += score;
@@ -195,11 +184,11 @@ bool read_graph_from_file(const std::string& filename, PageRank& pagerank) {
         throw std::runtime_error("Could not open file: " + filename);
     }
     
-    // Skip header line (already used to initialize PageRank)
+    // ::::: Skip header line
     std::string line;
     std::getline(file, line);
     
-    // Read edges
+    // ::::: Read edges
     int line_number = 2;
     while (std::getline(file, line)) {
         std::istringstream iss(line);
@@ -237,7 +226,7 @@ bool write_results_to_file(const std::string& filename, const std::vector<double
 
 int main(int argc, char* argv[]) {
     try {
-        // Check command line arguments
+        // ::::: Check command line arguments
         if (argc < 3) {
             std::cerr << "Usage: " << argv[0] << " input_file output_file [damping_factor] [max_iterations] [convergence_threshold]" << std::endl;
             return 1;
@@ -246,7 +235,7 @@ int main(int argc, char* argv[]) {
         std::string input_file = argv[1];
         std::string output_file = argv[2];
         
-        // Parse optional parameters
+        // ::::: Parse optional parameters
         double damping_factor = 0.85;
         int max_iterations = 100;
         double convergence_threshold = 1e-6;
@@ -255,7 +244,7 @@ int main(int argc, char* argv[]) {
         if (argc > 4) max_iterations = std::stoi(argv[4]);
         if (argc > 5) convergence_threshold = std::stod(argv[5]);
         
-        // Read number of nodes and edges from first line of input file
+        // ::::: Read graph from file
         std::ifstream file(input_file);
         if (!file.is_open()) {
             throw std::runtime_error("Could not open input file: " + input_file);
@@ -272,13 +261,13 @@ int main(int argc, char* argv[]) {
         
         file.close();
         
-        // Initialize PageRank
+        // ::::: Initialize PageRank
         PageRank pagerank(num_nodes, num_edges, damping_factor, max_iterations, convergence_threshold);
         
-        // Read graph from file
+        // ::::: Read graph from file
         read_graph_from_file(input_file, pagerank);
         
-        // Compute PageRank scores
+        // ::::: Compute PageRank scores
         std::cout << "Computing PageRank for " << num_nodes << " nodes and " << num_edges << " edges" << std::endl;
         std::cout << "Parameters: damping_factor = " << damping_factor 
                   << ", max_iterations = " << max_iterations 
@@ -286,14 +275,14 @@ int main(int argc, char* argv[]) {
         
         pagerank.compute();
         
-        // Get and display top 10 nodes
+        // ::::: Get and display top 10 nodes
         auto top_nodes = pagerank.get_top_nodes(10);
         std::cout << "\nTop 10 nodes by PageRank score:" << std::endl;
         for (const auto& [node, score] : top_nodes) {
             std::cout << "Node " << node << ": " << score << std::endl;
         }
         
-        // Write all results to file
+        // ::::: Write all results to file
         write_results_to_file(output_file, pagerank.get_scores());
         std::cout << "\nResults written to " << output_file << std::endl;
         

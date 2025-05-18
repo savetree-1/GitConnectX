@@ -5,28 +5,28 @@ import sys
 from datetime import datetime
 import json
 
-# Add project root to path for imports
+# ::::: Add project root
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Import backend modules
+# ::::: Import backend modules
 from backend.fetch_data import GitHubDataFetcher
 from backend.process_data import DataProcessor
 from backend.graph_service import GraphService
 from api.auth import require_auth
 import config
 
-# Set up logging
+# ::::: Set up logging
 logger = logging.getLogger(__name__)
 
-# Create routes blueprint
+# ::::: Create routes blueprint
 routes_bp = Blueprint('routes', __name__)
 
-# Initialize services
+# ::::: Initialize services
 github_fetcher = GitHubDataFetcher(api_token=config.GITHUB_API_TOKEN)
 data_processor = DataProcessor()
 graph_service = GraphService()
 
-# Health and status endpoints
+# ::::: Health and status endpoints
 @routes_bp.route('/health', methods=['GET'])
 def health_check():
     """Simple health check endpoint"""
@@ -45,7 +45,7 @@ def api_version():
         'features': config.ENABLED_FEATURES
     })
 
-# User data endpoints
+# ::::: User data endpoints
 @routes_bp.route('/users/<username>', methods=['GET'])
 def fetch_user(username):
     """
@@ -64,7 +64,7 @@ def fetch_user(username):
         if not user_data:
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Process fetched data
+        # ::::: Process fetched data
         processed_data = data_processor.process_user_data(user_data)
         
         return jsonify({
@@ -99,10 +99,10 @@ def fetch_user_repositories(username):
         
         repos = github_fetcher.fetch_user_repositories(username, sort=sort_by, limit=limit)
         
-        if repos is None:  # User not found
+        if repos is None:  # ::::: User not found
             return jsonify({'error': f'User {username} not found'}), 404
             
-        if not repos:  # No repositories
+        if not repos:  # ::::: No repositories
             return jsonify({
                 'status': 'success',
                 'data': {
@@ -112,7 +112,7 @@ def fetch_user_repositories(username):
                 }
             })
             
-        # Process repositories
+        # ::::: Process repositories
         processed_repos = data_processor.process_repositories(repos)
         
         return jsonify({
@@ -128,7 +128,7 @@ def fetch_user_repositories(username):
         logger.error(f"Error fetching repositories: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Network endpoints
+# ::::: Network endpoints
 @routes_bp.route('/networks/<username>', methods=['GET'])
 def fetch_network(username):
     """
@@ -149,19 +149,19 @@ def fetch_network(username):
         include_repos = request.args.get('include_repos', default='true').lower() == 'true'
         max_connections = request.args.get('max_connections', default=100, type=int)
         
-        # Limit depth to prevent excessive API calls
+        # ::::: Limit depth for excessive API calls
         if depth > 3:
             depth = 3
             
         logger.info(f"Fetching network for {username} with depth {depth}, " 
                    f"include_repos={include_repos}, max_connections={max_connections}")
         
-        # Fetch user and their connections
+        # ::::: fetch user data
         user_data = github_fetcher.fetch_user_data(username)
         if not user_data:
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Fetch the network (followers, following, collaborators)
+        # ::::: Fetch the network
         network_data = github_fetcher.fetch_user_network(
             username, 
             depth=depth, 
@@ -169,7 +169,7 @@ def fetch_network(username):
             max_connections=max_connections
         )
         
-        # Process the network data into graph format
+        # ::::: Process the data into graph format
         processed_network = data_processor.process_network_data(network_data)
         
         return jsonify({
@@ -213,10 +213,10 @@ def fetch_followers(username):
         
         followers = github_fetcher.fetch_user_followers(username, limit=limit)
         
-        if followers is None:  # User not found
+        if followers is None:  # ::::: User not found
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Process followers
+        # ::::: Process followers
         processed_followers = data_processor.process_users(followers)
         
         return jsonify({
@@ -253,10 +253,10 @@ def fetch_following(username):
         
         following = github_fetcher.fetch_user_following(username, limit=limit)
         
-        if following is None:  # User not found
+        if following is None:  # ::::: User not found
             return jsonify({'error': f'User {username} not found'}), 404
             
-        # Process following
+        # ::::: Process following
         processed_following = data_processor.process_users(following)
         
         return jsonify({
@@ -272,7 +272,7 @@ def fetch_following(username):
         logger.error(f"Error fetching following: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Repository endpoints
+# ::::: Repo endpoints
 @routes_bp.route('/repositories/<owner>/<repo>', methods=['GET'])
 def fetch_repository(owner, repo):
     """
@@ -288,13 +288,13 @@ def fetch_repository(owner, repo):
     try:
         logger.info(f"Fetching repository data for {owner}/{repo}")
         
-        # Fetch repository data
+        # ::::: Fetch repo data
         repo_data = github_fetcher.fetch_repository_data(owner, repo)
         
         if not repo_data:
             return jsonify({'error': f'Repository {owner}/{repo} not found'}), 404
             
-        # Process repository data
+        # ::::: Process repo data
         processed_repo = data_processor.process_repository_data(repo_data)
         
         return jsonify({
@@ -321,13 +321,13 @@ def fetch_contributors(owner, repo):
     try:
         logger.info(f"Fetching contributors for repository {owner}/{repo}")
         
-        # Fetch contributors
+        # ::::: Fetch contributors
         contributors = github_fetcher.fetch_repository_contributors(owner, repo)
         
-        if contributors is None:  # Repository not found
+        if contributors is None:  # ::::: Repo not found
             return jsonify({'error': f'Repository {owner}/{repo} not found'}), 404
             
-        # Process contributors
+        # ::::: Process contributors
         processed_contributors = data_processor.process_contributors(contributors)
         
         return jsonify({
@@ -343,7 +343,7 @@ def fetch_contributors(owner, repo):
         logger.error(f"Error fetching contributors: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Analysis endpoints
+# ::::: Analysis endpoints
 @routes_bp.route('/analysis/path', methods=['GET'])
 def find_path():
     """
@@ -365,7 +365,7 @@ def find_path():
             
         logger.info(f"Finding path between {source} and {target}")
         
-        # Check if users exist
+        # ::::: Check if users exist
         source_data = github_fetcher.fetch_user_data(source)
         target_data = github_fetcher.fetch_user_data(target)
         
@@ -374,7 +374,7 @@ def find_path():
         if not target_data:
             return jsonify({'error': f'Target user {target} not found'}), 404
             
-        # Find the path using graph service
+        # ::::: Find path using graph
         path_result = graph_service.find_shortest_path(source, target)
         
         return jsonify({
@@ -414,13 +414,13 @@ def detect_communities():
             
         logger.info(f"Detecting communities for {username} using {algorithm}")
         
-        # Fetch user network data
+        # ::::: Fetch user network
         network_data = github_fetcher.fetch_user_network(username, depth=2)
         
-        # Process network data
+        # ::::: Process network data
         processed_network = data_processor.process_network_data(network_data)
         
-        # Detect communities
+        # ::::: Detect communities
         communities = graph_service.detect_communities(
             processed_network, 
             algorithm=algorithm
@@ -462,25 +462,25 @@ def rank_developers():
         if not username:
             return jsonify({'error': 'Username parameter is required'}), 400
             
-        # Limit depth to prevent excessive API calls
+        # ::::: Limit depth for excessive API calls
         if depth > 3:
             depth = 3
             
         logger.info(f"Ranking network for {username} using {algorithm}, depth={depth}")
         
-        # Fetch user network
+        # ::::: Fetch user network
         network_data = github_fetcher.fetch_user_network(username, depth=depth)
         
-        # Process network data
+        # ::::: Process network data
         processed_network = data_processor.process_network_data(network_data)
         
-        # Rank developers
+        # ::::: Rank developers
         rankings = graph_service.rank_nodes(
             processed_network,
             algorithm=algorithm
         )
         
-        # Format the rankings for API response
+        # ::::: Format the rankings for API response
         formatted_rankings = []
         for i, (user, score) in enumerate(rankings.items()):
             formatted_rankings.append({
@@ -518,13 +518,13 @@ def analyze_languages(username):
     try:
         logger.info(f"Analyzing languages for user {username}")
         
-        # Fetch user repositories
+        # ::::: Fetch user repositories
         repos = github_fetcher.fetch_user_repositories(username)
         
-        if repos is None:  # User not found
+        if repos is None:  # ::::: User not found
             return jsonify({'error': f'User {username} not found'}), 404
             
-        if not repos:  # No repositories
+        if not repos:  # ::::: No repositories
             return jsonify({
                 'status': 'success',
                 'data': {
@@ -535,10 +535,10 @@ def analyze_languages(username):
                 }
             })
             
-        # Analyze languages across all repositories
+        # ::::: Analyze languages
         language_stats = data_processor.analyze_languages(repos)
         
-        # Determine top language
+        # ::::: Find top language
         top_language = None
         max_bytes = 0
         total_bytes = sum(language_stats.values())
@@ -548,7 +548,7 @@ def analyze_languages(username):
                 max_bytes = bytes_used
                 top_language = lang
         
-        # Convert to percentages
+        # ::::: Calculate language percentages
         language_percentages = {}
         for lang, bytes_used in language_stats.items():
             percentage = (bytes_used / total_bytes * 100) if total_bytes > 0 else 0
@@ -569,7 +569,7 @@ def analyze_languages(username):
         logger.error(f"Error analyzing languages: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Protected routes requiring authentication
+# ::::: Protected routes requiring auth
 @routes_bp.route('/me/starred', methods=['GET'])
 @require_auth
 def get_starred_repos():
@@ -585,7 +585,7 @@ def get_starred_repos():
         
         logger.info(f"Fetching starred repositories for authenticated user {username}")
         
-        # Fetch starred repositories using user's token
+        # ::::: Fetch starred repositories
         starred = github_fetcher.fetch_user_starred(username, auth_token=token)
         
         # Process starred repositories
@@ -618,7 +618,7 @@ def get_recommendations():
         
         logger.info(f"Generating recommendations for authenticated user {username}")
         
-        # Generate recommendations
+        # ::::: Generate recommendations
         recommendations = graph_service.generate_recommendations(username)
         
         return jsonify({
@@ -634,7 +634,7 @@ def get_recommendations():
         logger.error(f"Error generating recommendations: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
-# Bulk data endpoints
+# ::::: Bulk data endpoints
 @routes_bp.route('/bulk/users', methods=['POST'])
 def bulk_fetch_users():
     """
@@ -664,7 +664,7 @@ def bulk_fetch_users():
             
         logger.info(f"Bulk fetching data for {len(usernames)} users")
         
-        # Fetch data for all users
+        # ::::: Fetch data users
         results = {}
         for username in usernames:
             user_data = github_fetcher.fetch_user_data(username)

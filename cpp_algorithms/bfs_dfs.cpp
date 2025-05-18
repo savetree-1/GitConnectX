@@ -24,7 +24,7 @@ private:
     }
 
 public:
-    // BFS implementation with distance tracking
+    // ::::: BFS implementation with distance tracking
     static std::pair<std::vector<int>, std::vector<int>> bfs(const Graph& graph, int startVertex) {
         if (!graph.hasVertex(startVertex)) {
             throw std::invalid_argument("Start vertex does not exist in the graph");
@@ -57,7 +57,7 @@ public:
         return {traversal, distances};
     }
     
-    // DFS implementation (iterative) with discovery and finish times
+    // ::::: DFS implementation (iterative)
     static std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> 
     dfs(const Graph& graph, int startVertex) {
         if (!graph.hasVertex(startVertex)) {
@@ -67,7 +67,7 @@ public:
         std::vector<int> traversal;
         std::vector<int> discoveryTime(graph.getNumVertices(), -1);
         std::vector<int> finishTime(graph.getNumVertices(), -1);
-        std::stack<std::pair<int, bool>> s; // vertex and whether it's being discovered
+        std::stack<std::pair<int, bool>> s; 
         std::unordered_set<int> visited;
         int time = 0;
         
@@ -83,9 +83,8 @@ public:
                     traversal.push_back(current);
                     discoveryTime[current] = time++;
                     
-                    s.push({current, false}); // Add finish time marker
+                    s.push({current, false});
                     
-                    // Push neighbors in reverse order for DFS
                     const auto& neighbors = graph.getNeighbors(current);
                     for (auto it = neighbors.rbegin(); it != neighbors.rend(); ++it) {
                         if (visited.find(it->first) == visited.end()) {
@@ -101,7 +100,7 @@ public:
         return {traversal, discoveryTime, finishTime};
     }
     
-    // DFS implementation (recursive) with discovery and finish times
+    // ::::: DFS implementation (recursive)
     static void dfsRecursive(const Graph& graph, int vertex, 
                            std::unordered_set<int>& visited,
                            std::vector<int>& traversal,
@@ -140,7 +139,7 @@ public:
         return {traversal, discoveryTime, finishTime};
     }
     
-    // Find connected components using DFS
+    // ::::: Find connected components using DFS
     static std::vector<std::vector<int>> findConnectedComponents(const Graph& graph) {
         std::vector<std::vector<int>> components;
         std::unordered_set<int> visited;

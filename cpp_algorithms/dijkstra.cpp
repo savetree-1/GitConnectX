@@ -38,7 +38,7 @@ public:
                           std::vector<std::pair<double, int>>,
                           std::greater<std::pair<double, int>>> pq;
 
-        // Initialize distance to start vertex
+        // ::::: Initialize distance to start vertex
         distances[startVertex] = 0.0;
         pq.push({0.0, startVertex});
 
@@ -47,10 +47,10 @@ public:
             double currentDist = pq.top().first;
             pq.pop();
 
-            // Skip if we've found a better path already
+            // ::::: Skip if we've found a better path already
             if (currentDist > distances[current]) continue;
 
-            // Process all neighbors
+            // ::::: Process all neighbors
             for (const auto& [next, weight] : graph.getNeighbors(current)) {
                 if (weight < 0) {
                     throw std::runtime_error("Negative edge weights are not allowed in Dijkstra's algorithm");
@@ -75,7 +75,7 @@ public:
 
         std::vector<int> path;
         if (!result.hasPathTo(endVertex)) {
-            return path; // No path exists
+            return path; // ::::: No path exists
         }
 
         for (int v = endVertex; v != -1; v = result.previous[v]) {

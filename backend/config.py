@@ -1,63 +1,63 @@
 import os
 from dotenv import load_dotenv
 
-# Load environment variables from .env file
+# ::::: load dotnev
 load_dotenv()
 
-# API Configuration
+# ::::: API Configuration
 API_VERSION = os.getenv('API_VERSION', '1.0.0')
 API_PREFIX = os.getenv('API_PREFIX', '/api/v1')
 
-# GitHub API Configuration
+# ::::: GitHub API Configuration
 GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN')
 GITHUB_API_BASE_URL = 'https://api.github.com'
 GITHUB_CLIENT_ID = os.getenv('GITHUB_CLIENT_ID')
 GITHUB_CLIENT_SECRET = os.getenv('GITHUB_CLIENT_SECRET')
 GITHUB_REDIRECT_URI = os.getenv('GITHUB_REDIRECT_URI', 'http://localhost:5000/api/auth/github/callback')
 
-# Frontend URL for redirects
+# ::::: Frontend URL 
 FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://localhost:3000')
 
-# Database Configuration
+# ::::: Database Configuration
 MONGODB_URI = os.getenv('MONGODB_URI', 'mongodb://localhost:27017/gitconnectx')
 
-# JWT Configuration for Authentication
+# ::::: JWT Configuration (authentication)
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'dev_secret_key')
 JWT_ALGORITHM = os.getenv('JWT_ALGORITHM', 'HS256')
 JWT_EXPIRATION_DELTA = int(os.getenv('JWT_EXPIRATION_DELTA', '86400'))  # 24 hours in seconds
 
-# Application Settings
+# ::::: Application Settings
 DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 SECRET_KEY = os.getenv('SECRET_KEY', 'dev_secret_key')
 
-# Cache Settings
+# ::::: Cache Settings
 CACHE_TIMEOUT = int(os.getenv('CACHE_TIMEOUT', '3600'))  # 1 hour in seconds
 
-# Graph Algorithm Settings
+# ::::: Graph Algorithm Settings
 PAGERANK_DAMPING = float(os.getenv('PAGERANK_DAMPING', '0.85'))
 PAGERANK_ITERATIONS = int(os.getenv('PAGERANK_ITERATIONS', '100'))
 LOUVAIN_RESOLUTION = float(os.getenv('LOUVAIN_RESOLUTION', '1.0'))
 
-# API Rate Limiting
+# ::::: API Rate Limit
 RATE_LIMIT_PER_MINUTE = int(os.getenv('RATE_LIMIT_PER_MINUTE', '60'))
 
-# Data Collection Parameters
+# ::::: Data Collection Parameters
 MAX_FOLLOWERS_TO_FETCH = int(os.getenv('MAX_FOLLOWERS_TO_FETCH', '500'))
 MAX_FOLLOWING_TO_FETCH = int(os.getenv('MAX_FOLLOWING_TO_FETCH', '500'))
 MAX_REPOS_TO_FETCH = int(os.getenv('MAX_REPOS_TO_FETCH', '100'))
 MAX_CONTRIBUTORS_TO_FETCH = int(os.getenv('MAX_CONTRIBUTORS_TO_FETCH', '100'))
 MAX_STARGAZERS_TO_FETCH = int(os.getenv('MAX_STARGAZERS_TO_FETCH', '100'))
 
-# File Paths
+# ::::: File Paths
 DATA_DIR = os.getenv('DATA_DIR', './data')
 PROCESSED_DATA_DIR = os.getenv('PROCESSED_DATA_DIR', './processed_data')
 LOG_DIR = os.getenv('LOG_DIR', './logs')
 
-# Graph Analysis Parameters
+# ::::: Logging Configuration
 PAGERANK_MAX_ITERATIONS = 100
 PAGERANK_TOLERANCE = 1e-6
 
-# Ensure directories exist
+# ::::: Ensure directories exist
 for directory in [DATA_DIR, PROCESSED_DATA_DIR, LOG_DIR]:
     os.makedirs(directory, exist_ok=True)
 

@@ -39,7 +39,7 @@ public:
         addVertex(from);
         addVertex(to);
 
-        // Check if edge already exists and update weight if it does
+        // ::::: Add edge to adjacency list
         auto& neighbors = adjList[from];
         auto it = std::find_if(neighbors.begin(), neighbors.end(),
                              [to](const auto& p) { return p.first == to; });
@@ -116,4 +116,4 @@ public:
     bool isDirectedGraph() const { return isDirected; }
 };
 
-#endif // GRAPH_H 
+#endif 

@@ -36,7 +36,7 @@ public:
         int n = graph.getNumVertices();
         if (n == 0) throw std::invalid_argument("Graph is empty");
 
-        // Build reverse adjacency list for efficient in-degree computation
+        // ::::: Initialize in-neighbors
         std::vector<std::unordered_set<int>> inNeighbors(n);
         for (int u = 0; u < n; ++u) {
             for (const auto& [v, _] : graph.getNeighbors(u)) {
@@ -44,7 +44,7 @@ public:
             }
         }
 
-        // Initialize degrees and core numbers
+        // ::::: Initialize degrees and core numbers
         std::vector<int> inDegrees(n), outDegrees(n), coreNumbers(n);
         for (int v = 0; v < n; ++v) {
             inDegrees[v] = inNeighbors[v].size();
@@ -52,7 +52,7 @@ public:
             coreNumbers[v] = std::min(inDegrees[v], outDegrees[v]);
         }
 
-        // Process vertices in non-decreasing order of degree
+        // ::::: Process vertices in non-decreasing order of degree
         bool changed = true;
         while (changed) {
             changed = false;
@@ -62,14 +62,14 @@ public:
                     coreNumbers[v] = minDegree;
                     changed = true;
 
-                    // Update out-neighbors
+                    // ::::: Update out-neighbors
                     for (const auto& [u, _] : graph.getNeighbors(v)) {
                         if (inDegrees[u] > minDegree) {
                             inDegrees[u]--;
                         }
                     }
 
-                    // Update in-neighbors
+                    // ::::: Update in-neighbors
                     for (int u : inNeighbors[v]) {
                         if (outDegrees[u] > minDegree) {
                             outDegrees[u]--;
@@ -122,15 +122,15 @@ public:
         for (int v : vertices) {
             if (!graph.hasVertex(v)) throw std::invalid_argument("Invalid vertex in subgraph");
             
-            // Count both in-degree and out-degree in the subgraph
+            // ::::: Initialize in-degree and out-degree
             int inDegree = 0, outDegree = 0;
             
-            // Count out-degree
+            // ::::: Count out-degree
             for (const auto& [u, _] : graph.getNeighbors(v)) {
                 if (vertexSet.count(u)) outDegree++;
             }
             
-            // Count in-degree
+            // ::::: Count in-degree
             for (int u = 0; u < graph.getNumVertices(); ++u) {
                 if (!vertexSet.count(u)) continue;
                 for (const auto& [w, _] : graph.getNeighbors(u)) {
