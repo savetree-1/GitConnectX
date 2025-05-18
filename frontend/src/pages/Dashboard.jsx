@@ -3,6 +3,10 @@ import { useLocation } from 'react-router-dom';
 import GraphVisualization from '../components/GraphVisualization';
 import AnalyticsTabs from '../components/AnalyticsTabs';
 import RepoAnalysis from '../components/RepoAnalysis';
+import CommunityDetectionMap from '../components/CommunityDetectionMap';
+import PathFinder from '../components/PathFinder';
+import RecommendationPanel from '../components/RecommendationPanel';
+import DomainProjectFinder from '../components/DomainProjectFinder';
 import ProfileSidebar from '../components/ProfileSidebar';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -148,6 +152,22 @@ const Dashboard = () => {
 
           <section id="repo-analysis">
             <RepoAnalysis username={username} />
+          </section>
+          
+          <section id="community-detection">
+            <CommunityDetectionMap username={username} isLoggedIn={userData !== null} />
+          </section>
+          
+          <section id="path-finder">
+            <PathFinder username={username} isLoggedIn={userData !== null} />
+          </section>
+          
+          <section id="recommendation-panel">
+            <RecommendationPanel username={username} isLoggedIn={userData !== null} />
+          </section>
+          
+          <section id="domain-project-finder">
+            <DomainProjectFinder username={username} isLoggedIn={userData !== null} />
           </section>
         </main>
       </div>
