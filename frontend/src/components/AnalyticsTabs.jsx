@@ -116,9 +116,9 @@ const AnalyticsTabs = () => {
   ];
 
   return (
-    <div className="w-full bg-gray-100 rounded-2xl shadow-lg p-6 border-blue-500 border-2">
+    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-300 border-2">
       <h2 className="text-3xl font-bold mb-6">Analytics Dashboard</h2>
-      <div className='bg-white border-blue-200 border-2 rounded-2xl p-2 mb-5'>
+      <div className='bg-white border-blue-300 border-2 rounded-xl p-2 mb-5 shadow-md'>
       <div className="flex items-center space-x-4 mb-4">
         <span
           className={`cursor-pointer px-2 py-1 rounded ${selectedYear === 2024 ? 'bg-blue-500 text-white' : 'bg-white text-blue-500 border border-blue-500'}`}
@@ -195,7 +195,7 @@ const AnalyticsTabs = () => {
         </div>
         </div>
 
-        <div className='bg-white border-blue-200 border-2 rounded-xl p-4'>
+        <div className='bg-white border-blue-300 border-2 rounded-xl p-4 shadow-md'>
           <h2 className='font-bold text-2xl mb-4'>GitHub Rank</h2>
           <div className="flex items-center justify-center">
             <div className="w-full h-80">

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const DomainProjectFinder = ({ username, isLoggedIn = false }) => {
+const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -230,6 +230,13 @@ const DomainProjectFinder = ({ username, isLoggedIn = false }) => {
     setVisibleRepoCount(prevCount => Math.min(prevCount + increment, repositories.length));
   };
 
+  // Handle repository selection
+  const handleRepositorySelect = (repo) => {
+    if (typeof onSelectRepository === 'function') {
+      onSelectRepository(repo);
+    }
+  };
+
   // Repository card component
   const RepositoryCard = ({ repo }) => {
     return (
@@ -276,12 +283,18 @@ const DomainProjectFinder = ({ username, isLoggedIn = false }) => {
           </div>
         </div>
         
-        <div className="mt-3 text-center">
+        <div className="mt-3 flex justify-between gap-2">
+          <button 
+            onClick={() => handleRepositorySelect(repo)} 
+            className="flex-1 px-2 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-medium rounded-md transition-colors"
+          >
+            View Timeline
+          </button>
           <a 
             href={repo.html_url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
+            className="flex-1 inline-block px-2 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors text-center"
           >
             View on GitHub
           </a>
@@ -331,8 +344,6 @@ const DomainProjectFinder = ({ username, isLoggedIn = false }) => {
 
   return (
     <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">Domain Project Finder</h2>
-      
       <div className="mb-6">
         <p className="text-gray-600 mb-4">
           Find reference projects and repositories in your domain of interest. 

@@ -7,6 +7,8 @@ import CommunityDetectionMap from '../components/CommunityDetectionMap';
 import PathFinder from '../components/PathFinder';
 import RecommendationPanel from '../components/RecommendationPanel';
 import DomainProjectFinder from '../components/DomainProjectFinder';
+import ContributionTimeline from '../components/ContributionTimeline';
+import InfoTooltip from '../components/InfoTooltip';
 import ProfileSidebar from '../components/ProfileSidebar';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -16,6 +18,7 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedRepository, setSelectedRepository] = useState(null);
   
   // Get username from URL state (passed from Home page)
   const username = location.state?.username || 'octocat';
@@ -115,6 +118,106 @@ const Dashboard = () => {
     fetchUserData();
   }, [username]);
 
+  // Handler for repository selection
+  const handleRepositorySelect = (repo) => {
+    setSelectedRepository(repo);
+    // Scroll to contribution timeline section
+    document.getElementById('contribution-timeline').scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Implementation details for component tooltips
+  const implementationInfo = {
+    graph: (
+      <div>
+        <p className="mb-2">Network graph visualization of GitHub connections using:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Force-directed graph layout (D3.js)</li>
+          <li><strong>Data Structure:</strong> Nodes and edges representing users and repositories</li>
+          <li><strong>Implementation:</strong> Interactive SVG visualization with drag, click, and hover events</li>
+        </ul>
+      </div>
+    ),
+    analytics: (
+      <div>
+        <p className="mb-2">Insights on user activity and repository analytics:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Time-series analysis of repository activity</li>
+          <li><strong>Data Structure:</strong> Timeline events indexed by timestamp</li>
+          <li><strong>Implementation:</strong> Multi-tab interface with dynamic charts and statistics</li>
+        </ul>
+      </div>
+    ),
+    repo: (
+      <div>
+        <p className="mb-2">Repository performance analysis and metrics:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Engagement scoring and trend analysis</li>
+          <li><strong>Data Structure:</strong> Time-series data on repository metrics</li>
+          <li><strong>Implementation:</strong> Visual performance indicators with trend highlighting</li>
+        </ul>
+      </div>
+    ),
+    community: (
+      <div>
+        <p className="mb-2">Community detection in GitHub user networks:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Louvain method and Girvan-Newman algorithm</li>
+          <li><strong>Data Structure:</strong> Graph partitioning with community assignments</li>
+          <li><strong>Implementation:</strong> Interactive visualization with community highlighting</li>
+        </ul>
+      </div>
+    ),
+    path: (
+      <div>
+        <p className="mb-2">Finding connection paths between GitHub users:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Breadth-First Search (BFS) for shortest path</li>
+          <li><strong>Data Structure:</strong> Adjacency list for social graph traversal</li>
+          <li><strong>Implementation:</strong> Animated path visualization with highlights for connection strength</li>
+        </ul>
+      </div>
+    ),
+    recommendation: (
+      <div>
+        <p className="mb-2">GitHub user and repository recommendations:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Collaborative filtering and content-based matching</li>
+          <li><strong>Data Structure:</strong> User-item interaction matrix</li>
+          <li><strong>Implementation:</strong> Personalized recommendations with similarity scoring</li>
+        </ul>
+      </div>
+    ),
+    domain: (
+      <div>
+        <p className="mb-2">Domain-specific project discovery:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Topic modeling and semantic search</li>
+          <li><strong>Data Structure:</strong> Indexed repository metadata with topic tags</li>
+          <li><strong>Implementation:</strong> Filterable project cards with domain categorization</li>
+        </ul>
+      </div>
+    ),
+    timeline: (
+      <div>
+        <p className="mb-2">Developer contribution timeline analysis:</p>
+        <ul className="list-disc pl-4 space-y-1">
+          <li><strong>Algorithm:</strong> Time-series analysis of commit patterns</li>
+          <li><strong>Data Structure:</strong> Temporal event sequence with contributor attribution</li>
+          <li><strong>Implementation:</strong> Interactive timeline with contributor filtering and activity metrics</li>
+        </ul>
+      </div>
+    )
+  };
+
+  const SectionTitle = ({ children, infoContent }) => (
+    <div className="flex items-center mb-4 bg-white bg-opacity-20 p-3 rounded-lg backdrop-filter backdrop-blur-sm">
+      <h2 className="bg-indigo-100 text-indigo-800 px-5 py-2 rounded-full text-xl font-bold mr-2 shadow-sm">
+        {children}
+      </h2>
+      <InfoTooltip content={infoContent} />
+    </div>
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
       <Header />
@@ -143,31 +246,67 @@ const Dashboard = () => {
         {/* Main Content */}
         <main className="w-3/4 p-30 space-y-12 overflow-x-auto">
           <section id="graph-visualization" className="min-w-full">
+            <SectionTitle infoContent={implementationInfo.graph}>
+              GitHub Network Visualization
+            </SectionTitle>
             <GraphVisualization username={username} />
           </section>
 
           <section id="analytics-tabs">
+            <SectionTitle infoContent={implementationInfo.analytics}>
+              Analytics Overview
+            </SectionTitle>
             <AnalyticsTabs username={username} />
           </section>
 
           <section id="repo-analysis">
+            <SectionTitle infoContent={implementationInfo.repo}>
+              Repository Analysis
+            </SectionTitle>
             <RepoAnalysis username={username} />
           </section>
           
           <section id="community-detection">
+            <SectionTitle infoContent={implementationInfo.community}>
+              Community Detection Map
+            </SectionTitle>
             <CommunityDetectionMap username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="path-finder">
+            <SectionTitle infoContent={implementationInfo.path}>
+              Connection Path Finder
+            </SectionTitle>
             <PathFinder username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="recommendation-panel">
+            <SectionTitle infoContent={implementationInfo.recommendation}>
+              Collaboration Recommendations
+            </SectionTitle>
             <RecommendationPanel username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="domain-project-finder">
-            <DomainProjectFinder username={username} isLoggedIn={userData !== null} />
+            <SectionTitle infoContent={implementationInfo.domain}>
+              Domain Project Finder
+            </SectionTitle>
+            <DomainProjectFinder 
+              username={username} 
+              isLoggedIn={userData !== null} 
+              onSelectRepository={handleRepositorySelect}
+            />
+          </section>
+          
+          <section id="contribution-timeline">
+            <SectionTitle infoContent={implementationInfo.timeline}>
+              Contribution Timeline Analyzer
+            </SectionTitle>
+            <ContributionTimeline 
+              username={username} 
+              isLoggedIn={userData !== null} 
+              selectedRepo={selectedRepository}
+            />
           </section>
         </main>
       </div>

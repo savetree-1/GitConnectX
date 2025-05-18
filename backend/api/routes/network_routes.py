@@ -408,6 +408,355 @@ def get_follower_network(username):
         logger.error(f"Error getting follower network: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
+@network_bp.route('/following/<username>', methods=['GET'])
+def get_following_network(username):
+    """
+    Get network of users that a GitHub user follows
+    
+    Args:
+        username (str): GitHub username
+    
+    Query parameters:
+        depth (int): Depth of the network to fetch (default: 1)
+    
+    Returns:
+        JSON with network data or error message
+    """
+    try:
+        depth = request.args.get('depth', default=1, type=int)
+        controller = NetworkController()
+        
+        # Check if user exists in our database
+        user = controller.db.get_github_user(username)
+        
+        # If user doesn't exist, try to fetch fresh data
+        if not user:
+            github_fetcher = GitHubDataFetcher()
+            user_data = github_fetcher.fetch_user_data(username)
+            
+            if not user_data:
+                return jsonify({'error': f'User {username} not found'}), 404
+                
+            user = controller.db.save_github_user(user_data)
+            
+            # Also fetch following for initial data
+            following_data = github_fetcher.fetch_user_following(username)
+            for following in following_data:
+                controller.db.save_github_user(following)
+                controller.db.save_follow_relationship(username, following['login'])
+        
+        # Use existing controller method or build following network
+        # This assumes get_user_following_network method exists in NetworkController
+        # If not, we'll need to implement it similar to the follower network
+        
+        # For now we'll build it directly here
+        network = {
+            'nodes': {},
+            'edges': []
+        }
+        
+        # Add central user
+        network['nodes'][username] = {
+            'id': f"{username}(user)",
+            'name': user.get('name', username),
+            'login': username,
+            'type': 'user',
+            'data': user
+        }
+        
+        # Get users that this user follows
+        following_users = controller.db.get_user_following(username)
+        
+        # Add following users and edges
+        for following_user in following_users:
+            user_login = following_user['login']
+            
+            # Add node
+            if user_login not in network['nodes']:
+                network['nodes'][user_login] = {
+                    'id': f"{user_login}(user)",
+                    'name': following_user.get('name', user_login),
+                    'login': user_login,
+                    'type': 'user',
+                    'data': following_user
+                }
+            
+            # Add edge
+            network['edges'].append({
+                'source': f"{username}(user)",
+                'target': f"{user_login}(user)",
+                'type': 'follows'
+            })
+        
+        # Clean MongoDB objects
+        if network and 'nodes' in network:
+            for node_id, node_data in network['nodes'].items():
+                if 'data' in node_data:
+                    network['nodes'][node_id]['data'] = clean_mongo_doc(node_data['data'])
+        
+        controller.close()
+        
+        if not network or not network['nodes']:
+            return jsonify({'error': f'Could not generate following network for {username}'}), 404
+        
+        return jsonify({
+            'status': 'success',
+            'data': network
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting following network: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@network_bp.route('/stargazers/<username>', methods=['GET'])
+def get_user_stargazers_network(username):
+    """
+    Get stargazers network for a GitHub user's repositories
+    
+    Args:
+        username (str): GitHub username
+    
+    Query parameters:
+        max_repos (int): Maximum number of repositories to include (default: 5)
+        max_stars (int): Maximum number of stargazers per repo (default: 50)
+    
+    Returns:
+        JSON with network data or error message
+    """
+    try:
+        max_repos = request.args.get('max_repos', default=5, type=int)
+        max_stars = request.args.get('max_stars', default=50, type=int)
+        
+        controller = NetworkController()
+        github_fetcher = GitHubDataFetcher()
+        
+        # Check if user exists
+        user = controller.db.get_github_user(username)
+        
+        # If user doesn't exist, try to fetch fresh data
+        if not user:
+            user_data = github_fetcher.fetch_user_data(username)
+            
+            if not user_data:
+                return jsonify({'error': f'User {username} not found'}), 404
+                
+            user = controller.db.save_github_user(user_data)
+        
+        # Get user's repositories
+        repos_data = github_fetcher.fetch_user_repositories(username, max_count=max_repos)
+        
+        # Create network graph
+        network = {
+            'nodes': {},
+            'edges': []
+        }
+        
+        # Add user node
+        network['nodes'][username] = {
+            'id': f"{username}(user)",
+            'name': user.get('name', username),
+            'login': username,
+            'type': 'user',
+            'data': user
+        }
+        
+        # Process each repository
+        for repo in repos_data:
+            repo_name = repo['name']
+            repo_full_name = repo['full_name']
+            
+            # Add repository node
+            repo_id = f"{repo_name}(repo)"
+            network['nodes'][repo_id] = {
+                'id': repo_id,
+                'name': repo_name,
+                'full_name': repo_full_name,
+                'type': 'repository',
+                'data': repo
+            }
+            
+            # Add edge from user to repo
+            network['edges'].append({
+                'source': f"{username}(user)",
+                'target': repo_id,
+                'type': 'owns'
+            })
+            
+            # Get stargazers for this repository
+            owner = repo_full_name.split('/')[0]
+            stargazers = github_fetcher.fetch_repository_stargazers(owner, repo_name, max_count=max_stars)
+            
+            # Add stargazer nodes and edges
+            for stargazer in stargazers:
+                stargazer_login = stargazer['login']
+                
+                # Skip if the stargazer is the owner
+                if stargazer_login == username:
+                    continue
+                    
+                # Add stargazer node if not already added
+                if stargazer_login not in network['nodes']:
+                    network['nodes'][stargazer_login] = {
+                        'id': f"{stargazer_login}(user)",
+                        'name': stargazer.get('name', stargazer_login),
+                        'login': stargazer_login,
+                        'type': 'user',
+                        'data': stargazer
+                    }
+                
+                # Add edge from stargazer to repo
+                network['edges'].append({
+                    'source': f"{stargazer_login}(user)",
+                    'target': repo_id,
+                    'type': 'stargazes'
+                })
+        
+        # Clean MongoDB objects
+        if network and 'nodes' in network:
+            for node_id, node_data in network['nodes'].items():
+                if 'data' in node_data:
+                    network['nodes'][node_id]['data'] = clean_mongo_doc(node_data['data'])
+        
+        controller.close()
+        
+        return jsonify({
+            'status': 'success',
+            'data': network
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting user stargazers network: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+@network_bp.route('/repositories/<username>', methods=['GET'])
+def get_repository_network(username):
+    """
+    Get repository network for a GitHub user
+    
+    Args:
+        username (str): GitHub username
+    
+    Query parameters:
+        max_repos (int): Maximum number of repositories to include (default: 10)
+        include_forks (bool): Whether to include forked repositories (default: true)
+    
+    Returns:
+        JSON with network data or error message
+    """
+    try:
+        max_repos = request.args.get('max_repos', default=10, type=int)
+        include_forks = request.args.get('include_forks', default='true').lower() == 'true'
+        
+        controller = NetworkController()
+        github_fetcher = GitHubDataFetcher()
+        
+        # Check if user exists
+        user = controller.db.get_github_user(username)
+        
+        # If user doesn't exist, try to fetch fresh data
+        if not user:
+            user_data = github_fetcher.fetch_user_data(username)
+            
+            if not user_data:
+                return jsonify({'error': f'User {username} not found'}), 404
+                
+            user = controller.db.save_github_user(user_data)
+        
+        # Get user's repositories
+        repos_data = github_fetcher.fetch_user_repositories(username, max_count=max_repos)
+        
+        # Filter out forks if needed
+        if not include_forks:
+            repos_data = [repo for repo in repos_data if not repo.get('is_fork', False)]
+        
+        # Create network graph
+        network = {
+            'nodes': {},
+            'edges': []
+        }
+        
+        # Add user node
+        network['nodes'][username] = {
+            'id': f"{username}(user)",
+            'name': user.get('name', username),
+            'login': username,
+            'type': 'user',
+            'data': user
+        }
+        
+        # Process each repository
+        for repo in repos_data:
+            repo_name = repo['name']
+            repo_full_name = repo['full_name']
+            
+            # Add repository node
+            repo_id = f"{repo_name}(repo)"
+            network['nodes'][repo_id] = {
+                'id': repo_id,
+                'name': repo_name,
+                'full_name': repo_full_name,
+                'type': 'repository',
+                'data': repo
+            }
+            
+            # Add edge from user to repo
+            network['edges'].append({
+                'source': f"{username}(user)",
+                'target': repo_id,
+                'type': 'owns'
+            })
+            
+            # Get contributors for this repository
+            owner = repo_full_name.split('/')[0]
+            try:
+                contributors = github_fetcher.fetch_repository_contributors(owner, repo_name)
+                
+                # Add contributor nodes and edges
+                for contributor in contributors:
+                    contributor_login = contributor['login']
+                    
+                    # Skip if the contributor is the owner
+                    if contributor_login == username:
+                        continue
+                        
+                    # Add contributor node if not already added
+                    if contributor_login not in network['nodes']:
+                        network['nodes'][contributor_login] = {
+                            'id': f"{contributor_login}(user)",
+                            'name': contributor.get('name', contributor_login),
+                            'login': contributor_login,
+                            'type': 'user',
+                            'data': contributor
+                        }
+                    
+                    # Add edge from contributor to repo
+                    network['edges'].append({
+                        'source': f"{contributor_login}(user)",
+                        'target': repo_id,
+                        'type': 'contributes',
+                        'weight': contributor.get('contributions', 1)
+                    })
+            except Exception as repo_error:
+                logger.warning(f"Error fetching contributors for {repo_full_name}: {str(repo_error)}")
+                # Continue with other repositories
+        
+        # Clean MongoDB objects
+        if network and 'nodes' in network:
+            for node_id, node_data in network['nodes'].items():
+                if 'data' in node_data:
+                    network['nodes'][node_id]['data'] = clean_mongo_doc(node_data['data'])
+        
+        controller.close()
+        
+        return jsonify({
+            'status': 'success',
+            'data': network
+        })
+        
+    except Exception as e:
+        logger.error(f"Error getting repository network: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
 @network_bp.route('/commits/<username>', methods=['GET'])
 def get_commit_network(username):
     """

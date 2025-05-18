@@ -109,7 +109,7 @@ const RepoAnalysis = ({ username }) => {
 
 
   return (
-    <div className="w-full bg-gray-100 rounded-lg shadow-lg p-6 border-blue-500 border-2">
+    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-300 border-2">
       <h2 className="text-2xl font-bold mb-6">Your Repositories Analysis</h2>
 
       {loading ? (
@@ -125,7 +125,7 @@ const RepoAnalysis = ({ username }) => {
         <>
           {/* Charts Section */}
           <div className="flex flex-col md:flex-row gap-6 mb-6">
-            <div className="w-full md:w-1/2 bg-white rounded-lg p-4 shadow-md border-blue-200 border-2">
+            <div className="w-full md:w-1/2 bg-white rounded-lg p-4 shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Language Distribution</h3>
               {languageData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -143,7 +143,7 @@ const RepoAnalysis = ({ username }) => {
               )}
             </div>
 
-            <div className="w-full md:w-1/2 bg-gray-50 rounded-lg p-4 shadow-md border-blue-200 border-2">
+            <div className="w-full md:w-1/2 bg-white rounded-lg p-4 shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Repo Size vs Forks</h3>
               {repoData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={300}>
@@ -166,7 +166,7 @@ const RepoAnalysis = ({ username }) => {
           {/* Network Visualizations with Zoom */}
           <div className="flex flex-col gap-6">
             {/* Follower Network */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-blue-200 border-2">
+            <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Follower Network</h3>
               <p className="text-sm text-gray-600 mb-2">Zoom with scroll / drag to explore.</p>
               <div className="h-80 overflow-hidden">
@@ -179,7 +179,7 @@ const RepoAnalysis = ({ username }) => {
             </div>
 
             {/* Bipartite Network */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-blue-200 border-2">
+            <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Bipartite Network</h3>
               <div className="h-80 overflow-hidden">
                   {/* Your Bipartite Network SVG content */}
@@ -191,7 +191,7 @@ const RepoAnalysis = ({ username }) => {
             </div>
 
             {/* Forks Network */}
-            <div className="bg-white p-4 rounded-lg shadow-md border-blue-200 border-2">
+            <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Forks Network</h3>
               <div className="h-80 overflow-hidden">
                   {/* Your Forks Network SVG content */}

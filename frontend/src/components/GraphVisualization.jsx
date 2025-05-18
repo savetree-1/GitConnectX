@@ -8,6 +8,7 @@ const GraphVisualization = ({ username }) => {
   const [networkData, setNetworkData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [graphType, setGraphType] = useState('followers');
 
   const margin = 50;
   const width = 500;
@@ -19,7 +20,25 @@ const GraphVisualization = ({ username }) => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetch(`http://localhost:5000/api/network/followers/${username}`);
+        
+        // Determine API endpoint based on graph type
+        let apiEndpoint;
+        switch(graphType) {
+          case 'following':
+            apiEndpoint = `http://localhost:5000/api/network/following/${username}`;
+            break;
+          case 'stargazers':
+            apiEndpoint = `http://localhost:5000/api/network/stargazers/${username}`;
+            break;
+          case 'repos':
+            apiEndpoint = `http://localhost:5000/api/network/repositories/${username}`;
+            break;
+          case 'followers':
+          default:
+            apiEndpoint = `http://localhost:5000/api/network/followers/${username}`;
+        }
+        
+        const response = await fetch(apiEndpoint);
         
         if (!response.ok) {
           throw new Error(`Failed to fetch network data: ${response.statusText}`);
@@ -128,7 +147,25 @@ const GraphVisualization = ({ username }) => {
         // Try to connect to API with alternative path
         try {
           console.log("Trying alternative API endpoint...");
-          const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/followers/${username}`);
+          
+          // Get alternative API endpoint based on graph type
+          let alternativeEndpoint;
+          switch(graphType) {
+            case 'following':
+              alternativeEndpoint = `http://127.0.0.1:5000/api/network/following/${username}`;
+              break;
+            case 'stargazers':
+              alternativeEndpoint = `http://127.0.0.1:5000/api/network/stargazers/${username}`;
+              break;
+            case 'repos':
+              alternativeEndpoint = `http://127.0.0.1:5000/api/network/repositories/${username}`;
+              break;
+            case 'followers':
+            default:
+              alternativeEndpoint = `http://127.0.0.1:5000/api/network/followers/${username}`;
+          }
+          
+          const alternativeResponse = await fetch(alternativeEndpoint);
           
           if (alternativeResponse.ok) {
             const data = await alternativeResponse.json();
@@ -246,7 +283,7 @@ const GraphVisualization = ({ username }) => {
     if (username) {
       fetchNetworkData();
     }
-  }, [username]);
+  }, [username, graphType]);
 
   // Render visualization when data is available
   useEffect(() => {
@@ -533,6 +570,14 @@ const GraphVisualization = ({ username }) => {
     );
   };
 
+  // Graph type labels for display
+  const graphTypeLabels = {
+    followers: "Followers Network",
+    following: "Following Network", 
+    stargazers: "Stargazers Network",
+    repos: "Repository Network"
+  };
+
   return (
     <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
         <h2 className="text-2xl font-bold text-gray-800">GitHub Graph Overview</h2>
@@ -545,14 +590,45 @@ const GraphVisualization = ({ username }) => {
         </label>
         </div>
       </div>
+      
+      {/* Graph Type Toggle Buttons */}
+      <div className="flex flex-wrap justify-center gap-2 mb-4">
+        <button
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${graphType === 'followers' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          onClick={() => setGraphType('followers')}
+        >
+          Followers
+        </button>
+        <button
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${graphType === 'following' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          onClick={() => setGraphType('following')}
+        >
+          Following
+        </button>
+        <button
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${graphType === 'stargazers' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          onClick={() => setGraphType('stargazers')}
+        >
+          Stargazers
+        </button>
+        <button
+          className={`px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${graphType === 'repos' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+          onClick={() => setGraphType('repos')}
+        >
+          Repositories
+        </button>
+      </div>
+      
       <div className={`flex mb-2 ${comparisonMode ? 'justify-around' : 'justify-center'}`}>
-        <h3 className="text-xl font-semibold text-blue-700">My GitHub Network</h3>
+        <h3 className="text-xl font-semibold text-blue-700 flex items-center">
+          {graphTypeLabels[graphType] || "My GitHub Network"}
+        </h3>
         {comparisonMode && <h3 className="text-xl font-semibold text-green-700">Friend's GitHub Network</h3>}
       </div>
       
       {loading ? (
         <div className="flex justify-center items-center h-96">
-          <p className="text-gray-500">Loading network data...</p>
+          <p className="text-gray-500">Loading {graphTypeLabels[graphType]} data...</p>
         </div>
       ) : error ? (
         <div className="flex justify-center items-center flex-col h-96">
@@ -561,7 +637,7 @@ const GraphVisualization = ({ username }) => {
           <p className="text-gray-600 mt-2">Run <code className="bg-gray-100 px-2 py-1 rounded">start_api.bat</code> to start the server.</p>
         </div>
       ) : (
-        <div className="bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
+        <div className="bg-white flex justify-center border-blue-300 border-2 rounded-xl p-4 shadow-md">
         <div className="overflow-x-auto relative">
               <svg ref={d3Container} 
                 style={{
