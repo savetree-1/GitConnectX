@@ -1,39 +1,209 @@
-import React from 'react';
-import logo from '../assets/logo.png';
+import React, { useState, useEffect } from 'react';
+import logo from '../assets/logo.jpg';
+import { Link } from 'react-router-dom';
 
 const Header = ({ scrollToFeatures, scrollToContact }) => {
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Handle scroll effect for navbar
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto flex justify-between items-center p-4">
-        <div className="flex items-center space-x-2">
-          <img className="w-10 md:w-10" src={logo} alt="logo" />
-          <div className="text-xl font-bold text-[#1737A1]">
-            GitConnectX
-          </div>
+    <header 
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-white/90 backdrop-blur-md shadow-lg py-2' 
+          : 'bg-transparent py-4'
+      }`}
+    >
+      <div className="container mx-auto max-w-6xl">
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center justify-between px-4">
+          {/* Logo and Brand */}
+          <Link to="/" className="flex items-center space-x-2 group">
+            <div className={`relative overflow-hidden rounded-full transition-all duration-300 ${scrolled ? '' : 'bg-white/10 p-1'}`}>
+              <img 
+                className={`w-10 h-10 object-cover transition-transform duration-500 group-hover:scale-110 ${scrolled ? '' : 'filter brightness-110'}`} 
+                src={logo} 
+                alt="logo" 
+              />
+              {!scrolled && (
+                <div className="absolute inset-0 bg-white opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
+              )}
+            </div>
+            <div className={`text-xl font-bold transition-colors duration-300 ${
+              scrolled ? 'text-[#1737A1]' : 'text-white'
+            }`}>
+              GitConnectX
+            </div>
+          </Link>
+
+          {/* Center Navigation */}
+          <nav className="flex space-x-1">
+            <Link 
+              to="/" 
+              className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
+                ${scrolled 
+                  ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
+                  : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
+                } relative overflow-hidden group`}
+            >
+              <span className="relative z-10">Home</span>
+              <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
+                scrolled ? 'bg-[#1737A1]' : 'bg-white'
+              }`}></span>
+            </Link>
+            
+            <button
+              onClick={scrollToFeatures}
+              className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
+                ${scrolled 
+                  ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
+                  : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
+                } relative overflow-hidden group focus:outline-none`}
+            >
+              <span className="relative z-10">Features</span>
+              <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
+                scrolled ? 'bg-[#1737A1]' : 'bg-white'
+              }`}></span>
+            </button>
+            
+            <Link 
+              to="/about" 
+              className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
+                ${scrolled 
+                  ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
+                  : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
+                } relative overflow-hidden group`}
+            >
+              <span className="relative z-10">About Us</span>
+              <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
+                scrolled ? 'bg-[#1737A1]' : 'bg-white'
+              }`}></span>
+            </Link>
+            
+            <button
+              onClick={scrollToContact}
+              className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
+                ${scrolled 
+                  ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
+                  : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
+                } relative overflow-hidden group focus:outline-none`}
+            >
+              <span className="relative z-10">Contact Us</span>
+              <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
+                scrolled ? 'bg-[#1737A1]' : 'bg-white'
+              }`}></span>
+            </button>
+          </nav>
+
+          {/* Login/Signup Button */}
+          <Link
+            to="/login"
+            className={`px-5 py-2 rounded-full font-medium shadow-lg transition-all duration-500
+              ${scrolled 
+                ? 'bg-[#1737A1] text-white hover:bg-[#122b82] hover:shadow-[#1737A1]/30 hover:scale-105' 
+                : 'bg-white text-[#1737A1] hover:bg-[#f0f0ff] hover:shadow-white/50 hover:scale-105'
+              } flex items-center gap-2 group`}
+          >
+            <span>Login / Signup</span>
+            <svg 
+              className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" 
+              fill="none" 
+              viewBox="0 0 24 24" 
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
         </div>
-        <nav className="space-x-6">
-          <a href="/" className="text-black hover:text-[#1737A1]">
-            Home
-          </a>
-          <button
-            onClick={scrollToFeatures}
-            className="text-black hover:text-[#1737A1] focus:outline-none"
+
+        {/* Mobile Navigation */}
+        <div className="md:hidden flex items-center justify-between px-4">
+          <Link to="/" className="flex items-center space-x-2">
+            <div className="rounded-full overflow-hidden w-8 h-8">
+              <img className="w-full h-full object-cover" src={logo} alt="logo" />
+            </div>
+            <div className={`text-lg font-bold ${scrolled ? 'text-[#1737A1]' : 'text-white'}`}>
+              GitConnectX
+            </div>
+          </Link>
+
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className={`p-2 rounded-md ${scrolled ? 'text-gray-700' : 'text-white'} focus:outline-none`}
           >
-            Features
+            {mobileMenuOpen ? (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            ) : (
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+              </svg>
+            )}
           </button>
-          <button
-            onClick={scrollToContact}
-            className="text-black hover:text-[#1737A1] focus:outline-none"
-          >
-            Contact Us
-          </button>
-          <a
-            href="/login"
-            className="text-white bg-[#1737A1] px-4 py-2 rounded w-full hover:bg-indigo-700 transition transform hover:-translate-y-1 hover:shadow-md"
-          >
-            Login / Signup
-          </a>
-        </nav>
+        </div>
+
+        {/* Mobile Menu */}
+        {mobileMenuOpen && (
+          <nav className="md:hidden bg-white shadow-lg rounded-b-xl mt-1 overflow-hidden animate-fadeIn mx-4">
+            <Link 
+              to="/" 
+              className="block text-gray-700 font-medium px-4 py-3 border-b border-gray-100 hover:bg-blue-50"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Home
+            </Link>
+            <button
+              onClick={() => {
+                scrollToFeatures();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left text-gray-700 font-medium px-4 py-3 border-b border-gray-100 hover:bg-blue-50 focus:outline-none"
+            >
+              Features
+            </button>
+            <Link 
+              to="/about" 
+              className="block text-gray-700 font-medium px-4 py-3 border-b border-gray-100 hover:bg-blue-50"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              About Us
+            </Link>
+            <button
+              onClick={() => {
+                scrollToContact();
+                setMobileMenuOpen(false);
+              }}
+              className="w-full text-left text-gray-700 font-medium px-4 py-3 border-b border-gray-100 hover:bg-blue-50 focus:outline-none"
+            >
+              Contact Us
+            </button>
+            <Link 
+              to="/login"
+              className="block bg-[#1737A1] text-white font-medium px-4 py-3 hover:bg-[#122b82]"
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Login / Signup
+            </Link>
+          </nav>
+        )}
       </div>
     </header>
   );

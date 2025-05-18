@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Features from './components/Features';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
+import AboutUs from './pages/AboutUs';
 import Contact from './components/Contact';
 import Docs from './components/Docs';
 import Contributors from './components/Contributors';
@@ -18,6 +19,7 @@ export default function App() {
         <Route path="/features" element={<Features />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<AboutUs />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/docs" element={<Docs />} />
         <Route path="/contributors" element={<Contributors />} />

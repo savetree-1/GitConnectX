@@ -1,0 +1,21 @@
+{
+  "name": "GitConnectX",
+  "short_name": "GitConnectX",
+  "icons": [
+    {
+      "src": "/logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "any maskable"
+    }
+  ],
+  "theme_color": "#1737A1",
+  "background_color": "#150429",
+  "display": "standalone"
+} 
