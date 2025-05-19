@@ -94,7 +94,7 @@ export default function ProfileSidebar({
   };
 
   return (
-    <div className="fixed top-30 w-[12rem] left-6  md:w-[32rem] h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500  z-50">
+    <div className="sticky top-16 w-full max-w-sm h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500 mx-auto mt-2 ml-8">
       {/* Background banner image */}
       <div className="relative w-full">
         <div

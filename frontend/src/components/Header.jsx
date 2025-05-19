@@ -1,11 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import logo from '../assets/logo.jpg';
+import logo from '../assets/smallerLogoWithoutBg.png';
 import { Link } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+
 
 const Header = ({ scrollToFeatures, scrollToContact }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const location = useLocation();
+  const navigate = useNavigate();
 
+  const handleHomeClick = (e) => {
+    if (location.pathname === '/') {
+      e.preventDefault(); // Prevent <Link> navigation
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // else, let <Link to="/"> handle navigation naturally
+  };
   // Handle scroll effect for navbar
   useEffect(() => {
     const handleScroll = () => {
@@ -35,15 +46,13 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
         <div className="hidden md:flex items-center justify-between px-4">
           {/* Logo and Brand */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className={`relative overflow-hidden rounded-full transition-all duration-300 ${scrolled ? '' : 'bg-white/10 p-1'}`}>
+            <div className="w-10 h-10 flex items-center justify-center">
               <img 
-                className={`w-10 h-10 object-cover transition-transform duration-500 group-hover:scale-110 ${scrolled ? '' : 'filter brightness-110'}`} 
+                className="w-10 h-10 object-contain"
                 src={logo} 
-                alt="logo" 
+                alt="logo"
+                style={{ filter: scrolled ? 'brightness(0) saturate(100%)' : 'brightness(0) saturate(100%) invert(1)' }}
               />
-              {!scrolled && (
-                <div className="absolute inset-0 bg-white opacity-20 group-hover:opacity-30 transition-opacity duration-300"></div>
-              )}
             </div>
             <div className={`text-xl font-bold transition-colors duration-300 ${
               scrolled ? 'text-[#1737A1]' : 'text-white'
@@ -56,6 +65,10 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
           <nav className="flex space-x-1">
             <Link 
               to="/" 
+              onClick={(e) => {
+                handleHomeClick(e);
+                setMobileMenuOpen(false);
+              }}
               className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
                 ${scrolled 
                   ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
@@ -84,6 +97,7 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
             
             <Link 
               to="/about" 
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
               className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
                 ${scrolled 
                   ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
@@ -135,7 +149,7 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
         {/* Mobile Navigation */}
         <div className="md:hidden flex items-center justify-between px-4">
           <Link to="/" className="flex items-center space-x-2">
-            <div className="rounded-full overflow-hidden w-8 h-8">
+            <div className="w-8 h-8">
               <img className="w-full h-full object-cover" src={logo} alt="logo" />
             </div>
             <div className={`text-lg font-bold ${scrolled ? 'text-[#1737A1]' : 'text-white'}`}>

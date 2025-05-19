@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
+import Features from '../components/Features';
+import Contact from '../components/Contact';
 
 // Import team member images
 import ankushImage from '../assets/ankush.jpg';
@@ -9,9 +11,20 @@ import anikaImage from '../assets/anika.jpg';
 import akhilImage from '../assets/akhil.jpg';
 
 const AboutUs = () => {
-  // Mock function for navigation, these would be replaced with actual implementations
-  const scrollToFeatures = () => {};
-  const scrollToContact = () => {};
+  const featuresRef = useRef(null);
+  const contactRef = useRef(null);
+
+  const scrollToFeatures = () => {
+    if (featuresRef.current) {
+      featuresRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const scrollToContact = () => {
+    if (contactRef.current) {
+      contactRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   // Load Font Awesome script and particles.js
   useEffect(() => {
@@ -146,12 +159,12 @@ const AboutUs = () => {
           </p>
           
           {/* Team section with bright green background */}
-          <div className="bg-[#a4e22a] py-16 rounded-3xl relative">
+          <div className="backdrop-blur-md bg-white/10 border border-white/30 py-20 rounded-3xl relative mb-30">
             <div className="container mx-auto px-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
                 
                 {/* Ankush Rawat */}
-                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-[#a4e22a]/50">
+                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-indigo-800/50">
                   <div className="overflow-hidden rounded-xl mb-6 w-full">
                     <img 
                       src={ankushImage} 
@@ -160,7 +173,7 @@ const AboutUs = () => {
                     />
                   </div>
                   <h3 className="font-bold text-xl uppercase text-center mb-1">Ankush Rawat</h3>
-                  <p className="text-[#a4e22a] mb-4 text-center font-semibold">AI Lead & Backend</p>
+                  <p className="text-indigo-800 mb-4 text-center font-semibold">AI Lead & Backend</p>
                   <p className="text-gray-600 text-center mb-6">
                     Expert in machine learning algorithms and backend architecture, specializing in network analysis and data processing systems.
                   </p>
@@ -181,7 +194,7 @@ const AboutUs = () => {
                 </div>
                 
                 {/* Ayush Negi */}
-                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-[#a4e22a]/50">
+                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-indigo-800/50">
                   <div className="overflow-hidden rounded-xl mb-6 w-full">
                     <img 
                       src={ayushImage} 
@@ -190,7 +203,7 @@ const AboutUs = () => {
                     />
                   </div>
                   <h3 className="font-bold text-xl uppercase text-center mb-1">Ayush Negi</h3>
-                  <p className="text-[#a4e22a] mb-4 text-center font-semibold">Backend Developer</p>
+                  <p className="text-indigo-800 mb-4 text-center font-semibold">Backend Developer</p>
                   <p className="text-gray-600 text-center mb-6">
                     Focuses on API development and integration, creating robust backend systems that power our data-intensive applications.
                   </p>
@@ -211,7 +224,7 @@ const AboutUs = () => {
                 </div>
                 
                 {/* Anika Dewari */}
-                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-[#a4e22a]/50">
+                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-indigo-800/50">
                   <div className="overflow-hidden rounded-xl mb-6 w-full">
                     <img 
                       src={anikaImage} 
@@ -220,7 +233,7 @@ const AboutUs = () => {
                     />
                   </div>
                   <h3 className="font-bold text-xl uppercase text-center mb-1">Anika Dewari</h3>
-                  <p className="text-[#a4e22a] mb-4 text-center font-semibold">Frontend Developer</p>
+                  <p className="text-indigo-800 mb-4 text-center font-semibold">Frontend Developer</p>
                   <p className="text-gray-600 text-center mb-6">
                     Creates beautiful and intuitive user interfaces, specializing in React components and data visualization.
                   </p>
@@ -241,7 +254,7 @@ const AboutUs = () => {
                 </div>
 
                 {/* Akhil */}
-                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-[#a4e22a]/50">
+                <div className="flex flex-col items-center bg-white p-8 rounded-xl shadow-md transition-all duration-300 hover:shadow-2xl group hover:scale-105 hover:shadow-indigo-800/50">
                   <div className="overflow-hidden rounded-xl mb-6 w-full">
                     <img 
                       src={akhilImage} 
@@ -250,7 +263,7 @@ const AboutUs = () => {
                     />
                   </div>
                   <h3 className="font-bold text-xl uppercase text-center mb-1">Akhil</h3>
-                  <p className="text-[#a4e22a] mb-4 text-center font-semibold">Algorithms & Database</p>
+                  <p className="text-indigo-800 mb-4 text-center font-semibold">Algorithms & Database</p>
                   <p className="text-gray-600 text-center mb-6">
                     Specializes in algorithm optimization and database architecture, ensuring efficient data storage and retrieval.
                   </p>
@@ -274,7 +287,7 @@ const AboutUs = () => {
           </div>
           
           {/* Our Values Section - New Creative Section */}
-          <div className="max-w-6xl mx-auto my-20 px-4">
+          <div className="max-w-6xl mx-auto my-20 px-4 mb-30">
             <h2 className="text-3xl font-bold text-center text-white mb-12">Our Core Values</h2>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -311,7 +324,7 @@ const AboutUs = () => {
           </div>
           
           {/* Mission and company info section */}
-          <div className="max-w-4xl mx-auto my-16 px-4">
+          <div className="max-w-4xl mx-auto my-16 px-4 mb-15">
             <h2 className="text-3xl font-bold text-center text-white mb-8">About GitConnectX</h2>
             
             <div className="bg-white rounded-2xl shadow-md p-8 mb-12 backdrop-blur-sm">
@@ -331,26 +344,26 @@ const AboutUs = () => {
             </div>
             
             {/* Core Features */}
-            <div className="bg-[#a4e22a] p-10 rounded-2xl mb-16 relative z-10">
-              <h3 className="text-2xl font-bold text-center text-white mb-8">Our Core Features</h3>
+            <div className="rounded-2xl mb-30 relative z-10">
+              <h3 className="text-3xl font-bold text-center text-white mb-8">Our Core Features</h3>
               <div className="grid md:grid-cols-3 gap-6">
-                <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                  <h4 className="text-xl font-semibold text-gray-800 mb-3">Network Analysis</h4>
-                  <p className="text-gray-600">
+                <div className="bg-[#1737A1]/30  backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                  <h4 className="text-xl font-semibold text-white mb-3">Network Analysis</h4>
+                  <p className="text-gray-300">
                     Visualize your GitHub connections and understand complex relationship patterns using our advanced network algorithms.
                   </p>
                 </div>
                 
-                <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                  <h4 className="text-xl font-semibold text-gray-800 mb-3">Contribution Insights</h4>
-                  <p className="text-gray-600">
+                <div className="bg-[#1737A1]/30  backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                  <h4 className="text-xl font-semibold text-white mb-3">Contribution Insights</h4>
+                  <p className="text-gray-300">
                     Gain valuable insights into your contribution patterns, identify your strengths, and discover areas for potential growth.
                   </p>
                 </div>
                 
-                <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
-                  <h4 className="text-xl font-semibold text-gray-800 mb-3">Community Detection</h4>
-                  <p className="text-gray-600">
+                <div className="bg-[#1737A1]/30  backdrop-blur-sm p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow">
+                  <h4 className="text-xl font-semibold text-white mb-3">Community Detection</h4>
+                  <p className="text-gray-300">
                     Find like-minded developers and active communities that align with your interests and skill set.
                   </p>
                 </div>
@@ -358,7 +371,7 @@ const AboutUs = () => {
             </div>
             
             {/* Testimonials Section - New Creative Section */}
-            <div className="mb-20">
+            <div className="mb-30">
               <h3 className="text-3xl font-bold text-center text-white mb-10">What Our Users Say</h3>
               
               <div className="grid md:grid-cols-2 gap-8">
@@ -400,14 +413,14 @@ const AboutUs = () => {
             
             {/* Get Involved Section */}
             <div className="text-center mb-16">
-              <h3 className="text-2xl font-bold text-white mb-4">Get Involved</h3>
+              <h3 className="text-3xl font-bold text-white mb-4">Get Involved</h3>
               <p className="text-gray-100 mb-8 max-w-2xl mx-auto">
                 We're always looking for contributors who are passionate about data visualization, network analysis, 
                 and building tools for developers. Join our community and help us build the future of GitHub networking.
               </p>
               
               <a 
-                href="https://github.com/yourusername/gitconnectx" 
+                href="https://github.com/savetree-1/GitConnectX" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="bg-[#1737A1] text-white px-8 py-3 rounded-xl font-medium hover:bg-indigo-700 transition-colors inline-block hover:shadow-lg"
@@ -416,6 +429,16 @@ const AboutUs = () => {
               </a>
             </div>
           </div>
+        </div>
+
+        {/* Features Section */}
+        <div ref={featuresRef}>
+          <Features />
+        </div>
+
+        {/* Contact Section */}
+        <div ref={contactRef}>
+          <Contact />
         </div>
       </div>
       
