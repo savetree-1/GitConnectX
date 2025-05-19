@@ -5,7 +5,7 @@ const Footer = () => {
     <footer className="bg-white text-grey-700 py-6">
       <div className="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center space-x-2">
-                <div className="rounded-full overflow-hidden w-10 h-10 flex-shrink-0">
+                <div className="rounded-full overflow-hidden w-20 h-20 flex-shrink-0">
                   <img className="w-full h-full object-cover filter" style={{ filter: 'brightness(0) saturate(100%)' }} src={logo} alt="logo" />
                 </div>
                 <div className="text-xl font-bold text-[#1737A1]">

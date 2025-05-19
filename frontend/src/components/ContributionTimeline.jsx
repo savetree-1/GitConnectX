@@ -541,7 +541,7 @@ const ContributionTimeline = ({ username, isLoggedIn = false, selectedRepo = nul
   };
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white  border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <div className="flex justify-between items-center mb-4">
         {/* Time range selector */}
         <div className="flex bg-gray-100 rounded-lg p-1">

@@ -327,7 +327,7 @@ const AboutUs = () => {
           <div className="max-w-4xl mx-auto my-16 px-4 mb-15">
             <h2 className="text-3xl font-bold text-center text-white mb-8">About GitConnectX</h2>
             
-            <div className="bg-white rounded-2xl shadow-md p-8 mb-12 backdrop-blur-sm">
+            <div className="bg-white rounded-2xl shadow-md p-8 mb-30 backdrop-blur-sm">
               <h3 className="text-2xl font-bold text-gray-800 mb-4">Our Mission</h3>
               <p className="text-gray-600 mb-6">
                 GitConnectX was created with a simple mission: to help developers visualize, analyze and leverage their GitHub networks 
@@ -440,9 +440,9 @@ const AboutUs = () => {
         <div ref={contactRef}>
           <Contact />
         </div>
+      <Footer />
       </div>
       
-      <Footer />
     </div>
   );
 };

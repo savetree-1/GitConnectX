@@ -579,7 +579,7 @@ const GraphVisualization = ({ username }) => {
   };
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
         <h2 className="text-2xl font-bold text-gray-800">GitHub Graph Overview</h2>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">

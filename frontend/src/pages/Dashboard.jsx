@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import GraphVisualization from '../components/GraphVisualization';
 import AnalyticsTabs from '../components/AnalyticsTabs';
@@ -14,6 +14,21 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 
 const Dashboard = () => {
+   const featuresRef = useRef(null);
+    const contactRef = useRef(null);
+  
+    const scrollToFeatures = () => {
+      if (featuresRef.current) {
+        featuresRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+  
+    const scrollToContact = () => {
+      if (contactRef.current) {
+        contactRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    };
+
   const location = useLocation();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -129,7 +144,7 @@ const Dashboard = () => {
   const implementationInfo = {
     graph: (
       <div>
-        <p className="mb-2">Network graph visualization of GitHub connections using:</p>
+        <p className="mb-2 ">Network graph visualization of GitHub connections using:</p>
         <ul className="list-disc pl-4 space-y-1">
           <li><strong>Algorithm:</strong> Force-directed graph layout (D3.js)</li>
           <li><strong>Data Structure:</strong> Nodes and edges representing users and repositories</li>
@@ -210,7 +225,7 @@ const Dashboard = () => {
   };
 
   const SectionTitle = ({ children, infoContent }) => (
-    <div className="flex items-center mb-4 bg-white bg-opacity-20 p-3 rounded-lg backdrop-filter backdrop-blur-sm">
+    <div className="flex items-center mb-4 border-blue-500 border-2 bg-white bg-opacity-20 p-3 rounded-lg backdrop-filter backdrop-blur-sm">
       <h2 className="bg-indigo-100 text-indigo-800 px-5 py-2 rounded-full text-xl font-bold mr-2 shadow-sm">
         {children}
       </h2>
@@ -220,7 +235,10 @@ const Dashboard = () => {
 
   return (
     <div className="flex flex-col min-h-screen bg-gradient-to-r from-blue-900 via-purple-800 to-indigo-800">
-      <Header />
+      <Header 
+        scrollToFeatures={scrollToFeatures} 
+        scrollToContact={scrollToContact} 
+      />
       <div className="flex flex-grow">
         {/* Sidebar */}
         <aside className="w-1/4 shadow-md rounded-2xl pt-18">

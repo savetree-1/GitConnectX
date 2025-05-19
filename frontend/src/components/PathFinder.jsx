@@ -552,7 +552,7 @@ const PathFinder = ({ username, isLoggedIn = false }) => {
   }, [pathData, sourceUser, targetUser, width, height, margin, isLoggedIn]);
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Path Finder</h2>
       
       <div className="mb-6">

@@ -259,7 +259,7 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
   };
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white rounded-lg border-blue-500 border-2 shadow-md p-5 mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Recommended Collaborators</h2>
         

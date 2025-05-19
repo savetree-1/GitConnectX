@@ -109,7 +109,7 @@ const RepoAnalysis = ({ username }) => {
 
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-300 border-2">
+    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-500 border-2">
       <h2 className="text-2xl font-bold mb-6">Your Repositories Analysis</h2>
 
       {loading ? (

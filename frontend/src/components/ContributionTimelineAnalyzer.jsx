@@ -676,7 +676,7 @@ const ContributionTimelineAnalyzer = ({ username, isLoggedIn = false }) => {
   };
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white  rounded-lg shadow-md p-5 mb-8">
       <p className="text-gray-600 mb-6">
         Advanced time-series analysis of your development patterns and collaboration trends
       </p>

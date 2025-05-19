@@ -343,7 +343,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
   };
 
   return (
-    <div className="font-sans bg-white rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <div className="mb-6">
         <p className="text-gray-600 mb-4">
           Find reference projects and repositories in your domain of interest. 

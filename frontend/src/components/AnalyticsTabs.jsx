@@ -116,7 +116,7 @@ const AnalyticsTabs = () => {
   ];
 
   return (
-    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-300 border-2">
+    <div className="w-full bg-white rounded-xl shadow-lg p-6 border-blue-500 border-2">
       <h2 className="text-3xl font-bold mb-6">Analytics Dashboard</h2>
       <div className='bg-white border-blue-300 border-2 rounded-xl p-2 mb-5 shadow-md'>
       <div className="flex items-center space-x-4 mb-4">
