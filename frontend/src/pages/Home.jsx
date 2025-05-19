@@ -131,12 +131,12 @@ const Home = () => {
               <div className="lg:w-1/2 text-center lg:text-left">
                 <h1 className="text-4xl lg:text-5xl font-extrabold text-white mb-2 drop-shadow-lg">
                   Welcome to <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-[#a4e22a]">GitConnectX</span>
-                </h1>
+          </h1>
                 <h1 className="text-4xl lg:text-5xl font-extrabold text-white mb-4 drop-shadow-lg">
-                  Explore Your GitHub Social Graph
-                </h1>
+            Explore Your GitHub Social Graph
+          </h1>
                 <p className="text-lg font-bold text-gray-100 mb-8 drop-shadow-lg max-w-lg mx-auto lg:mx-0">
-                  Visualize your network, compare with friends, and understand your GitHub presence like never before.
+            Visualize your network, compare with friends, and understand your GitHub presence like never before.
                 </p>
               </div>
               
@@ -150,28 +150,28 @@ const Home = () => {
                   <h3 className="text-gray-800 font-semibold mb-4 relative z-10">Start Exploring Now</h3>
                   
                   <div className="mb-4 relative z-10">
-                    <input
-                      type="text"
-                      placeholder="Enter your GitHub username"
+              <input
+                type="text"
+                placeholder="Enter your GitHub username"
                       className="border border-gray-300 px-5 py-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#1737A1]/50 focus:border-[#1737A1] transition-all duration-300"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                    />
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+              />
                     <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                       </svg>
                     </div>
-                  </div>
+            </div>
 
                   <div className="mb-4 flex items-center justify-center relative z-10">
                     <label className="inline-flex items-center cursor-pointer">
-                      <input
-                        type="checkbox"
+              <input
+                type="checkbox"
                         className="sr-only peer"
-                        checked={compare}
-                        onChange={() => setCompare(!compare)}
-                      />
+                checked={compare}
+                onChange={() => setCompare(!compare)}
+              />
                       <div className={`relative w-11 h-6 rounded-full transition peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 
                         ${compare ? 'bg-[#1737A1]' : 'bg-gray-200'}`}>
                         <div className={`absolute top-[2px] left-[2px] bg-white w-5 h-5 rounded-full transition-all duration-300 
@@ -180,37 +180,37 @@ const Home = () => {
                       </div>
                       <span className="ml-3 text-gray-700 font-medium">Compare with a friend?</span>
                     </label>
-                  </div>
+            </div>
 
-                  {compare && (
+            {compare && (
                     <div className="mb-4 relative z-10 animate-fadeIn">
-                      <input
-                        type="text"
-                        placeholder="Enter your friend's GitHub username"
+                <input
+                  type="text"
+                  placeholder="Enter your friend's GitHub username"
                         className="border border-gray-300 px-5 py-3 rounded-lg w-full focus:outline-none focus:ring-2 focus:ring-[#1737A1]/50 focus:border-[#1737A1] transition-all duration-300"
-                        value={friendUsername}
-                        onChange={(e) => setFriendUsername(e.target.value)}
-                      />
+                  value={friendUsername}
+                  onChange={(e) => setFriendUsername(e.target.value)}
+                />
                       <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400">
                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                           <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
                         </svg>
                       </div>
-                    </div>
-                  )}
+              </div>
+            )}
 
-                  <button
+            <button
                     className="bg-gradient-to-r from-[#1737A1] to-[#122b82] text-white px-6 py-3 rounded-lg w-full hover:opacity-95 transition-all transform hover:-translate-y-1 hover:shadow-md flex items-center justify-center space-x-2 group relative z-10"
-                    onClick={handleAnalyze}
-                  >
+              onClick={handleAnalyze}
+            >
                     <span>Analyze Now</span>
                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 transform transition-transform group-hover:translate-x-1" viewBox="0 0 20 20" fill="currentColor">
                       <path fillRule="evenodd" d="M12.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
                     </svg>
-                  </button>
-                </div>
-              </div>
-            </div>
+            </button>
+          </div>
+        </div>
+      </div>
           </div>
         </div>
         
@@ -220,9 +220,9 @@ const Home = () => {
         </div>
       </div>
       
-      <section ref={contactRef}>
-        <Contact/>
-      </section>
+        <section ref={contactRef}>
+          <Contact/>
+        </section>
       <Footer />
     </div>
   );
