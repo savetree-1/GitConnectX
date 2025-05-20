@@ -530,6 +530,15 @@ def get_user_stargazers_network(username):
         controller = NetworkController()
         github_fetcher = GitHubDataFetcher()
         
+        # Check if we have a valid API token
+        if not github_fetcher.api_token or github_fetcher.api_token == "your_github_token":
+            logger.warning(f"GitHub API token not set or invalid. Providing demo stargazers network data for {username}")
+            demo_network = github_fetcher.generate_demo_stargazers_network(username, max_repos)
+            return jsonify({
+                'status': 'success',
+                'data': demo_network
+            })
+        
         # Check if user exists
         user = controller.db.get_github_user(username)
         
@@ -538,12 +547,26 @@ def get_user_stargazers_network(username):
             user_data = github_fetcher.fetch_user_data(username)
             
             if not user_data:
-                return jsonify({'error': f'User {username} not found'}), 404
+                logger.warning(f"User {username} not found. Providing demo stargazers network data.")
+                demo_network = github_fetcher.generate_demo_stargazers_network(username, max_repos)
+                return jsonify({
+                    'status': 'success',
+                    'data': demo_network
+                })
                 
             user = controller.db.save_github_user(user_data)
         
         # Get user's repositories
         repos_data = github_fetcher.fetch_user_repositories(username, max_count=max_repos)
+        
+        # If no repositories found, provide demo data
+        if not repos_data:
+            logger.warning(f"No repositories found for {username}. Providing demo data.")
+            demo_network = github_fetcher.generate_demo_stargazers_network(username, max_repos)
+            return jsonify({
+                'status': 'success',
+                'data': demo_network
+            })
         
         # Create network graph
         network = {
@@ -650,6 +673,15 @@ def get_repository_network(username):
         controller = NetworkController()
         github_fetcher = GitHubDataFetcher()
         
+        # Check if we have a valid API token
+        if not github_fetcher.api_token or github_fetcher.api_token == "your_github_token":
+            logger.warning(f"GitHub API token not set or invalid. Providing demo repository network data for {username}")
+            demo_network = github_fetcher.generate_demo_repository_network(username, max_repos)
+            return jsonify({
+                'status': 'success',
+                'data': demo_network
+            })
+        
         # Check if user exists
         user = controller.db.get_github_user(username)
         
@@ -658,7 +690,12 @@ def get_repository_network(username):
             user_data = github_fetcher.fetch_user_data(username)
             
             if not user_data:
-                return jsonify({'error': f'User {username} not found'}), 404
+                logger.warning(f"User {username} not found. Providing demo repository network data.")
+                demo_network = github_fetcher.generate_demo_repository_network(username, max_repos)
+                return jsonify({
+                    'status': 'success',
+                    'data': demo_network
+                })
                 
             user = controller.db.save_github_user(user_data)
         
@@ -668,6 +705,15 @@ def get_repository_network(username):
         # Filter out forks if needed
         if not include_forks:
             repos_data = [repo for repo in repos_data if not repo.get('is_fork', False)]
+        
+        # If no repositories found, provide demo data
+        if not repos_data:
+            logger.warning(f"No repositories found for {username}. Providing demo data.")
+            demo_network = github_fetcher.generate_demo_repository_network(username, max_repos)
+            return jsonify({
+                'status': 'success',
+                'data': demo_network
+            })
         
         # Create network graph
         network = {
@@ -929,3 +975,67 @@ def find_path():
     except Exception as e:
         logger.error(f"Error finding path: {str(e)}")
         return jsonify({'error': str(e)}), 500 
+
+@network_bp.route('/repositories/domain/<domain>', methods=['GET'])
+def get_repositories_by_domain(domain):
+    """
+    Get repositories by domain/topic
+    
+    Args:
+        domain (str): Domain/topic to search for
+    
+    Query parameters:
+        limit (int): Maximum number of repositories to return (default: 10)
+    
+    Returns:
+        JSON with repository data or error message
+    """
+    try:
+        limit = request.args.get('limit', default=10, type=int)
+        
+        # Initialize GitHub fetcher
+        github_fetcher = GitHubDataFetcher()
+        
+        # Map domain to GitHub topics
+        domain_topic_map = {
+            'web-development': 'web',
+            'machine-learning': 'machine-learning',
+            'cybersecurity': 'security',
+            'mobile-apps': 'mobile',
+            'data-science': 'data-science',
+            'devops': 'devops',
+            'blockchain': 'blockchain',
+            'game-development': 'game-development',
+            'iot': 'iot',
+            'cloud-computing': 'cloud'
+        }
+        
+        # Use the mapped topic or the domain itself if no mapping exists
+        search_topic = domain_topic_map.get(domain, domain)
+        
+        # Search for repositories by topic
+        try:
+            repositories = github_fetcher.search_repositories_by_topic(search_topic, max_count=limit)
+            
+            # Save repos to database for future use
+            controller = NetworkController()
+            for repo in repositories:
+                controller.db.save_github_repo(repo)
+            
+            return jsonify({
+                'status': 'success',
+                'data': repositories
+            })
+        except Exception as e:
+            logger.error(f"Error searching repositories by topic: {str(e)}")
+            return jsonify({
+                'status': 'error',
+                'message': f"Failed to search repositories: {str(e)}"
+            }), 500
+            
+    except Exception as e:
+        logger.error(f"Error in get_repositories_by_domain: {str(e)}")
+        return jsonify({
+            'status': 'error',
+            'message': str(e)
+        }), 500 

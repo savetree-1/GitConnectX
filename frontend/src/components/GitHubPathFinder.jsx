@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const PathFinder = ({ username, isAuthenticated }) => {
+const GitHubPathFinder = ({ username, isAuthenticated }) => {
   const [sourceUser, setSourceUser] = useState(username || 'octocat');
   const [targetUser, setTargetUser] = useState('');
   const [suggestions, setSuggestions] = useState([]);
@@ -423,4 +423,4 @@ const PathFinder = ({ username, isAuthenticated }) => {
   );
 };
 
-export default PathFinder; 
+export default GitHubPathFinder; 

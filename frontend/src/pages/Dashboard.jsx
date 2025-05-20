@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import GraphVisualization from '../components/GraphVisualization';
 import AnalyticsTabs from '../components/AnalyticsTabs';
-import RepoAnalysis from '../components/RepoAnalysis';
+import RepositoryAnalysis from '../components/RepositoryAnalysis';
 import CommunityDetectionMap from '../components/CommunityDetectionMap';
 import PathFinder from '../components/PathFinder';
 import RecommendationPanel from '../components/RecommendationPanel';
@@ -281,7 +281,9 @@ const Dashboard = () => {
             <SectionTitle infoContent={implementationInfo.repo}>
               Repository Analysis
             </SectionTitle>
-            <RepoAnalysis username={username} />
+            <div className="my-6">
+              <RepositoryAnalysis username={username} isAuthenticated={userData?.isAuthenticated} />
+            </div>
           </section>
           
           <section id="community-detection">

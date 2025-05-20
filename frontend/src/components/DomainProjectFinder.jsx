@@ -8,6 +8,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
   const [repositories, setRepositories] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [visibleRepoCount, setVisibleRepoCount] = useState(isLoggedIn ? 4 : 3);
+  const [totalReposToShow, setTotalReposToShow] = useState(isLoggedIn ? 4 : 3);
   const [popularDomains, setPopularDomains] = useState([
     { id: 'web-development', name: 'Web Development', color: 'bg-blue-500', icon: '🌐' },
     { id: 'machine-learning', name: 'Machine Learning', color: 'bg-green-500', icon: '🤖' },
@@ -28,29 +29,25 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
     setShowResults(true);
     
     try {
-      if (isLoggedIn) {
-        // In a real app, this would call the API
-        try {
-          const response = await fetch(`http://localhost:5000/api/repositories/domain/${domain}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch repositories: ${response.statusText}`);
-          }
-          
-          const data = await response.json();
-          
-          if (data.status === 'success') {
-            setRepositories(data.data);
-          } else {
-            throw new Error(data.message || 'Failed to load repositories');
-          }
-        } catch (err) {
-          console.error('Error fetching repositories from API:', err);
-          // Fall back to demo data
-          generateDemoRepositories(domain);
+      // Always try to fetch from the API first
+      try {
+        // Use our new API endpoint with a higher limit to enable "Show More"
+        const response = await fetch(`http://localhost:5000/api/network/repositories/domain/${domain}?limit=20`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch repositories: ${response.statusText}`);
         }
-      } else {
-        // For guests, generate demo repos
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setRepositories(data.data);
+        } else {
+          throw new Error(data.message || 'Failed to load repositories');
+        }
+      } catch (err) {
+        console.error('Error fetching repositories from API:', err);
+        // Fall back to demo data
         generateDemoRepositories(domain);
       }
     } catch (err) {
@@ -205,6 +202,10 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
   const handleDomainSelection = (domain) => {
     setSelectedDomain(domain);
     setSearchTerm(''); // Clear any search term
+    // Reset visible count on new domain selection
+    const initialCount = isLoggedIn ? 4 : 3;
+    setVisibleRepoCount(initialCount);
+    setTotalReposToShow(initialCount);
     searchRepositories(domain);
   };
 
@@ -228,6 +229,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
     // Increase by 4 for logged-in users, by 2 for guests
     const increment = isLoggedIn ? 4 : 2;
     setVisibleRepoCount(prevCount => Math.min(prevCount + increment, repositories.length));
+    setTotalReposToShow(prevCount => Math.min(prevCount + increment, repositories.length));
   };
 
   // Handle repository selection
@@ -411,11 +413,11 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
           ) : (
             <div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {repositories.slice(0, visibleRepoCount).map(repo => (
+                {repositories.slice(0, totalReposToShow).map(repo => (
                   <RepositoryCard key={repo.id} repo={repo} />
                 ))}
                 
-                {!isLoggedIn && repositories.length > 0 && visibleRepoCount >= 3 && (
+                {!isLoggedIn && repositories.length > 0 && totalReposToShow >= 3 && (
                   <LimitedAccessCard />
                 )}
                 
@@ -427,7 +429,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
               </div>
               
               {/* Show More button */}
-              {repositories.length > visibleRepoCount && (
+              {repositories.length > totalReposToShow && (
                 <div className="mt-6 text-center">
                   <button 
                     onClick={handleShowMore}
@@ -435,7 +437,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
                   >
                     Show More Projects
                     <span className="ml-2 text-gray-500 text-sm">
-                      ({visibleRepoCount} of {repositories.length})
+                      ({totalReposToShow} of {repositories.length})
                     </span>
                   </button>
                 </div>

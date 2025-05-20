@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
+import DemoDataGenerator from './DemoDataGenerator';
 
 const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
   const d3Container = useRef(null);
@@ -11,8 +12,8 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
   const [timelineData, setTimelineData] = useState(null);
 
   const margin = 50;
-  const width = 500;
-  const height = 500;
+  const width = 450;   // Smaller width
+  const height = 380;  // Smaller height
 
   // Fetch community data from API
   useEffect(() => {
@@ -23,90 +24,89 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
         
         // For logged-in users, fetch actual data; for guests, use sample data
         if (isLoggedIn && username) {
-          const response = await fetch(`http://localhost:5000/api/community/${algorithm}/${username}`);
-          
-          if (!response.ok) {
-            throw new Error(`Failed to fetch community data: ${response.statusText}`);
-          }
-          
-          const data = await response.json();
-          console.log("API response for community data:", data);
-          
-          if (data.status === 'success') {
-            setCommunityData(data.data);
+          try {
+            const response = await fetch(`http://localhost:5000/api/community/${algorithm}/${username}`);
             
-            // Also fetch timeline data for logged-in users
-            const timelineResponse = await fetch(`http://localhost:5000/api/community/timeline/${username}`);
-            if (timelineResponse.ok) {
-              const timelineData = await timelineResponse.json();
-              setTimelineData(timelineData.data);
+            if (!response.ok) {
+              throw new Error(`Failed to fetch community data: ${response.statusText}`);
             }
-          } else {
-            throw new Error('Invalid response format');
+            
+            const data = await response.json();
+            console.log("API response for community data:", data);
+            
+            if (data.status === 'success') {
+              setCommunityData(data.data);
+              
+              // Also fetch timeline data for logged-in users
+              const timelineResponse = await fetch(`http://localhost:5000/api/community/timeline/${username}`);
+              if (timelineResponse.ok) {
+                const timelineData = await timelineResponse.json();
+                setTimelineData(timelineData.data);
+              }
+              return;
+            }
+          } catch (apiErr) {
+            console.log('API not available, using demo data');
           }
-        } else {
-          // Load sample data for guest users
-          setSampleData();
         }
+        
+        // Generate demo data using DemoDataGenerator
+        const demoData = DemoDataGenerator.generateCommunityData(algorithm);
+        console.log("Using demo community data:", demoData);
+        
+        // Format demo data for the visualization
+        const formattedData = {
+          nodes: demoData.visualizationData.nodes.map(node => ({
+            id: node.id,
+            community: node.communityId,
+            size: 8 + (Math.random() * 5)  // Random size between 8-13
+          })),
+          links: demoData.visualizationData.links.map(link => ({
+            source: link.source,
+            target: link.target,
+            weight: link.value
+          })),
+          communities: demoData.metrics.map(metric => ({
+            id: metric.id,
+            name: metric.name,
+            color: ['#3182CE', '#38A169', '#E53E3E', '#D69E2E', '#805AD5'][metric.id % 5]
+          })),
+          userCommunityAffinity: demoData.metrics.map(metric => ({
+            communityId: metric.id,
+            percentage: Math.floor(100 / demoData.metrics.length * (1 + (Math.random() * 0.5)))
+          }))
+        };
+        
+        setCommunityData(formattedData);
+        
+        // Generate sample timeline data
+        const timelineDates = [];
+        const now = new Date();
+        for (let i = 5; i > 0; i--) {
+          const month = now.getMonth() - i + 1;
+          const year = now.getFullYear() + (month <= 0 ? -1 : 0);
+          const adjustedMonth = month <= 0 ? month + 12 : month;
+          timelineDates.push(`${year}-${String(adjustedMonth).padStart(2, '0')}`);
+        }
+        
+        const sampleTimeline = {
+          timeline: timelineDates.map(date => {
+            const data = { date };
+            formattedData.communities.forEach(community => {
+              data[`community${community.id}`] = 20 + Math.floor(Math.random() * 60);
+            });
+            return data;
+          })
+        };
+        
+        setTimelineData(sampleTimeline);
+        
       } catch (err) {
-        console.error('Error fetching community data:', err);
+        console.error('Error with community data:', err);
         setError(err.message);
-        // Use sample data if API fails
-        setSampleData();
       } finally {
         setLoading(false);
       }
-    };
-    
-    // Helper function to set sample data for guests or when API fails
-    const setSampleData = () => {
-      // Sample data for community visualization
-      const sampleCommunities = {
-        nodes: [
-          { id: 'user1', community: 1, size: 10 },
-          { id: 'user2', community: 1, size: 8 },
-          { id: 'user3', community: 1, size: 7 },
-          { id: 'user4', community: 2, size: 9 },
-          { id: 'user5', community: 2, size: 8 },
-          { id: 'user6', community: 3, size: 10 },
-          { id: 'user7', community: 3, size: 6 },
-          { id: 'user8', community: 3, size: 5 },
-        ],
-        links: [
-          { source: 'user1', target: 'user2', weight: 2 },
-          { source: 'user1', target: 'user3', weight: 1 },
-          { source: 'user2', target: 'user3', weight: 1 },
-          { source: 'user4', target: 'user5', weight: 2 },
-          { source: 'user6', target: 'user7', weight: 1 },
-          { source: 'user6', target: 'user8', weight: 1 },
-          { source: 'user7', target: 'user8', weight: 1 },
-        ],
-        communities: [
-          { id: 1, name: 'Frontend Developers', color: '#3182CE' },
-          { id: 2, name: 'Backend Developers', color: '#38A169' },
-          { id: 3, name: 'Data Scientists', color: '#E53E3E' },
-        ],
-        userCommunityAffinity: [
-          { communityId: 1, percentage: 60 },
-          { communityId: 2, percentage: 25 },
-          { communityId: 3, percentage: 15 },
-        ]
-      };
-      
-      setCommunityData(sampleCommunities);
-      
-      // Sample timeline data
-      const sampleTimeline = {
-        timeline: [
-          { date: '2023-01', community1: 40, community2: 30, community3: 30 },
-          { date: '2023-02', community1: 45, community2: 30, community3: 25 },
-          { date: '2023-03', community1: 50, community2: 25, community3: 25 },
-          { date: '2023-04', community1: 55, community2: 25, community3: 20 },
-          { date: '2023-05', community1: 60, community2: 25, community3: 15 },
-        ]
-      };
-      
-      setTimelineData(sampleTimeline);
     };
 
     fetchCommunityData();
@@ -136,10 +136,10 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
 
       // Create force simulation
       const simulation = d3.forceSimulation(communityData.nodes)
-        .force('link', d3.forceLink(communityData.links).id(d => d.id).distance(100))
-        .force('charge', d3.forceManyBody().strength(-200))
+        .force('link', d3.forceLink(communityData.links).id(d => d.id).distance(80))
+        .force('charge', d3.forceManyBody().strength(-150))
         .force('center', d3.forceCenter(width / 2 + margin, height / 2 + margin))
-        .force('collision', d3.forceCollide().radius(d => d.size * 1.5));
+        .force('collision', d3.forceCollide().radius(d => d.size * 1.2));
 
       // Draw links
       const link = svg.append('g')
@@ -273,8 +273,8 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
   const drawCommunityAffinity = (svg) => {
     const gaugeWidth = 200;
     const gaugeHeight = 150;
-    const gaugeX = width - gaugeWidth;
-    const gaugeY = height - gaugeHeight;
+    const gaugeX = width - gaugeWidth - 20;
+    const gaugeY = height - gaugeHeight - 50;
 
     const gaugeGroup = svg.append('g')
       .attr('transform', `translate(${gaugeX + margin}, ${gaugeY + margin})`);
@@ -342,10 +342,10 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
   const drawTimeline = (svg) => {
     if (!timelineData || !timelineData.timeline || timelineData.timeline.length === 0) return;
     
-    const chartWidth = width;
+    const chartWidth = width - 100;
     const chartHeight = 100;
-    const chartX = margin;
-    const chartY = height + margin + 50;
+    const chartX = margin + 50;
+    const chartY = height + margin;
 
     const chartGroup = svg.append('g')
       .attr('transform', `translate(${chartX}, ${chartY})`);
@@ -456,11 +456,11 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
         </div>
       ) : (
         <div className="bg-white flex justify-center border-blue-200 border-2 rounded-xl p-4">
-          <div className="overflow-x-auto relative">
+          <div className="overflow-hidden relative">
             <svg ref={d3Container} 
               style={{
                 width: `${width + margin * 2}px`,
-                height: `${height + margin * 2 + (isLoggedIn ? 200 : 0)}px`,
+                height: `${height + margin * 2 + 200}px`,
                 backgroundColor: 'transparent'
               }}>
             </svg>
