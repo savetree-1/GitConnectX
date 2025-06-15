@@ -23,15 +23,6 @@ cd GitConnectX
 ### Install Python Dependencies
 
 ```bash
-# Create and activate a virtual environment
-python -m venv venv
-
-# On Windows:
-venv\Scripts\activate
-
-# On macOS/Linux:
-source venv/bin/activate
-
 # Install required packages
 pip install -r requirements.txt
 ```
