@@ -241,7 +241,7 @@ const Dashboard = () => {
       />
       <div className="flex flex-grow">
         {/* Sidebar */}
-        <aside className="w-1/4 shadow-md rounded-2xl pt-18">
+        <aside className="w-1/4 shadow-md rounded-2xl pt-40">
           {loading ? (
             <div className="flex items-center justify-center h-full">
               <p className="text-white text-xl">Loading profile data...</p>

@@ -1,9 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
-import Features from '../components/Features';
-import Contact from '../components/Contact';
-
 // Import team member images
 import ankushImage from '../assets/ankush.jpg';
 import ayushImage from '../assets/ayush.jpg';
@@ -11,21 +8,6 @@ import anikaImage from '../assets/anika.jpg';
 import akhilImage from '../assets/akhil.jpg';
 
 const AboutUs = () => {
-  const featuresRef = useRef(null);
-  const contactRef = useRef(null);
-
-  const scrollToFeatures = () => {
-    if (featuresRef.current) {
-      featuresRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const scrollToContact = () => {
-    if (contactRef.current) {
-      contactRef.current.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   // Load Font Awesome script and particles.js
   useEffect(() => {
     // Load Font Awesome
@@ -145,10 +127,7 @@ const AboutUs = () => {
         }}
       ></div>
       
-      <Header 
-        scrollToFeatures={scrollToFeatures} 
-        scrollToContact={scrollToContact} 
-      />
+      <Header />
       
       <div className="flex-grow pt-20 relative z-10">
         <div className="container mx-auto px-4 py-12">
@@ -429,16 +408,6 @@ const AboutUs = () => {
               </a>
             </div>
           </div>
-        </div>
-
-        {/* Features Section */}
-        <div ref={featuresRef}>
-          <Features />
-        </div>
-
-        {/* Contact Section */}
-        <div ref={contactRef}>
-          <Contact />
         </div>
       <Footer />
       </div>

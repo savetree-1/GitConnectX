@@ -10,7 +10,7 @@ const Features = () => {
   };
 
   return (
-    <div ref={featuresRef} className="bg-transparent py-20 relative z-10">
+    <div ref={featuresRef} className="bg-transparent py-25 relative z-10">
       <div className="container mx-auto text-center px-6">
         <h1 className="text-5xl font-extrabold text-white mb-6 drop-shadow-lg">
           Features

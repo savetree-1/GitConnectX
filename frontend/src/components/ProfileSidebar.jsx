@@ -94,7 +94,7 @@ export default function ProfileSidebar({
   };
 
   return (
-    <div className="sticky top-16 w-full max-w-sm h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500 mx-auto mt-2 ml-8">
+    <div className="sticky top-32 w-full max-w-[450px] h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500 mx-auto mt-2 ml-8">
       {/* Background banner image */}
       <div className="relative w-full">
         <div
@@ -127,14 +127,14 @@ export default function ProfileSidebar({
         </div>
 
         {/* Rank Badge */}
-        <span className="bg-blue-100 text-blue-800 text-sm font-semibold px-4 py-1 rounded-full">
+        <span className="bg-blue-100 text-blue-800 text-base font-semibold px-4 py-1 rounded-full">
           {getUserRank()}
         </span>
 
         {/* Stats Section */}
         <div>
           <div className="border-t border-gray-300 my-4" />
-          <div className="space-y-4 text-gray-700 text-sm">
+          <div className="space-y-2 text-gray-700 text-base">
             <div className="flex items-center gap-2">
               <Folder className="w-5 h-5" />
               <span>{stats.repos} Repos</span>

@@ -37,8 +37,8 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
     <header 
       className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/90 backdrop-blur-md shadow-lg py-2' 
-          : 'bg-transparent py-4'
+          ? 'bg-white/90 backdrop-blur-md shadow-lg py-6' 
+          : 'bg-transparent py-6'
       }`}
     >
       <div className="container mx-auto max-w-6xl">
@@ -46,15 +46,15 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
         <div className="hidden md:flex items-center justify-between px-4">
           {/* Logo and Brand */}
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 flex items-center justify-center">
+            <div className="w-15 h-15 flex items-center justify-center">
               <img 
-                className="w-10 h-10 object-contain"
+                className="w-15 h-15 object-contain"
                 src={logo} 
                 alt="logo"
                 style={{ filter: scrolled ? 'brightness(0) saturate(100%)' : 'brightness(0) saturate(100%) invert(1)' }}
               />
             </div>
-            <div className={`text-xl font-bold transition-colors duration-300 ${
+            <div className={`text-2xl font-bold transition-colors duration-300 ${
               scrolled ? 'text-[#1737A1]' : 'text-white'
             }`}>
               GitConnectX
@@ -75,7 +75,7 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
                   : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
                 } relative overflow-hidden group`}
             >
-              <span className="relative z-10">Home</span>
+              <span className="text-lg relative z-10">Home</span>
               <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
                 scrolled ? 'bg-[#1737A1]' : 'bg-white'
               }`}></span>
@@ -89,26 +89,11 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
                   : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
                 } relative overflow-hidden group focus:outline-none`}
             >
-              <span className="relative z-10">Features</span>
+              <span className="text-lg relative z-10">Features</span>
               <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
                 scrolled ? 'bg-[#1737A1]' : 'bg-white'
               }`}></span>
             </button>
-            
-            <Link 
-              to="/about" 
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className={`font-medium px-4 py-2 rounded-lg transition-all duration-300 
-                ${scrolled 
-                  ? 'text-gray-700 hover:bg-blue-100 hover:text-[#1737A1] hover:shadow-sm' 
-                  : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
-                } relative overflow-hidden group`}
-            >
-              <span className="relative z-10">About Us</span>
-              <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
-                scrolled ? 'bg-[#1737A1]' : 'bg-white'
-              }`}></span>
-            </Link>
             
             <button
               onClick={scrollToContact}
@@ -118,7 +103,7 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
                   : 'text-white hover:bg-white/10 hover:text-white hover:shadow-lg shadow-white/10'
                 } relative overflow-hidden group focus:outline-none`}
             >
-              <span className="relative z-10">Contact Us</span>
+              <span className="text-lg relative z-10">Contact Us</span>
               <span className={`absolute bottom-0 left-0 w-full h-0.5 transform scale-x-0 transition-transform duration-300 group-hover:scale-x-100 ${
                 scrolled ? 'bg-[#1737A1]' : 'bg-white'
               }`}></span>
@@ -134,7 +119,7 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
                 : 'bg-white text-[#1737A1] hover:bg-[#f0f0ff] hover:shadow-white/50 hover:scale-105'
               } flex items-center gap-2 group`}
           >
-            <span>Login / Signup</span>
+            <span className='text-lg' > Login / Signup</span>
             <svg 
               className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" 
               fill="none" 
@@ -193,13 +178,6 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
             >
               Features
             </button>
-            <Link 
-              to="/about" 
-              className="block text-gray-700 font-medium px-4 py-3 border-b border-gray-100 hover:bg-blue-50"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              About Us
-            </Link>
             <button
               onClick={() => {
                 scrollToContact();
