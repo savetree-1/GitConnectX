@@ -109,26 +109,6 @@ const Header = ({ scrollToFeatures, scrollToContact }) => {
               }`}></span>
             </button>
           </nav>
-
-          {/* Login/Signup Button */}
-          <Link
-            to="/login"
-            className={`px-5 py-2 rounded-full font-medium shadow-lg transition-all duration-500
-              ${scrolled 
-                ? 'bg-[#1737A1] text-white hover:bg-[#122b82] hover:shadow-[#1737A1]/30 hover:scale-105' 
-                : 'bg-white text-[#1737A1] hover:bg-[#f0f0ff] hover:shadow-white/50 hover:scale-105'
-              } flex items-center gap-2 group`}
-          >
-            <span className='text-lg' > Login / Signup</span>
-            <svg 
-              className="w-4 h-4 transform transition-transform duration-300 group-hover:translate-x-1" 
-              fill="none" 
-              viewBox="0 0 24 24" 
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
         </div>
 
         {/* Mobile Navigation */}
