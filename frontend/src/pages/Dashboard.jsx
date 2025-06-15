@@ -224,12 +224,12 @@ const Dashboard = () => {
     )
   };
 
-  const SectionTitle = ({ children, infoContent }) => (
+  const SectionTitle = ({ children, infoContent ,  position = 'right' }) => (
     <div className="flex items-center mb-4 border-blue-500 border-2 bg-white bg-opacity-20 p-3 rounded-lg backdrop-filter backdrop-blur-sm">
       <h2 className="bg-indigo-100 text-indigo-800 px-5 py-2 rounded-full text-xl font-bold mr-2 shadow-sm">
         {children}
       </h2>
-      <InfoTooltip content={infoContent} />
+    <InfoTooltip content={infoContent} position={position} />
     </div>
   );
 
@@ -264,21 +264,21 @@ const Dashboard = () => {
         {/* Main Content */}
         <main className="w-3/4 p-30 space-y-12 overflow-x-auto">
           <section id="graph-visualization" className="min-w-full">
-            <SectionTitle infoContent={implementationInfo.graph}>
+            <SectionTitle infoContent={implementationInfo.graph}  position="right">
               GitHub Network Visualization
             </SectionTitle>
             <GraphVisualization username={username} />
           </section>
 
           <section id="analytics-tabs">
-            <SectionTitle infoContent={implementationInfo.analytics}>
+            <SectionTitle infoContent={implementationInfo.analytics} position="right">
               Analytics Overview
             </SectionTitle>
             <AnalyticsTabs username={username} />
           </section>
 
           <section id="repo-analysis">
-            <SectionTitle infoContent={implementationInfo.repo}>
+            <SectionTitle infoContent={implementationInfo.repo}position="right">
               Repository Analysis
             </SectionTitle>
             <div className="my-6">
@@ -287,28 +287,28 @@ const Dashboard = () => {
           </section>
           
           <section id="community-detection">
-            <SectionTitle infoContent={implementationInfo.community}>
+            <SectionTitle infoContent={implementationInfo.community}position="right">
               Community Detection Map
             </SectionTitle>
             <CommunityDetectionMap username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="path-finder">
-            <SectionTitle infoContent={implementationInfo.path}>
+            <SectionTitle infoContent={implementationInfo.path} position="right">
               Connection Path Finder
             </SectionTitle>
             <PathFinder username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="recommendation-panel">
-            <SectionTitle infoContent={implementationInfo.recommendation}>
+            <SectionTitle infoContent={implementationInfo.recommendation}position="right">
               Collaboration Recommendations
             </SectionTitle>
             <RecommendationPanel username={username} isLoggedIn={userData !== null} />
           </section>
           
           <section id="domain-project-finder">
-            <SectionTitle infoContent={implementationInfo.domain}>
+            <SectionTitle infoContent={implementationInfo.domain}position="right">
               Domain Project Finder
             </SectionTitle>
             <DomainProjectFinder 
@@ -319,7 +319,7 @@ const Dashboard = () => {
           </section>
           
           <section id="contribution-timeline">
-            <SectionTitle infoContent={implementationInfo.timeline}>
+            <SectionTitle infoContent={implementationInfo.timeline} position="right">
               Contribution Timeline Analyzer
             </SectionTitle>
             <ContributionTimeline 

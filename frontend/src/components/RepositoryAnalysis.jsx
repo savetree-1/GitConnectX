@@ -70,11 +70,11 @@ const RepositoryAnalysis = ({ username, isAuthenticated }) => {
     <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Repository Analysis</h2>
       
-      {!isAuthenticated && (
+      {/* {!isAuthenticated && (
         <div className="italic text-sm text-gray-500 mb-4">
           Sign in to see your personal repository analysis
         </div>
-      )}
+      )} */}
       
       {loading ? (
         <div className="flex justify-center items-center h-64">

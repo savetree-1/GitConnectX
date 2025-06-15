@@ -206,7 +206,7 @@ const PathFinder = ({ username, isAuthenticated }) => {
         .attr('x', d => (d.source.x + d.target.x) / 2)
         .attr('y', d => (d.source.y + d.target.y) / 2 - 15)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '10px')
+        .attr('font-size', '16px')
         .attr('fill', d => d.type === 'follows' ? '#3182ce' : '#38a169')
         .text(d => d.type === 'follows' ? 'Follows' : 'Collaborates');
       
@@ -248,7 +248,7 @@ const PathFinder = ({ username, isAuthenticated }) => {
         .attr('x', d => d.x)
         .attr('y', d => d.y + 30)
         .attr('text-anchor', 'middle')
-        .attr('font-size', '12px')
+        .attr('font-size', '18px')
         .attr('font-weight', d => d.isEndpoint ? 'bold' : 'normal')
         .text(d => d.id);
       
@@ -322,7 +322,7 @@ const PathFinder = ({ username, isAuthenticated }) => {
               <button
                 onClick={findPath}
                 disabled={loading || !sourceUser || !targetUser}
-                className={`px-4 py-2 rounded-md text-white font-medium ${
+                className={`px-4 py-2 text-base rounded-md text-white font-bold ${
                   loading || !sourceUser || !targetUser 
                     ? 'bg-gray-400 cursor-not-allowed' 
                     : 'bg-blue-600 hover:bg-blue-700'
@@ -334,11 +334,11 @@ const PathFinder = ({ username, isAuthenticated }) => {
           </>
         ) : (
           <div className="w-full text-center">
-            <p className="text-gray-500">Sign in to find connections between any GitHub users</p>
+            {/* <p className="text-gray-500">Sign in to find connections between any GitHub users</p> */}
             <div className="mt-3 flex justify-center">
               <button
                 onClick={() => setShowDemo(true)}
-                className="px-4 py-2 text-sm bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
+                className="px-4 py-2 text-base font-medium bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
               >
                 Show Demo Connection
               </button>
@@ -362,9 +362,9 @@ const PathFinder = ({ username, isAuthenticated }) => {
               style={{ width: '100%', height: '250px', backgroundColor: 'white' }}
             />
             
-            <div className="mt-3 text-xs text-center text-gray-600">
+            <div className="mt-3 text-base text-center text-gray-600">
               {isAuthenticated ? 
-                'Interactive visualization of connection path' : 
+                'Interactive visualization of connection path' :
                 'Sample connection path visualization (octocat → torvalds)'}
             </div>
           </div>

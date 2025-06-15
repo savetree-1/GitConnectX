@@ -11,9 +11,9 @@ const GraphVisualization = ({ username }) => {
   const [error, setError] = useState(null);
   const [graphType, setGraphType] = useState('followers');
 
-  const margin = 50;
-  const width = 500;
-  const height = 500;
+  const margin = 60;
+  const width = 1000;
+  const height = 700;
 
   // Fetch network data from API
   useEffect(() => {
@@ -458,8 +458,8 @@ const GraphVisualization = ({ username }) => {
       const createGraph = (data, xOffset = 0, isSecondGraph = false) => {
         const localWidth = width + margin * 2;
         const simulation = d3.forceSimulation(data.nodes)
-          .force('link', d3.forceLink(data.links).id(d => d.id).distance(150))
-          .force('charge', d3.forceManyBody().strength(-200))
+          .force('link', d3.forceLink(data.links).id(d => d.id).distance(350))
+          .force('charge', d3.forceManyBody().strength(-400))
           .force('center', d3.forceCenter(localWidth / 2, height / 2));
 
         const graphGroup = svg.append('g')
@@ -896,7 +896,7 @@ const GraphVisualization = ({ username }) => {
   };
 
   return (
-    <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
+    <div className="font-sans bg-white w-full border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
         <h2 className="text-2xl font-bold text-gray-800">GitHub Graph Overview</h2>
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
@@ -955,11 +955,11 @@ const GraphVisualization = ({ username }) => {
         </div>
       ) : (
         <div className="bg-white flex justify-center border-blue-300 border-2 rounded-xl p-4 shadow-md">
-        <div className="overflow-x-auto relative">
+        <div className="overflow-x-auto w-full relative">
               <svg ref={d3Container} 
                 style={{
               width: comparisonMode ? `${2 * (width + margin * 2)}px` : `${width + margin * 2}px`,
-              height: '600px',
+              height: '800px',
               backgroundColor: 'transparent'
                 }}>
               </svg>

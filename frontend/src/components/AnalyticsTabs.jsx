@@ -195,15 +195,15 @@ const AnalyticsTabs = () => {
         </div>
         </div>
 
-        <div className='bg-white border-blue-300 border-2 rounded-xl p-4 shadow-md'>
+        <div className='bg-white text-lg border-blue-300 border-2 rounded-xl p-4 shadow-md'>
           <h2 className='font-bold text-2xl mb-4'>GitHub Rank</h2>
           <div className="flex items-center justify-center">
-            <div className="w-full h-80">
+            <div className="w-full h-150">
               <ResponsiveContainer width="100%" height="100%">
                 <RadarChart cx="50%" cy="50%" outerRadius="80%" data={githubRankData}>
                   <PolarGrid stroke="#e2e8f0" />
-                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#4a5568', fontSize: 12 }} />
-                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <PolarAngleAxis dataKey="subject" tick={{ fill: '#4a5568', fontSize: 16 }} />
+                  <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 16 }} />
                   <Tooltip />
                   <Legend />
                   <Radar name="You" dataKey="You" stroke="#fca5a5" fill="#fca5a5" fillOpacity={0.6} />
@@ -214,7 +214,7 @@ const AnalyticsTabs = () => {
           </div>
           <div className="mt-4 flex justify-center space-x-8">
             <div className="text-center">
-              <h3 className="font-semibold">Overall Rank</h3>
+              <h3 className="text-base font-semibold">Overall Rank</h3>
               <div className="mt-2">
                 <span className="bg-red-100 text-red-800 font-medium px-3 py-1 rounded-full">You: 78/100</span>
               </div>

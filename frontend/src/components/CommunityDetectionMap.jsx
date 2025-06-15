@@ -12,8 +12,8 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
   const [timelineData, setTimelineData] = useState(null);
 
   const margin = 50;
-  const width = 450;   // Smaller width
-  const height = 380;  // Smaller height
+  const width = 1000;   // Smaller width
+  const height = 800;  // Smaller height
 
   // Fetch community data from API
   useEffect(() => {
@@ -136,8 +136,8 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
 
       // Create force simulation
       const simulation = d3.forceSimulation(communityData.nodes)
-        .force('link', d3.forceLink(communityData.links).id(d => d.id).distance(80))
-        .force('charge', d3.forceManyBody().strength(-150))
+        .force('link', d3.forceLink(communityData.links).id(d => d.id).distance(105))
+        .force('charge', d3.forceManyBody().strength(-200))
         .force('center', d3.forceCenter(width / 2 + margin, height / 2 + margin))
         .force('collision', d3.forceCollide().radius(d => d.size * 1.2));
 
@@ -194,7 +194,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
         .data(communityData.nodes)
         .enter().append('text')
         .text(d => d.id)
-        .attr('font-size', 10)
+        .attr('font-size', 14)
         .attr('dy', '-1.2em')
         .attr('text-anchor', 'middle')
         .attr('fill', '#333');
@@ -212,10 +212,10 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
           .attr('fill', community.color);
         
         legendItem.append('text')
-          .attr('x', 15)
-          .attr('y', 4)
+          .attr('x', 9)
+          .attr('y', 3)
           .text(community.name)
-          .attr('font-size', 12);
+          .attr('font-size', 18);
       });
 
       // Update positions on simulation tick
@@ -271,8 +271,8 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
 
   // Draw community affinity gauge/chart
   const drawCommunityAffinity = (svg) => {
-    const gaugeWidth = 200;
-    const gaugeHeight = 150;
+    const gaugeWidth = 250;
+    const gaugeHeight = 200;
     const gaugeX = width - gaugeWidth - 20;
     const gaugeY = height - gaugeHeight - 50;
 
@@ -284,7 +284,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
       .attr('height', gaugeHeight)
       .attr('fill', 'white')
       .attr('stroke', '#ddd')
-      .attr('rx', 5);
+      .attr('rx', 15);
     
     gaugeGroup.append('text')
       .attr('x', gaugeWidth / 2)
@@ -355,6 +355,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
       .attr('y', -20)
       .attr('text-anchor', 'middle')
       .attr('font-weight', 'bold')
+      .attr('font-size', 18)
       .text('Community Membership Timeline');
     
     // Set up scales
