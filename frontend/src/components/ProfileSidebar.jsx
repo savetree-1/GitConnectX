@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Users, Star, GitBranch, Folder } from "lucide-react";
 import Sunset from "../assets/sunset.png";
-
 export default function ProfileSidebar({
   profilePicUrl = "",
   name = "GitHub User",
@@ -94,7 +93,7 @@ export default function ProfileSidebar({
   };
 
   return (
-    <div className="sticky top-32 w-full max-w-[450px] h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500 mx-auto mt-2 ml-8">
+    <div className="sticky top-32 w-full max-w-xl h-auto bg-white rounded-2xl shadow-lg border-2 border-blue-500 mt-2 ml-5">
       {/* Background banner image */}
       <div className="relative w-full">
         <div

@@ -23,12 +23,6 @@ const Footer = () => {
             GitHub Repository
           </a>
           <a
-            href="/about"
-            className="hover:text-[#1737A1] transition-colors"
-          >
-            About Us
-          </a>
-          <a
             href="/privacy"
             className="hover:text-[#1737A1] transition-colors"
           >

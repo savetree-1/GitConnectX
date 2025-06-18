@@ -442,7 +442,7 @@ const GraphVisualization = ({ username }) => {
 .attr('viewBox', `0 0 ${containerWidth} ${height + margin * 2 + 50}`)
         .attr('preserveAspectRatio', 'xMidYMid meet')
         .style('background', 'white');
-
+      
       const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
         .style("position", "absolute")
@@ -463,7 +463,7 @@ const GraphVisualization = ({ username }) => {
           .force('center', d3.forceCenter(localWidth / 2, height / 2));
 
         const graphGroup = svg.append('g')
-          .attr('transform', `translate(${xOffset}, ${margin / 2})`);
+        .attr('transform', `translate(${xOffset}, ${margin + 70})`); // More space for bigger heading
 
         // Add gradient definitions
         const defs = svg.append("defs");
@@ -732,7 +732,123 @@ const GraphVisualization = ({ username }) => {
         };
         createGraph(emptyComparisonData, width + margin * 2, true);
       }
+          const addBigHeadings = () => {
+      // Create a group for the entire header section
+      const headerGroup = svg.append('g')
+        .attr('class', 'header-group')
+        .style('pointer-events', 'all'); // Ensure header can receive mouse events
 
+      // Main header background with shadow
+      headerGroup.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', comparisonMode ? containerWidth : width + margin * 2)
+        .attr('height', 70)
+        .attr('fill', 'white')
+        .attr('stroke', '#e5e7eb')
+        .attr('stroke-width', 2)
+        .attr('rx', 12)
+        .style('filter', 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))');
+
+      // Gradient overlay for style
+      const headerGradient = svg.select("defs") || svg.append("defs");
+      const gradient = headerGradient.append("linearGradient")
+        .attr("id", "headerOverlay")
+        .attr("x1", "0%")
+        .attr("x2", "100%")
+        .attr("y1", "0%")
+        .attr("y2", "100%");
+        
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "rgba(99, 102, 241, 0.05)");
+        
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "rgba(139, 92, 246, 0.05)");
+
+      headerGroup.append('rect')
+        .attr('x', 0)
+        .attr('y', 0)
+        .attr('width', comparisonMode ? containerWidth : width + margin * 2)
+        .attr('height', 70)
+        .attr('fill', 'url(#headerOverlay)')
+        .attr('rx', 12);
+
+      // Main heading - MUCH BIGGER
+      headerGroup.append('text')
+        .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
+        .attr('y', 30)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '28px') // Much bigger!
+        .attr('font-weight', '900') // Extra bold
+        .attr('fill', '#145CFC')
+        .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+        .style('letter-spacing', '-0.025em')
+        .text('Your GitHub Network');
+
+      // Subtitle
+      headerGroup.append('text')
+        .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
+        .attr('y', 52)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '16px')
+        .attr('font-weight', '500')
+        .attr('fill', '#145CFC')
+        .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+        .text(`${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
+
+      // Comparison heading if in comparison mode
+      if (comparisonMode) {
+        // Divider line
+        headerGroup.append('line')
+          .attr('x1', containerWidth / 2)
+          .attr('y1', 10)
+          .attr('x2', containerWidth / 2)
+          .attr('y2', 60)
+          .attr('stroke', '#d1d5db')
+          .attr('stroke-width', 2);
+
+        headerGroup.append('text')
+          .attr('x', (containerWidth / 4) * 3)
+          .attr('y', 30)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '28px') // Much bigger!
+          .attr('font-weight', '900') // Extra bold
+          .attr('fill', '#dc2626')
+          .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+          .style('letter-spacing', '-0.025em')
+          .text('Friend GitHub Network');
+
+        headerGroup.append('text')
+          .attr('x', (containerWidth / 4) * 3)
+          .attr('y', 52)
+          .attr('text-anchor', 'middle')
+          .attr('font-size', '16px')
+          .attr('font-weight', '500')
+          .attr('fill', '#dc2626')
+          .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+        .text(`Friend's ${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
+      }
+
+      // Add decorative elements
+      headerGroup.append('circle')
+        .attr('cx', 20)
+        .attr('cy', 35)
+        .attr('r', 6)
+        .attr('fill', '#10b981');
+
+      if (!comparisonMode) {
+        headerGroup.append('circle')
+          .attr('cx', width + margin * 2 - 20)
+          .attr('cy', 35)
+          .attr('r', 6)
+          .attr('fill', '#f59e0b');
+      }
+    };
+
+    // Add headings AFTER graphs so they appear on top
+    addBigHeadings();
       svg.on("click", () => {
         setSelectedNode(null);
       });
@@ -936,12 +1052,7 @@ const GraphVisualization = ({ username }) => {
         </button>
       </div>
       
-      <div className={`flex mb-2 ${comparisonMode ? 'justify-around' : 'justify-center'}`}>
-        <h3 className="text-xl font-semibold text-blue-700 flex items-center">
-          {graphTypeLabels[graphType] || "My GitHub Network"}
-        </h3>
-        {comparisonMode && <h3 className="text-xl font-semibold text-green-700">Friend's GitHub Network</h3>}
-      </div>
+      <div className={`flex mb-2 ${comparisonMode ? 'justify-around' : 'justify-center'}`}></div>
       
       {loading ? (
         <div className="flex justify-center items-center h-96">
