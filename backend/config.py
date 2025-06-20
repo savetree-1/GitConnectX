@@ -7,6 +7,7 @@ load_dotenv()
 # ::::: API Configuration
 API_VERSION = os.getenv('API_VERSION', '1.0.0')
 API_PREFIX = os.getenv('API_PREFIX', '/api/v1')
+print("GITHUB_API_TOKEN:", os.getenv("GITHUB_API_TOKEN"))
 
 # ::::: GitHub API Configuration
 GITHUB_API_TOKEN = os.getenv('GITHUB_API_TOKEN')

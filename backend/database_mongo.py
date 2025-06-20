@@ -264,4 +264,17 @@ class MongoDBService:
             return [doc["repo_full_name"] for doc in cursor]
         except Exception as e:
             logger.error(f"Error getting user contributed repos: {str(e)}")
+            return []
+    
+    def get_user_following(self, login):
+        # ::::: Get user dicts for users followed by a GitHub user
+        try:
+            following_logins = self.get_following(login)
+            if not following_logins:
+                return []
+            # Fetch user dicts for each login
+            users = list(self.github_users.find({"login": {"$in": following_logins}}))
+            return users
+        except Exception as e:
+            logger.error(f"Error getting user following: {str(e)}")
             return [] 
