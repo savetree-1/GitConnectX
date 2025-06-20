@@ -15,9 +15,10 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
         if (isLoggedIn) {
           // For logged-in users, fetch real recommendations
           try {
-            const response = await fetch(`http://localhost:5000/api/recommendations/${username}`);
+            const response = await fetch(`http://localhost:5000/api/user/recommendations/${username}`);
             
             if (!response.ok) {
+              console.error(`Failed to fetch recommendations: ${response.status} ${response.statusText}`);
               throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
             }
             

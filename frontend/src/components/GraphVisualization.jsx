@@ -21,6 +21,23 @@ const GraphVisualization = ({ username }) => {
       try {
         setLoading(true);
         setError(null);
+        if (comparisonMode && username && window.friendUsername) {
+          // Use the new compare endpoint
+          const compareEndpoint = `http://localhost:5000/api/network/compare?user1=${username}&user2=${window.friendUsername}`;
+          const response = await fetch(compareEndpoint);
+          if (!response.ok) {
+            console.error(`Failed to fetch comparison data: ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to fetch comparison data: ${response.statusText}`);
+          }
+          const data = await response.json();
+          if (data.status === 'success') {
+            setNetworkData(data.data);
+          } else {
+            throw new Error(data.message || 'Invalid response format');
+          }
+          setLoading(false);
+          return;
+        }
         
         // Determine API endpoint based on graph type
         let apiEndpoint;
@@ -43,6 +60,7 @@ const GraphVisualization = ({ username }) => {
         const response = await fetch(apiEndpoint);
         
         if (!response.ok) {
+          console.error(`Failed to fetch network data: ${response.status} ${response.statusText}`);
           throw new Error(`Failed to fetch network data: ${response.statusText}`);
         }
         
@@ -193,6 +211,8 @@ const GraphVisualization = ({ username }) => {
           }
           
           const alternativeResponse = await fetch(alternativeEndpoint);
+          
+          if (!alternativeResponse.ok) console.error(`Failed to fetch network data (alt): ${alternativeResponse.status} ${alternativeResponse.statusText}`);
           
           if (alternativeResponse.ok) {
             const data = await alternativeResponse.json();
@@ -429,7 +449,7 @@ const GraphVisualization = ({ username }) => {
     if (username) {
       fetchNetworkData();
     }
-  }, [username, graphType]);
+  }, [username, comparisonMode, graphType]);
 
   // Render visualization when data is available
   useEffect(() => {
@@ -721,134 +741,132 @@ const GraphVisualization = ({ username }) => {
           .attr("stroke-dashoffset", 0);
       };
 
-      createGraph(networkData, 0, false);
-      if (comparisonMode) {
-        // Get a message that comparison mode requires the API
-        const emptyComparisonData = {
-          nodes: [
-            { id: 'API Required', group: 1, type: 'user', details: { name: 'API Required' }}
-          ],
-          links: []
-        };
-        createGraph(emptyComparisonData, width + margin * 2, true);
+      if (comparisonMode && networkData && networkData.user1 && networkData.user2) {
+        // Draw user1's network on the left
+        createGraph({ nodes: networkData.user1.nodes, links: networkData.user1.edges }, 0, false);
+        // Draw user2's network on the right
+        createGraph({ nodes: networkData.user2.nodes, links: networkData.user2.edges }, width + margin * 2, true);
+      } else if (!comparisonMode && networkData) {
+        createGraph(networkData, 0, false);
       }
-          const addBigHeadings = () => {
-      // Create a group for the entire header section
-      const headerGroup = svg.append('g')
-        .attr('class', 'header-group')
-        .style('pointer-events', 'all'); // Ensure header can receive mouse events
 
-      // Main header background with shadow
-      headerGroup.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('width', comparisonMode ? containerWidth : width + margin * 2)
-        .attr('height', 70)
-        .attr('fill', 'white')
-        .attr('stroke', '#e5e7eb')
-        .attr('stroke-width', 2)
-        .attr('rx', 12)
-        .style('filter', 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))');
+      const addBigHeadings = () => {
+        // Create a group for the entire header section
+        const headerGroup = svg.append('g')
+          .attr('class', 'header-group')
+          .style('pointer-events', 'all'); // Ensure header can receive mouse events
 
-      // Gradient overlay for style
-      const headerGradient = svg.select("defs") || svg.append("defs");
-      const gradient = headerGradient.append("linearGradient")
-        .attr("id", "headerOverlay")
-        .attr("x1", "0%")
-        .attr("x2", "100%")
-        .attr("y1", "0%")
-        .attr("y2", "100%");
+        // Main header background with shadow
+        headerGroup.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', comparisonMode ? containerWidth : width + margin * 2)
+          .attr('height', 70)
+          .attr('fill', 'white')
+          .attr('stroke', '#e5e7eb')
+          .attr('stroke-width', 2)
+          .attr('rx', 12)
+          .style('filter', 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))');
+
+        // Gradient overlay for style
+        const headerGradient = svg.select("defs") || svg.append("defs");
+        const gradient = headerGradient.append("linearGradient")
+          .attr("id", "headerOverlay")
+          .attr("x1", "0%")
+          .attr("x2", "100%")
+          .attr("y1", "0%")
+          .attr("y2", "100%");
         
-      gradient.append("stop")
-        .attr("offset", "0%")
-        .attr("stop-color", "rgba(99, 102, 241, 0.05)");
+        gradient.append("stop")
+          .attr("offset", "0%")
+          .attr("stop-color", "rgba(99, 102, 241, 0.05)");
         
-      gradient.append("stop")
-        .attr("offset", "100%")
-        .attr("stop-color", "rgba(139, 92, 246, 0.05)");
+        gradient.append("stop")
+          .attr("offset", "100%")
+          .attr("stop-color", "rgba(139, 92, 246, 0.05)");
 
-      headerGroup.append('rect')
-        .attr('x', 0)
-        .attr('y', 0)
-        .attr('width', comparisonMode ? containerWidth : width + margin * 2)
-        .attr('height', 70)
-        .attr('fill', 'url(#headerOverlay)')
-        .attr('rx', 12);
+        headerGroup.append('rect')
+          .attr('x', 0)
+          .attr('y', 0)
+          .attr('width', comparisonMode ? containerWidth : width + margin * 2)
+          .attr('height', 70)
+          .attr('fill', 'url(#headerOverlay)')
+          .attr('rx', 12);
 
-      // Main heading - MUCH BIGGER
-      headerGroup.append('text')
-        .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
-        .attr('y', 30)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '28px') // Much bigger!
-        .attr('font-weight', '900') // Extra bold
-        .attr('fill', '#145CFC')
-        .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
-        .style('letter-spacing', '-0.025em')
-        .text('Your GitHub Network');
-
-      // Subtitle
-      headerGroup.append('text')
-        .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
-        .attr('y', 52)
-        .attr('text-anchor', 'middle')
-        .attr('font-size', '16px')
-        .attr('font-weight', '500')
-        .attr('fill', '#145CFC')
-        .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
-        .text(`${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
-
-      // Comparison heading if in comparison mode
-      if (comparisonMode) {
-        // Divider line
-        headerGroup.append('line')
-          .attr('x1', containerWidth / 2)
-          .attr('y1', 10)
-          .attr('x2', containerWidth / 2)
-          .attr('y2', 60)
-          .attr('stroke', '#d1d5db')
-          .attr('stroke-width', 2);
-
+        // Main heading - MUCH BIGGER
         headerGroup.append('text')
-          .attr('x', (containerWidth / 4) * 3)
+          .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
           .attr('y', 30)
           .attr('text-anchor', 'middle')
           .attr('font-size', '28px') // Much bigger!
           .attr('font-weight', '900') // Extra bold
-          .attr('fill', '#dc2626')
+          .attr('fill', '#145CFC')
           .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
           .style('letter-spacing', '-0.025em')
-          .text('Friend GitHub Network');
+          .text('Your GitHub Network');
 
+        // Subtitle
         headerGroup.append('text')
-          .attr('x', (containerWidth / 4) * 3)
+          .attr('x', comparisonMode ? containerWidth / 4 : (width + margin * 2) / 2)
           .attr('y', 52)
           .attr('text-anchor', 'middle')
           .attr('font-size', '16px')
           .attr('font-weight', '500')
-          .attr('fill', '#dc2626')
+          .attr('fill', '#145CFC')
           .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
-        .text(`Friend's ${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
-      }
+          .text(`${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
 
-      // Add decorative elements
-      headerGroup.append('circle')
-        .attr('cx', 20)
-        .attr('cy', 35)
-        .attr('r', 6)
-        .attr('fill', '#10b981');
+        // Comparison heading if in comparison mode
+        if (comparisonMode) {
+          // Divider line
+          headerGroup.append('line')
+            .attr('x1', containerWidth / 2)
+            .attr('y1', 10)
+            .attr('x2', containerWidth / 2)
+            .attr('y2', 60)
+            .attr('stroke', '#d1d5db')
+            .attr('stroke-width', 2);
 
-      if (!comparisonMode) {
+          headerGroup.append('text')
+            .attr('x', (containerWidth / 4) * 3)
+            .attr('y', 30)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '28px') // Much bigger!
+            .attr('font-weight', '900') // Extra bold
+            .attr('fill', '#dc2626')
+            .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+            .style('letter-spacing', '-0.025em')
+            .text('Friend GitHub Network');
+
+          headerGroup.append('text')
+            .attr('x', (containerWidth / 4) * 3)
+            .attr('y', 52)
+            .attr('text-anchor', 'middle')
+            .attr('font-size', '16px')
+            .attr('font-weight', '500')
+            .attr('fill', '#dc2626')
+            .attr('font-family', 'Inter, system-ui, -apple-system, sans-serif')
+          .text(`Friend's ${graphType.charAt(0).toUpperCase() + graphType.slice(1)} Network`);
+        }
+
+        // Add decorative elements
         headerGroup.append('circle')
-          .attr('cx', width + margin * 2 - 20)
+          .attr('cx', 20)
           .attr('cy', 35)
           .attr('r', 6)
-          .attr('fill', '#f59e0b');
-      }
-    };
+          .attr('fill', '#10b981');
 
-    // Add headings AFTER graphs so they appear on top
-    addBigHeadings();
+        if (!comparisonMode) {
+          headerGroup.append('circle')
+            .attr('cx', width + margin * 2 - 20)
+            .attr('cy', 35)
+            .attr('r', 6)
+            .attr('fill', '#f59e0b');
+        }
+      };
+
+      // Add headings AFTER graphs so they appear on top
+      addBigHeadings();
       svg.on("click", () => {
         setSelectedNode(null);
       });

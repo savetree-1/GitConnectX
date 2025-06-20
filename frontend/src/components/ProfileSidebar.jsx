@@ -18,6 +18,7 @@ export default function ProfileSidebar({
         
         // Try primary endpoint
         const response = await fetch(`http://localhost:5000/api/network/${username}?depth=1`);
+        if (!response.ok) console.error(`Failed to fetch network stats: ${response.status} ${response.statusText}`);
         
         if (response.ok) {
           const data = await response.json();
@@ -37,6 +38,7 @@ export default function ProfileSidebar({
         // Try alternative endpoint
         console.log("Trying alternative endpoint...");
         const alternativeResponse = await fetch(`http://127.0.0.1:5000/api/network/${username}?depth=1`);
+        if (!alternativeResponse.ok) console.error(`Failed to fetch network stats (alt): ${alternativeResponse.status} ${alternativeResponse.statusText}`);
         
         if (alternativeResponse.ok) {
           const data = await alternativeResponse.json();

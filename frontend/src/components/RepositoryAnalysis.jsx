@@ -18,6 +18,8 @@ const RepositoryAnalysis = ({ username, isAuthenticated }) => {
           try {
             const response = await fetch(`http://localhost:5000/api/user/${username}/repositories`);
             
+            if (!response.ok) console.error(`Failed to fetch repository analysis: ${response.status} ${response.statusText}`);
+            
             if (response.ok) {
               const data = await response.json();
               if (data.status === 'success') {

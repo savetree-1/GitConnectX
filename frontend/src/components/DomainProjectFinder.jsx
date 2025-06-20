@@ -35,6 +35,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
         const response = await fetch(`http://localhost:5000/api/network/repositories/domain/${domain}?limit=20`);
         
         if (!response.ok) {
+          console.error(`Failed to fetch repositories: ${response.status} ${response.statusText}`);
           throw new Error(`Failed to fetch repositories: ${response.statusText}`);
         }
         

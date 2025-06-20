@@ -28,6 +28,7 @@ const CommunityMap = ({ username, isAuthenticated }) => {
                 return;
               }
             }
+            if (!response.ok) console.error(`Failed to fetch communities: ${response.status} ${response.statusText}`);
             // If API fails, continue to use demo data
           } catch (e) {
             console.log('API not available, using demo data');

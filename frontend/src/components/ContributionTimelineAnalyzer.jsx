@@ -24,6 +24,7 @@ const ContributionTimelineAnalyzer = ({ username, isLoggedIn = false }) => {
             const response = await fetch(`http://localhost:5000/api/contributions/${username}`);
             
             if (!response.ok) {
+              console.error(`Failed to fetch contributions: ${response.status} ${response.statusText}`);
               throw new Error(`Failed to fetch contribution data: ${response.statusText}`);
             }
             

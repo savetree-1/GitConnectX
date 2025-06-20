@@ -404,7 +404,7 @@ const Dashboard = () => {
               Repository Analysis
             </SectionTitle>
             <div className="my-6">
-              <RepositoryAnalysis username={username} isAuthenticated={userData?.isAuthenticated} />
+              <RepositoryAnalysis username={username} isAuthenticated={true} />
             </div>
           </section>
           

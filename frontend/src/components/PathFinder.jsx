@@ -71,6 +71,7 @@ const PathFinder = ({ username, isAuthenticated }) => {
         // Try to fetch real path data from API
         try {
           const response = await fetch(`http://localhost:5000/api/network/path?source=${sourceUser}&target=${targetUser}`);
+          if (!response.ok) console.error(`Failed to fetch path: ${response.status} ${response.statusText}`);
           
           if (response.ok) {
             const data = await response.json();

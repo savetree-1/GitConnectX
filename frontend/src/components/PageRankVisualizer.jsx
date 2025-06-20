@@ -18,6 +18,8 @@ const PageRankVisualizer = ({ username, isAuthenticated }) => {
           try {
             const response = await fetch(`http://localhost:5000/api/network/pagerank`);
             
+            if (!response.ok) console.error(`Failed to fetch pagerank: ${response.status} ${response.statusText}`);
+            
             if (response.ok) {
               const data = await response.json();
               if (data.status === 'success') {

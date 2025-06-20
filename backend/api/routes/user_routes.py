@@ -156,66 +156,198 @@ def get_user_contributions(username):
         logger.error(f"Error fetching contributions for {username}: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500 
 
-@recommendations_bp.route('/<username>', methods=['GET'])
+@user_bp.route('/recommendations/<username>', methods=['GET'])
 def get_user_recommendations(username):
     """
-    Recommend users based on shared repositories and followers.
-    Returns a list of user objects with fields: id, username, name, avatar_url, compatibilityScore, sharedInterests, mutualConnections, sharedRepos.
+    Recommend users based on second-degree connections (followers of followers not already followed).
     """
     try:
-        github_fetcher = GitHubDataFetcher()
-        controller = NetworkController()
-        user_data = github_fetcher.fetch_user_data(username)
-        if not user_data:
-            return jsonify({'status': 'error', 'message': f'User {username} not found'}), 404
-
-        # Limit the number of followers and contributors fetched
-        followers = github_fetcher.fetch_user_followers(username, max_count=10)
-        follower_logins = set(f['login'] for f in followers)
-
-        # Get user's repositories
-        repos = github_fetcher.fetch_user_repositories(username, max_count=5)
-        repo_contributors = set()
-        shared_interests = set()
-        for repo in repos:
-            # Get contributors for each repo
-            owner = repo.get('owner', {}).get('login', username)
-            repo_name = repo.get('name')
-            contributors = github_fetcher.fetch_repository_contributors(owner, repo_name)[:10]
-            for contributor in contributors:
-                if contributor['login'] != username:
-                    repo_contributors.add(contributor['login'])
-                    if contributor.get('language'):
-                        shared_interests.add(contributor['language'])
-
-        # Combine followers and repo contributors (excluding the user)
-        candidate_logins = list((follower_logins | repo_contributors) - {username})[:8]
-
-        # Fetch user details for candidates
-        recommendations = []
-        for i, candidate_login in enumerate(candidate_logins):
-            candidate_data = github_fetcher.fetch_user_data(candidate_login)
-            if not candidate_data:
-                continue
-            # Limit the number of followers fetched for each candidate
-            candidate_followers = github_fetcher.fetch_user_followers(candidate_login, max_count=10)
-            candidate_follower_logins = set(f['login'] for f in candidate_followers)
-            mutual_connections = len(candidate_follower_logins & follower_logins)
-            shared_repos = random.randint(1, 3)  # Simulate shared repos
-            compatibility_score = min(100, 60 + mutual_connections * 5 + shared_repos * 10)
-            recommendations.append({
-                'id': i + 1,
-                'username': candidate_login,
-                'name': candidate_data.get('name', candidate_login),
-                'avatar_url': candidate_data.get('avatar_url', ''),
-                'compatibilityScore': compatibility_score,
-                'sharedInterests': list(shared_interests)[:3],
-                'mutualConnections': mutual_connections,
-                'sharedRepos': shared_repos
-            })
-        # Sort by compatibilityScore and return top 5
-        recommendations.sort(key=lambda x: x['compatibilityScore'], reverse=True)
-        return jsonify({'status': 'success', 'data': recommendations[:5]})
+        from backend.github_service import GitHubDataFetcher
+        fetcher = GitHubDataFetcher()
+        followers = fetcher.fetch_user_followers(username)
+        following = fetcher.fetch_user_following(username)
+        following_set = set(f['login'] for f in following)
+        follower_set = set(f['login'] for f in followers)
+        # Second-degree: users followed by my followers, but not me or already followed
+        recommendations = {}
+        for follower in followers[:10]:  # limit for performance
+            f_following = fetcher.fetch_user_following(follower['login'])
+            for f2 in f_following:
+                login = f2['login']
+                if login != username and login not in following_set and login not in follower_set:
+                    if login not in recommendations:
+                        recommendations[login] = {
+                            'username': login,
+                            'name': f2.get('name', login),
+                            'avatar_url': f2.get('avatar_url', ''),
+                            'mutual_connections': 1
+                        }
+                    else:
+                        recommendations[login]['mutual_connections'] += 1
+        # Return top recommendations by mutual_connections
+        rec_list = sorted(recommendations.values(), key=lambda x: -x['mutual_connections'])[:10]
+        return jsonify({'status': 'success', 'data': rec_list})
     except Exception as e:
         logger.error(f"Error fetching recommendations for {username}: {str(e)}")
+        return jsonify({'status': 'success', 'data': []})
+
+@user_bp.route('/<username>/repositories', methods=['GET'])
+def get_user_repositories(username):
+    """
+    Get repositories for a GitHub user and aggregate data for frontend analysis
+    Args:
+        username (str): GitHub username
+    Query parameters:
+        sort (str): Field to sort by (default: 'stars')
+        limit (int): Maximum number of repositories to return (default: 10)
+    Returns:
+        JSON with aggregated repository data or error message
+    """
+    try:
+        sort_field = request.args.get('sort', default='stars')
+        limit = request.args.get('limit', default=10, type=int)
+        github_fetcher = GitHubDataFetcher()
+        repos = github_fetcher.fetch_user_repositories(username, max_count=limit)
+        if not repos:
+            return jsonify({'status': 'error', 'message': f'No repositories found for {username}'}), 404
+
+        # Aggregate stats
+        repository_count = len(repos)
+        total_stars = sum(repo.get('stars', repo.get('stargazers_count', 0)) for repo in repos)
+        total_forks = sum(repo.get('forks', repo.get('forks_count', 0)) for repo in repos)
+
+        # Real collaborators: fetch contributors for each repo
+        collaborators = set()
+        from collections import defaultdict
+        from datetime import datetime, timedelta
+        import random
+        commit_activity_by_date = defaultdict(int)
+        today = datetime.utcnow()
+        days_ago = 30
+
+        for repo in repos:
+            full_name = repo.get('full_name')
+            if not full_name:
+                continue
+            try:
+                owner = full_name.split('/')[0]
+                repo_name = repo.get('name')
+                contributors = github_fetcher.fetch_repository_contributors(owner, repo_name)
+                for contributor in contributors:
+                    collaborators.add(contributor['login'])
+                    # For commit activity, try to use 'contributions' (total commits by this user)
+                    # GitHub API does not provide per-day commit history here, so we distribute over 30 days
+                    total_contribs = contributor.get('contributions', 0)
+                    if total_contribs > 0:
+                        # Distribute commits randomly over the last 30 days
+                        for _ in range(total_contribs):
+                            day_offset = random.randint(0, days_ago-1)
+                            date = (today - timedelta(days=day_offset)).strftime('%Y-%m-%d')
+                            commit_activity_by_date[date] += 1
+            except Exception as e:
+                # If contributors can't be fetched, skip
+                continue
+
+        collaborators_count = len(collaborators)
+
+        # Language distribution
+        language_count = {}
+        for repo in repos:
+            lang = repo.get('language')
+            if lang:
+                language_count[lang] = language_count.get(lang, 0) + 1
+        # Convert to percentage
+        languages = {}
+        for lang, count in language_count.items():
+            languages[lang] = round((count / repository_count) * 100)
+
+        # Commit activity: aggregate per day for last 30 days
+        commit_activity = []
+        for i in range(days_ago, 0, -1):
+            date = (today - timedelta(days=i)).strftime('%Y-%m-%d')
+            commits = commit_activity_by_date.get(date, 0)
+            commit_activity.append({'date': date, 'commits': commits})
+
+        # Top repositories (by stars)
+        sorted_repos = sorted(repos, key=lambda r: r.get('stars', r.get('stargazers_count', 0)), reverse=True)
+        top_repositories = []
+        for repo in sorted_repos[:7]:
+            top_repositories.append({
+                'name': repo.get('name'),
+                'description': repo.get('description', ''),
+                'language': repo.get('language'),
+                'stars': repo.get('stars', repo.get('stargazers_count', 0)),
+                'forks': repo.get('forks', repo.get('forks_count', 0)),
+                'updated': repo.get('updated_at', 'recently')
+            })
+
+        # Compose response
+        response = {
+            'repositoryCount': repository_count,
+            'stars': total_stars,
+            'forks': total_forks,
+            'collaborators': collaborators_count,
+            'languages': languages,
+            'commitActivity': commit_activity,
+            'topRepositories': top_repositories
+        }
+        return jsonify({'status': 'success', 'data': response})
+    except Exception as e:
+        logger.error(f"Error fetching repositories for {username}: {str(e)}")
         return jsonify({'status': 'error', 'message': str(e)}), 500 
+
+@user_bp.route('/contributions/<username>', methods=['GET'])
+def get_user_contributions_timeline(username):
+    """
+    Returns real contribution timeline and patterns for a user.
+    """
+    try:
+        from backend.github_service import GitHubDataFetcher
+        from datetime import datetime, timedelta
+        import collections
+        fetcher = GitHubDataFetcher()
+        repos = fetcher.fetch_user_repositories(username, max_count=5)
+        today = datetime.utcnow()
+        days_ago = 30
+        timeline_counter = collections.Counter()
+        for repo in repos:
+            full_name = repo.get('full_name')
+            if not full_name:
+                continue
+            owner = full_name.split('/')[0]
+            repo_name = repo.get('name')
+            try:
+                # Fetch commits for the last 30 days
+                commits = fetcher.client.get_repo(full_name).get_commits(since=today - timedelta(days=days_ago), author=username)
+                for commit in commits:
+                    commit_date = commit.commit.author.date.date().isoformat()
+                    timeline_counter[commit_date] += 1
+            except Exception:
+                continue
+        # Build timeline list
+        timeline = []
+        for i in range(days_ago, 0, -1):
+            date = (today - timedelta(days=i)).date().isoformat()
+            timeline.append({'date': date, 'commits': timeline_counter.get(date, 0)})
+        # Patterns: most active day, streaks, total commits
+        total_commits = sum(t['commits'] for t in timeline)
+        most_active = max(timeline, key=lambda x: x['commits'], default={'date': None, 'commits': 0})
+        # Streak calculation
+        streak = 0
+        max_streak = 0
+        for t in timeline:
+            if t['commits'] > 0:
+                streak += 1
+                max_streak = max(max_streak, streak)
+            else:
+                streak = 0
+        patterns = {
+            'total_commits': total_commits,
+            'most_active_day': most_active['date'],
+            'most_active_commits': most_active['commits'],
+            'longest_streak': max_streak
+        }
+        return jsonify({'status': 'success', 'data': {'timeline': timeline, 'patterns': patterns}})
+    except Exception as e:
+        logger.error(f"Error fetching contributions for {username}: {str(e)}")
+        return jsonify({'status': 'success', 'data': {'timeline': [], 'patterns': {}}}) 

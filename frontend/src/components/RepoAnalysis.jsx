@@ -32,10 +32,10 @@ const RepoAnalysis = ({ username }) => {
         setError(null);
 
         const langResponse = await fetch(`http://localhost:5000/api/analyze/languages/${username}`);
-        const reposResponse = await fetch(`http://localhost:5000/api/users/${username}/repositories?sort=stars&limit=10`);
+        const reposResponse = await fetch(`http://localhost:5000/api/user/${username}/repositories?sort=stars&limit=10`);
 
-        if (!langResponse.ok) throw new Error(`Failed to fetch language data: ${langResponse.statusText}`);
-        if (!reposResponse.ok) throw new Error(`Failed to fetch repository data: ${reposResponse.statusText}`);
+        if (!langResponse.ok) console.error(`Failed to fetch language data: ${langResponse.status} ${langResponse.statusText}`);
+        if (!reposResponse.ok) console.error(`Failed to fetch repository data: ${reposResponse.status} ${reposResponse.statusText}`);
 
         const langData = await langResponse.json();
         const reposData = await reposResponse.json();
@@ -65,7 +65,7 @@ const RepoAnalysis = ({ username }) => {
         // Try alternative API endpoint
         try {
           const altLangResponse = await fetch(`http://127.0.0.1:5000/api/analyze/languages/${username}`);
-          const altReposResponse = await fetch(`http://127.0.0.1:5000/api/users/${username}/repositories?sort=stars&limit=10`);
+          const altReposResponse = await fetch(`http://127.0.0.1:5000/api/user/${username}/repositories?sort=stars&limit=10`);
 
           if (altLangResponse.ok && altReposResponse.ok) {
             const langData = await altLangResponse.json();
@@ -165,41 +165,64 @@ const RepoAnalysis = ({ username }) => {
 
           {/* Network Visualizations with Zoom */}
           <div className="flex flex-col gap-6">
-            {/* Follower Network */}
+            {/* Real Repository List (replaces Follower Network SVG) */}
             <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
-              <h3 className="text-xl font-semibold mb-4">Follower Network</h3>
-              <p className="text-sm text-gray-600 mb-2">Zoom with scroll / drag to explore.</p>
-              <div className="h-80 overflow-hidden">
-                  {/* Add your follower network SVG elements here */}
-                  <circle cx="300" cy="200" r="20" fill="#3B82F6" />
-                  <text x="300" y="230" textAnchor="middle" fontSize="12">main/repo</text>
-                  <line x1="300" y1="200" x2="400" y2="130" stroke="#ccc" />
-                  <circle cx="400" cy="130" r="15" fill="#FBBF24" />
-              </div>
+              <h3 className="text-xl font-semibold mb-4">Repositories</h3>
+              {repoData.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {repoData.map(repo => (
+                    <li key={repo.name} className="py-2">
+                      <div className="font-semibold">{repo.name}</div>
+                      <div className="text-sm text-gray-600">
+                        Size: {repo.size} KB | Forks: {repo.forks} | Stars: {repo.stargazers_count} | Language: {repo.language}
+                      </div>
+                      {repo.description && (
+                        <div className="text-xs text-gray-500 mt-1">{repo.description}</div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-center">No repository data available</p>
+              )}
             </div>
 
-            {/* Bipartite Network */}
+            {/* Bipartite Network (real data) */}
             <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
-              <h3 className="text-xl font-semibold mb-4">Bipartite Network</h3>
-              <div className="h-80 overflow-hidden">
-                  {/* Your Bipartite Network SVG content */}
-                  <circle cx="300" cy="100" r="20" fill="#F97316" />
-                  <text x="300" y="130" textAnchor="middle" fontSize="12">hub1</text>
-                  <line x1="300" y1="100" x2="150" y2="150" stroke="#ccc" />
-                  <circle cx="150" cy="150" r="15" fill="#3B82F6" />
-              </div>
+              <h3 className="text-xl font-semibold mb-4">Bipartite Network (Repo-Language)</h3>
+              {repoData.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {repoData.map(repo => (
+                    <li key={repo.name} className="py-2">
+                      <div className="font-semibold">{repo.name}</div>
+                      <div className="text-sm text-gray-600">
+                        Language: {repo.language || 'Unknown'}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-center">No repository data available</p>
+              )}
             </div>
 
-            {/* Forks Network */}
+            {/* Forks Network (real data) */}
             <div className="bg-white p-4 rounded-lg shadow-md border-blue-300 border-2">
               <h3 className="text-xl font-semibold mb-4">Forks Network</h3>
-              <div className="h-80 overflow-hidden">
-                  {/* Your Forks Network SVG content */}
-                  <circle cx="300" cy="120" r="20" fill="#EF4444" />
-                  <text x="300" y="150" textAnchor="middle" fontSize="12">Main Repo</text>
-                  <line x1="300" y1="120" x2="150" y2="300" stroke="#ccc" />
-                  <circle cx="150" cy="300" r="15" fill="#10B981" />
-              </div>
+              {repoData.length > 0 ? (
+                <ul className="divide-y divide-gray-200">
+                  {repoData.map(repo => (
+                    <li key={repo.name} className="py-2">
+                      <div className="font-semibold">{repo.name}</div>
+                      <div className="text-sm text-gray-600">
+                        Forks: {repo.forks}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-gray-500 text-center">No repository data available</p>
+              )}
             </div>
           </div>
         </>

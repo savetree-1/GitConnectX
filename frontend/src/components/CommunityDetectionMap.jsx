@@ -25,10 +25,10 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
         // For logged-in users, fetch actual data; for guests, use sample data
         if (isLoggedIn && username) {
           try {
-            const response = await fetch(`http://localhost:5000/api/community/${algorithm}/${username}`);
+            const response = await fetch(`http://localhost:5000/api/network/community/${algorithm}/${username}`);
             
             if (!response.ok) {
-              throw new Error(`Failed to fetch community data: ${response.statusText}`);
+              console.error(`Failed to fetch community data: ${response.status} ${response.statusText}`);
             }
             
             const data = await response.json();
@@ -38,10 +38,12 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
               setCommunityData(data.data);
               
               // Also fetch timeline data for logged-in users
-              const timelineResponse = await fetch(`http://localhost:5000/api/community/timeline/${username}`);
+              const timelineResponse = await fetch(`http://localhost:5000/api/network/community/timeline/${username}`);
               if (timelineResponse.ok) {
                 const timelineData = await timelineResponse.json();
                 setTimelineData(timelineData.data);
+              } else {
+                console.error(`Failed to fetch community timeline: ${timelineResponse.status} ${timelineResponse.statusText}`);
               }
               return;
             }

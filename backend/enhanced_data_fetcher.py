@@ -59,6 +59,11 @@ class GitHubDataFetcher:
                 followers.append({
                     "login": follower.login,
                     "id": follower.id,
+                    "name": follower.name,
+                    "avatar_url": follower.avatar_url,
+                    "followers": follower.followers,
+                    "following": follower.following,
+                    "public_repos": follower.public_repos,
                     "type": "follower"
                 })
                 time.sleep(API_REQUEST_DELAY)
@@ -130,9 +135,26 @@ class GitHubDataFetcher:
             return repositories
     
     # ::::: Fetch stargazers and contributors
-    def fetch_stargazers(self, repo):
+    def fetch_stargazers(self, repo, limit=1000):
         # ::::: Fetch stargazers
-        pass
+        stargazers = []
+        try:
+            for count, stargazer in enumerate(repo.get_stargazers(), 1):
+                if count > limit:
+                    break
+                stargazers.append({
+                    "login": stargazer.login,
+                    "id": stargazer.id,
+                    "type": "stargazer"
+                })
+                time.sleep(API_REQUEST_DELAY)
+                if count % 10 == 0:
+                    print(f"Fetched {count} stargazers...", end='\r')
+            print(f"Total stargazers fetched: {len(stargazers)}")
+            return stargazers
+        except GithubException as e:
+            print(f"Error fetching stargazers: {e}")
+            return stargazers
     
     def fetch_contributors(self, repo):
         # ::::: Fetch contributors
