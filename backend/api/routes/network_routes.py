@@ -466,6 +466,7 @@ def get_following_network(username):
         
         # Get users that this user follows
         following_users = controller.db.get_user_following(username)
+        following_count = len(controller.db.get_following(username))
         
         # Add following users and edges
         for following_user in following_users:
@@ -501,7 +502,8 @@ def get_following_network(username):
         
         return jsonify({
             'status': 'success',
-            'data': network
+            'data': network,
+            'following_count': following_count
         })
         
     except Exception as e:
@@ -642,9 +644,11 @@ def get_user_stargazers_network(username):
         
         controller.close()
         
+        stargazer_count = len([n for n in network['nodes'].values() if n['type'] == 'user' and n['login'] != username])
         return jsonify({
             'status': 'success',
-            'data': network
+            'data': network,
+            'stargazers_count': stargazer_count
         })
         
     except Exception as e:
@@ -902,6 +906,7 @@ def get_communities():
     Query parameters:
         algorithm (str): Community detection algorithm to use ('louvain' or 'girvan_newman')
         recalculate (bool): Whether to recalculate communities (default: false)
+        username (str): (optional) GitHub username to ensure is present in the DB
     
     Returns:
         JSON with community assignments or error message
@@ -909,20 +914,36 @@ def get_communities():
     try:
         algorithm = request.args.get('algorithm', default='louvain')
         recalculate = request.args.get('recalculate', default='false').lower() == 'true'
-        
+        username = request.args.get('username')
         controller = NetworkController()
-        
+        github_fetcher = GitHubDataFetcher()
+        # If a username is provided, ensure their data is present
+        if username:
+            user = controller.db.get_github_user(username)
+            if not user:
+                user_data = github_fetcher.fetch_user_data(username)
+                if user_data:
+                    controller.db.save_github_user(user_data)
+                    # Fetch and save followers
+                    followers = github_fetcher.fetch_user_followers(username)
+                    for follower in followers:
+                        controller.db.save_github_user(follower)
+                        controller.db.save_follow_relationship(follower['login'], username)
+                    # Fetch and save following
+                    following = github_fetcher.fetch_user_following(username)
+                    for following_user in following:
+                        controller.db.save_github_user(following_user)
+                        controller.db.save_follow_relationship(username, following_user['login'])
+                    # Fetch and save repos
+                    repos = github_fetcher.fetch_user_repositories(username)
+                    for repo in repos:
+                        controller.db.save_github_repo(repo)
         if recalculate:
-            # This is a heavy operation, so we'll require authentication
-            # @token_required could be added here in a production environment
             communities = controller.detect_communities(algorithm=algorithm)
         else:
-            # If not recalculating, just get the stored community assignments
             users = list(controller.db.github_users.find({'community_id': {'$exists': True}}, {'login': 1, 'community_id': 1}))
             communities = {user['login']: user['community_id'] for user in users if 'community_id' in user}
-        
         controller.close()
-        
         return jsonify({
             'status': 'success',
             'data': {
@@ -930,7 +951,6 @@ def get_communities():
                 'communities': communities
             }
         })
-        
     except Exception as e:
         logger.error(f"Error getting communities: {str(e)}")
         return jsonify({'error': str(e)}), 500

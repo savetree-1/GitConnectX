@@ -98,7 +98,7 @@ except Exception as e:
 try:
     from backend.api.auth import auth_bp
     from backend.api.routes.network_routes import network_bp
-    from backend.api.routes.user_routes import user_bp
+    from backend.api.routes.user_routes import user_bp, recommendations_bp
     
     # Create Flask app
     app = Flask(__name__)
@@ -113,6 +113,7 @@ try:
     app.register_blueprint(auth_bp)
     app.register_blueprint(network_bp)
     app.register_blueprint(user_bp)
+    app.register_blueprint(recommendations_bp)
 except Exception as e:
     logger.error(f"Error setting up blueprints: {str(e)}")
     # Create minimal Flask app if blueprints fail
