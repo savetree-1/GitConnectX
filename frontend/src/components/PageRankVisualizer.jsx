@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const PageRankVisualizer = ({ username, isAuthenticated }) => {
+const PageRankVisualizer = ({ username }) => {
   const [pageRankData, setPageRankData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,27 +13,20 @@ const PageRankVisualizer = ({ username, isAuthenticated }) => {
         setLoading(true);
         setError(null);
         
-        if (isAuthenticated) {
-          // Try to fetch real data from API if user is authenticated
-          try {
-            const response = await fetch(`http://localhost:5000/api/network/pagerank`);
-            
-            if (!response.ok) console.error(`Failed to fetch pagerank: ${response.status} ${response.statusText}`);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.status === 'success') {
-                setPageRankData(data.data);
-                return;
-              }
-            }
-            // If API fails, continue to use demo data
-          } catch (e) {
-            console.log('API not available, using demo data');
+        // Try to fetch real data from API
+        const response = await fetch(`http://localhost:5000/api/network/pagerank`);
+        
+        if (!response.ok) console.error(`Failed to fetch pagerank: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            setPageRankData(data.data);
+            return;
           }
         }
         
-        // Generate demo data if API fails or user is not authenticated
+        // If API fails, continue to use demo data
         const demoData = DemoDataGenerator.generatePageRankData();
         setPageRankData(demoData);
         
@@ -46,7 +39,7 @@ const PageRankVisualizer = ({ username, isAuthenticated }) => {
     };
 
     fetchPageRankData();
-  }, [isAuthenticated]);
+  }, []);
 
   const handleShowMore = () => {
     setDisplayCount(prev => Math.min(prev + 10, pageRankData.users.length));
@@ -55,12 +48,6 @@ const PageRankVisualizer = ({ username, isAuthenticated }) => {
   return (
     <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">GitHub Influence Rankings</h2>
-      
-      {!isAuthenticated && (
-        <div className="italic text-sm text-gray-500 mb-4">
-          Sign in to see personalized influence rankings for your network
-        </div>
-      )}
       
       {loading ? (
         <div className="flex justify-center items-center h-64">
@@ -161,9 +148,7 @@ const PageRankVisualizer = ({ username, isAuthenticated }) => {
           )}
           
           <div className="text-xs text-center text-gray-500 mt-4">
-            {isAuthenticated ? 
-              'PageRank algorithm applied to your GitHub network' : 
-              'Sample PageRank data based on typical GitHub networks'}
+            'PageRank algorithm applied to your GitHub network'
           </div>
         </div>
       )}

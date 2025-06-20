@@ -624,6 +624,7 @@ def get_pagerank():
 def get_communities():
     """
     Run a simple community detection (Louvain or connected components) on the user's combined network.
+    Returns a graph structure for visualization.
     """
     try:
         import networkx as nx
@@ -641,11 +642,40 @@ def get_communities():
         for f in following:
             G.add_node(f['login'])
             G.add_edge(username, f['login'])
-        # Use connected components as a simple community detection
+        # Community detection
         communities = []
+        node_to_community = {}
         for i, comp in enumerate(nx.connected_components(G)):
-            communities.append({'id': i, 'members': list(comp)})
-        return jsonify({'status': 'success', 'data': {'algorithm': algorithm, 'communities': communities}})
+            members = list(comp)
+            communities.append({'id': i, 'members': members})
+            for node in members:
+                node_to_community[node] = i
+        # Build nodes and links for visualization
+        nodes = []
+        for node in G.nodes():
+            nodes.append({
+                'id': node,
+                'name': node,
+                'communityId': node_to_community.get(node, -1)
+            })
+        links = []
+        for u, v in G.edges():
+            links.append({
+                'source': u,
+                'target': v,
+                'value': 1
+            })
+        # Metrics for each community
+        metrics = [{'id': c['id'], 'size': len(c['members'])} for c in communities]
+        return jsonify({'status': 'success', 'data': {
+            'algorithm': algorithm,
+            'communities': communities,
+            'visualizationData': {
+                'nodes': nodes,
+                'links': links
+            },
+            'metrics': metrics
+        }})
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
@@ -735,6 +765,7 @@ def get_community_timeline(username):
 def get_network_path():
     """
     Find the shortest path between two users using followers/following (limited to 2-hop neighborhood for performance).
+    Returns a structure compatible with the frontend connection finder.
     """
     try:
         source = request.args.get('source')
@@ -742,7 +773,19 @@ def get_network_path():
         if not source or not target:
             return jsonify({'status': 'error', 'message': 'source and target required'}), 400
         if source == target:
-            return jsonify({'status': 'success', 'data': {'source': source, 'target': target, 'path': [source]}})
+            # Return minimal structure for self-path
+            return jsonify({'status': 'success', 'data': {
+                'source': {'username': source, 'displayName': source},
+                'target': {'username': target, 'displayName': target},
+                'path': [source],
+                'connections': [],
+                'metrics': {
+                    'pathLength': 0,
+                    'averageStrength': 1.0,
+                    'sharedRepositories': 0,
+                    'directConnection': True
+                }
+            }})
         import networkx as nx
         from backend.github_service import GitHubDataFetcher
         fetcher = GitHubDataFetcher()
@@ -772,15 +815,73 @@ def get_network_path():
         # Find shortest path
         try:
             path = nx.shortest_path(G, source=source, target=target)
-            return jsonify({'status': 'success', 'data': {'source': source, 'target': target, 'path': path}})
+            # Build connections and metrics for frontend
+            connections = []
+            for i in range(len(path)-1):
+                connections.append({
+                    'source': path[i],
+                    'target': path[i+1],
+                    'type': 'follows',
+                    'strength': 1.0,  # Dummy value
+                    'sharedRepos': 0  # Dummy value
+                })
+            metrics = {
+                'pathLength': len(path)-1,
+                'averageStrength': 1.0,
+                'sharedRepositories': 0,
+                'directConnection': len(path) == 2
+            }
+            return jsonify({'status': 'success', 'data': {
+                'source': {'username': source, 'displayName': source},
+                'target': {'username': target, 'displayName': target},
+                'path': path,
+                'connections': connections,
+                'metrics': metrics
+            }})
         except nx.NetworkXNoPath:
-            return jsonify({'status': 'success', 'data': {'source': source, 'target': target, 'path': []}})
+            return jsonify({'status': 'success', 'data': {
+                'source': {'username': source, 'displayName': source},
+                'target': {'username': target, 'displayName': target},
+                'path': [],
+                'connections': [],
+                'metrics': {
+                    'pathLength': 0,
+                    'averageStrength': 0.0,
+                    'sharedRepositories': 0,
+                    'directConnection': False
+                }
+            }})
         except nx.NodeNotFound:
-            return jsonify({'status': 'success', 'data': {'source': source, 'target': target, 'path': []}})
+            return jsonify({'status': 'success', 'data': {
+                'source': {'username': source, 'displayName': source},
+                'target': {'username': target, 'displayName': target},
+                'path': [],
+                'connections': [],
+                'metrics': {
+                    'pathLength': 0,
+                    'averageStrength': 0.0,
+                    'sharedRepositories': 0,
+                    'directConnection': False
+                }
+            }})
     except Exception as e:
         # fallback to demo path
         if source and target:
-            return jsonify({'status': 'success', 'data': {'source': source, 'target': target, 'path': [source, 'octocat', target]}})
+            return jsonify({'status': 'success', 'data': {
+                'source': {'username': source, 'displayName': source},
+                'target': {'username': target, 'displayName': target},
+                'path': [source, 'octocat', target],
+                'connections': [
+                    {'source': source, 'target': 'octocat', 'type': 'follows', 'strength': 1.0, 'sharedRepos': 0},
+                    {'source': 'octocat', 'target': target, 'type': 'follows', 'strength': 1.0, 'sharedRepos': 0}
+                ],
+                'metrics': {
+                    'pathLength': 2,
+                    'averageStrength': 1.0,
+                    'sharedRepositories': 0,
+                    'directConnection': False
+                }
+            }})
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
 @network_bp.route('/repositories/domain/<domain>', methods=['GET'])

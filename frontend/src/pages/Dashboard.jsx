@@ -412,21 +412,21 @@ const Dashboard = () => {
             <SectionTitle infoContent={implementationInfo.community}position="right">
               Community Detection Map
             </SectionTitle>
-            <CommunityDetectionMap username={username} isLoggedIn={userData !== null} />
+            <CommunityDetectionMap username={username} isAuthenticated={true} />
           </section>
           
           <section id="path-finder">
             <SectionTitle infoContent={implementationInfo.path} position="right">
               Connection Path Finder
             </SectionTitle>
-            <PathFinder username={username} isLoggedIn={userData !== null} />
+            <PathFinder username={username} isAuthenticated={true} />
           </section>
           
           <section id="recommendation-panel">
             <SectionTitle infoContent={implementationInfo.recommendation}position="right">
               Collaboration Recommendations
             </SectionTitle>
-            <RecommendationPanel username={username} isLoggedIn={userData !== null} />
+            <RecommendationPanel username={username} isAuthenticated={true} />
           </section>
           
           <section id="domain-project-finder">
@@ -435,7 +435,7 @@ const Dashboard = () => {
             </SectionTitle>
             <DomainProjectFinder 
               username={username} 
-              isLoggedIn={userData !== null} 
+              isAuthenticated={true} 
               onSelectRepository={handleRepositorySelect}
             />
           </section>
@@ -446,7 +446,7 @@ const Dashboard = () => {
             </SectionTitle>
             <ContributionTimeline 
               username={username} 
-              isLoggedIn={userData !== null} 
+              isAuthenticated={true} 
               selectedRepo={selectedRepository}
             />
           </section>

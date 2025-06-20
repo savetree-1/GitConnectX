@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const CommunityMap = ({ username, isAuthenticated }) => {
+const CommunityMap = ({ username }) => {
   const d3Container = useRef(null);
   const [algorithm, setAlgorithm] = useState('louvain');
   const [communityData, setCommunityData] = useState(null);
@@ -16,26 +16,20 @@ const CommunityMap = ({ username, isAuthenticated }) => {
         setLoading(true);
         setError(null);
         
-        if (isAuthenticated) {
-          // Try to fetch real data from API if user is authenticated
-          try {
-            const response = await fetch(`http://localhost:5000/api/network/communities?algorithm=${algorithm}`);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.status === 'success') {
-                setCommunityData(data.data);
-                return;
-              }
-            }
-            if (!response.ok) console.error(`Failed to fetch communities: ${response.status} ${response.statusText}`);
-            // If API fails, continue to use demo data
-          } catch (e) {
-            console.log('API not available, using demo data');
+        // Try to fetch real data from API
+        const response = await fetch(`http://localhost:5000/api/network/communities?algorithm=${algorithm}&username=${username}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            setCommunityData(data.data);
+            return;
           }
         }
+        if (!response.ok) console.error(`Failed to fetch communities: ${response.status} ${response.statusText}`);
+        // If API fails, continue to use demo data
         
-        // Generate demo data if API fails or user is not authenticated
+        // Generate demo data if API fails
         const demoData = DemoDataGenerator.generateCommunityData(algorithm);
         setCommunityData(demoData);
         
@@ -48,7 +42,7 @@ const CommunityMap = ({ username, isAuthenticated }) => {
     };
 
     fetchCommunityData();
-  }, [algorithm, isAuthenticated]);
+  }, [algorithm, username]);
 
   useEffect(() => {
     if (d3Container.current && communityData) {
@@ -201,12 +195,6 @@ const CommunityMap = ({ username, isAuthenticated }) => {
             </button>
           </div>
         </div>
-        
-        {!isAuthenticated && (
-          <div className="italic text-sm text-gray-500">
-            Sign in for personalized community analysis
-          </div>
-        )}
       </div>
       
       {loading ? (
@@ -227,9 +215,7 @@ const CommunityMap = ({ username, isAuthenticated }) => {
             />
             
             <div className="mt-3 text-xs text-center text-gray-600">
-              {isAuthenticated ? 
-                'Click on a node to view community details' : 
-                'Sample community visualization based on typical GitHub networks'}
+              Sample community visualization based on typical GitHub networks
             </div>
           </div>
           

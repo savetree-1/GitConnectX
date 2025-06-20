@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const RepositoryAnalysis = ({ username, isAuthenticated }) => {
+const RepositoryAnalysis = ({ username }) => {
   const [repoData, setRepoData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -13,27 +13,21 @@ const RepositoryAnalysis = ({ username, isAuthenticated }) => {
         setLoading(true);
         setError(null);
         
-        if (isAuthenticated) {
-          // Try to fetch real data from API if user is authenticated
-          try {
-            const response = await fetch(`http://localhost:5000/api/user/${username}/repositories`);
-            
-            if (!response.ok) console.error(`Failed to fetch repository analysis: ${response.status} ${response.statusText}`);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.status === 'success') {
-                setRepoData(data.data);
-                return;
-              }
-            }
-            // If API fails, continue to use demo data
-          } catch (e) {
-            console.log('API not available, using demo data');
+        // Try to fetch real data from API
+        const response = await fetch(`http://localhost:5000/api/user/${username}/repositories`);
+        
+        if (!response.ok) console.error(`Failed to fetch repository analysis: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            setRepoData(data.data);
+            return;
           }
         }
+        // If API fails, continue to use demo data
         
-        // Generate demo data if API fails or user is not authenticated
+        // Generate demo data if API fails
         const demoData = DemoDataGenerator.generateRepoAnalysisData();
         setRepoData(demoData);
         
@@ -46,7 +40,7 @@ const RepositoryAnalysis = ({ username, isAuthenticated }) => {
     };
 
     fetchRepositoryData();
-  }, [username, isAuthenticated]);
+  }, [username]);
 
   // Helper function to determine language color
   const getLanguageColor = (language) => {
@@ -207,9 +201,9 @@ const RepositoryAnalysis = ({ username, isAuthenticated }) => {
           </div>
           
           <div className="text-xs text-center text-gray-500 mt-4">
-            {isAuthenticated ? 
+            {/* {isAuthenticated ? 
               'Data from your GitHub repositories' : 
-              'Sample repository data for demonstration purposes'}
+              'Sample repository data for demonstration purposes'} */}
           </div>
         </div>
       )}

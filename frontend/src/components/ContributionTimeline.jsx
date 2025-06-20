@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const ContributionTimeline = ({ username, isAuthenticated }) => {
+const ContributionTimeline = ({ username }) => {
   const [timelineData, setTimelineData] = useState(DemoDataGenerator.generateContributionTimeline());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -14,26 +14,20 @@ const ContributionTimeline = ({ username, isAuthenticated }) => {
         setLoading(true);
         setError(null);
         
-        if (isAuthenticated && username) {
-          // Try to fetch real data from API if user is authenticated
-          try {
-            const response = await fetch(`http://localhost:5000/api/user/${username}/contributions`);
-            
-            if (response.ok) {
-              const data = await response.json();
-              if (data.status === 'success') {
-                setTimelineData(data.data);
-                return;
-              }
-            }
-            if (!response.ok) console.error(`Failed to fetch contribution timeline: ${response.status} ${response.statusText}`);
-            // If API fails, continue to use demo data
-          } catch (e) {
-            console.log('API not available, using demo data');
+        // Try to fetch real data from API
+        const response = await fetch(`http://localhost:5000/api/user/${username}/contributions`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            setTimelineData(data.data);
+            return;
           }
         }
+        if (!response.ok) console.error(`Failed to fetch contribution timeline: ${response.status} ${response.statusText}`);
+        // If API fails, continue to use demo data
         
-        // Generate demo data if API fails or user is not authenticated
+        // Generate demo data if API fails
         const demoData = DemoDataGenerator.generateContributionTimeline();
         setTimelineData(demoData);
         
@@ -46,7 +40,7 @@ const ContributionTimeline = ({ username, isAuthenticated }) => {
     };
 
     fetchTimelineData();
-  }, [username, isAuthenticated]);
+  }, [username]);
 
   // Calculate max value for chart scaling
   const getMaxValue = () => {
@@ -58,12 +52,6 @@ const ContributionTimeline = ({ username, isAuthenticated }) => {
   return (
     <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">GitHub Contribution Timeline</h2>
-      
-      {!isAuthenticated && (
-        <div className="italic text-sm text-gray-500 mb-4">
-          Sign in to see your personal contribution timeline
-        </div>
-      )}
       
       {/* Tab navigation */}
       <div className="border-b border-gray-200 mb-6">
@@ -339,9 +327,7 @@ const ContributionTimeline = ({ username, isAuthenticated }) => {
           )}
           
           <div className="text-xs text-center text-gray-500 mt-6">
-            {isAuthenticated ? 
-              'Data from your GitHub contribution history' : 
-              'Sample contribution data for demonstration purposes'}
+            'Data from your GitHub contribution history'
           </div>
         </div>
       )}

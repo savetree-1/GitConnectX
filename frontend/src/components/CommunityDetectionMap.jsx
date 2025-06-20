@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
+const CommunityDetectionMap = ({ username }) => {
   const d3Container = useRef(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -23,7 +23,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
         setError(null);
         
         // For logged-in users, fetch actual data; for guests, use sample data
-        if (isLoggedIn && username) {
+        if (username) {
           try {
             const response = await fetch(`http://localhost:5000/api/network/community/${algorithm}/${username}`);
             
@@ -112,7 +112,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
     };
 
     fetchCommunityData();
-  }, [username, algorithm, isLoggedIn]);
+  }, [username, algorithm]);
 
   // Render community visualization when data is available
   useEffect(() => {
@@ -238,12 +238,12 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
       });
 
       // If user is logged in, draw the community affinity gauge
-      if (isLoggedIn && communityData.userCommunityAffinity) {
+      if (communityData.userCommunityAffinity) {
         drawCommunityAffinity(svg);
       }
 
       // Draw timeline if available and user is logged in
-      if (isLoggedIn && timelineData) {
+      if (timelineData) {
         drawTimeline(svg);
       }
 
@@ -269,7 +269,7 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
     return () => {
       d3.select("body").selectAll(".tooltip").remove();
     };
-  }, [communityData, width, height, margin, isLoggedIn]);
+  }, [communityData, width, height, margin]);
 
   // Draw community affinity gauge/chart
   const drawCommunityAffinity = (svg) => {
@@ -414,39 +414,27 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
     <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
       <h2 className="text-2xl font-bold text-gray-800 mb-4">Community Detection Map</h2>
       
-      {isLoggedIn && (
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-4">
-            <span className="mr-2 text-lg">Algorithm:</span>
-            <div className="flex items-center space-x-2">
-              <button
-                onClick={() => setAlgorithm('louvain')}
-                className={`px-3 py-1 rounded ${algorithm === 'louvain' ? 
-                  'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-              >
-                Louvain
-              </button>
-              <button
-                onClick={() => setAlgorithm('girvan-newman')}
-                className={`px-3 py-1 rounded ${algorithm === 'girvan-newman' ? 
-                  'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
-              >
-                Girvan-Newman
-              </button>
-            </div>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-4">
+          <span className="mr-2 text-lg">Algorithm:</span>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setAlgorithm('louvain')}
+              className={`px-3 py-1 rounded ${algorithm === 'louvain' ? 
+                'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              Louvain
+            </button>
+            <button
+              onClick={() => setAlgorithm('girvan-newman')}
+              className={`px-3 py-1 rounded ${algorithm === 'girvan-newman' ? 
+                'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            >
+              Girvan-Newman
+            </button>
           </div>
         </div>
-      )}
-      
-      {!isLoggedIn && (
-        <div className="bg-blue-50 p-3 rounded-md mb-4 text-sm">
-          <p className="text-blue-700">
-            <span className="font-bold">Educational Note:</span> Community detection algorithms identify groups within networks. 
-            Louvain optimizes modularity for fast community detection, while Girvan-Newman removes edges to find communities.
-            <span className="block mt-2">Sign in to explore interactive community features.</span>
-          </p>
-        </div>
-      )}
+      </div>
       
       {loading ? (
         <div className="flex justify-center items-center h-96">
@@ -472,15 +460,13 @@ const CommunityDetectionMap = ({ username, isLoggedIn = false }) => {
       )}
       
       {/* Educational tooltip for non-logged in users */}
-      {!isLoggedIn && (
-        <div className="mt-4 bg-gray-50 p-3 rounded-md text-sm">
-          <h3 className="font-bold text-gray-700 mb-1">Understanding Community Clusters</h3>
-          <p className="text-gray-600">
-            Communities in GitHub networks represent groups of users who collaborate more frequently with each other.
-            These clusters can reveal specialization areas, common interests, or collaborative project groups.
-          </p>
-        </div>
-      )}
+      <div className="mt-4 bg-gray-50 p-3 rounded-md text-sm">
+        <h3 className="font-bold text-gray-700 mb-1">Understanding Community Clusters</h3>
+        <p className="text-gray-600">
+          Communities in GitHub networks represent groups of users who collaborate more frequently with each other.
+          These clusters can reveal specialization areas, common interests, or collaborative project groups.
+        </p>
+      </div>
     </div>
   );
 };

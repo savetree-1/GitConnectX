@@ -2,14 +2,14 @@ import { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 import DemoDataGenerator from './DemoDataGenerator';
 
-const PathFinder = ({ username, isAuthenticated }) => {
+const PathFinder = ({ username }) => {
   const [sourceUser, setSourceUser] = useState(username || 'octocat');
   const [targetUser, setTargetUser] = useState('');
   const [suggestions, setSuggestions] = useState([]);
   const [pathData, setPathData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showDemo, setShowDemo] = useState(!isAuthenticated);
+  const [showDemo, setShowDemo] = useState(false);
   
   const d3Container = useRef(null);
   const sourceInputRef = useRef(null);
@@ -17,11 +17,11 @@ const PathFinder = ({ username, isAuthenticated }) => {
   
   // Load sample data for demo mode or when not authenticated
   useEffect(() => {
-    if (showDemo || !isAuthenticated) {
+    if (showDemo || !username) {
       const demoPath = DemoDataGenerator.generatePathFinderData('octocat', 'torvalds');
       setPathData(demoPath);
     }
-  }, [showDemo, isAuthenticated]);
+  }, [showDemo, username]);
   
   // Handle user search
   const handleUserSearch = async (query, isSource) => {
@@ -67,24 +67,22 @@ const PathFinder = ({ username, isAuthenticated }) => {
     setError(null);
     
     try {
-      if (isAuthenticated) {
-        // Try to fetch real path data from API
-        try {
-          const response = await fetch(`http://localhost:5000/api/network/path?source=${sourceUser}&target=${targetUser}`);
-          if (!response.ok) console.error(`Failed to fetch path: ${response.status} ${response.statusText}`);
-          
-          if (response.ok) {
-            const data = await response.json();
-            if (data.status === 'success') {
-              setPathData(data.data);
-              setLoading(false);
-              return;
-            }
+      // Try to fetch real path data from API
+      try {
+        const response = await fetch(`http://localhost:5000/api/network/path?source=${sourceUser}&target=${targetUser}`);
+        if (!response.ok) console.error(`Failed to fetch path: ${response.status} ${response.statusText}`);
+        
+        if (response.ok) {
+          const data = await response.json();
+          if (data.status === 'success') {
+            setPathData(data.data);
+            setLoading(false);
+            return;
           }
-          // If API fails, continue to use demo data
-        } catch (e) {
-          console.log('API not available, using demo data');
         }
+        // If API fails, continue to use demo data
+      } catch (e) {
+        console.log('API not available, using demo data');
       }
       
       // Generate demo path data
@@ -265,87 +263,71 @@ const PathFinder = ({ username, isAuthenticated }) => {
       
       {/* Search controls */}
       <div className="flex flex-wrap gap-4 mb-5">
-        {isAuthenticated ? (
-          <>
-            <div className="relative">
-              <label htmlFor="source-user" className="block text-sm font-medium text-gray-700 mb-1">Source User</label>
-              <input
-                id="source-user"
-                type="text"
-                value={sourceUser}
-                onChange={(e) => { setSourceUser(e.target.value); handleUserSearch(e.target.value, true); }}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full"
-                placeholder="GitHub username"
-                ref={sourceInputRef}
-              />
-              {suggestions.length > 0 && sourceInputRef.current === document.activeElement && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                  {suggestions.map(suggestion => (
-                    <li 
-                      key={suggestion.username}
-                      className="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-blue-100"
-                      onClick={() => handleSelectSuggestion(suggestion.username, true)}
-                    >
-                      {suggestion.displayName} (@{suggestion.username})
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            
-            <div className="relative">
-              <label htmlFor="target-user" className="block text-sm font-medium text-gray-700 mb-1">Target User</label>
-              <input
-                id="target-user"
-                type="text"
-                value={targetUser}
-                onChange={(e) => { setTargetUser(e.target.value); handleUserSearch(e.target.value, false); }}
-                className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full"
-                placeholder="GitHub username"
-                ref={targetInputRef}
-              />
-              {suggestions.length > 0 && targetInputRef.current === document.activeElement && (
-                <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                  {suggestions.map(suggestion => (
-                    <li 
-                      key={suggestion.username}
-                      className="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-blue-100"
-                      onClick={() => handleSelectSuggestion(suggestion.username, false)}
-                    >
-                      {suggestion.displayName} (@{suggestion.username})
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            
-            <div className="flex items-end">
-              <button
-                onClick={findPath}
-                disabled={loading || !sourceUser || !targetUser}
-                className={`px-4 py-2 text-base rounded-md text-white font-bold ${
-                  loading || !sourceUser || !targetUser 
-                    ? 'bg-gray-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700'
-                }`}
-              >
-                {loading ? 'Finding...' : 'Find Path'}
-              </button>
-            </div>
-          </>
-        ) : (
-          <div className="w-full text-center">
-            {/* <p className="text-gray-500">Sign in to find connections between any GitHub users</p> */}
-            <div className="mt-3 flex justify-center">
-              <button
-                onClick={() => setShowDemo(true)}
-                className="px-4 py-2 text-base font-medium bg-blue-100 text-blue-700 rounded-md hover:bg-blue-200"
-              >
-                Show Demo Connection
-              </button>
-            </div>
-          </div>
-        )}
+        <div className="relative">
+          <label htmlFor="source-user" className="block text-sm font-medium text-gray-700 mb-1">Source User</label>
+          <input
+            id="source-user"
+            type="text"
+            value={sourceUser}
+            onChange={(e) => { setSourceUser(e.target.value); handleUserSearch(e.target.value, true); }}
+            className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full"
+            placeholder="GitHub username"
+            ref={sourceInputRef}
+          />
+          {suggestions.length > 0 && sourceInputRef.current === document.activeElement && (
+            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {suggestions.map(suggestion => (
+                <li 
+                  key={suggestion.username}
+                  className="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-blue-100"
+                  onClick={() => handleSelectSuggestion(suggestion.username, true)}
+                >
+                  {suggestion.displayName} (@{suggestion.username})
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        
+        <div className="relative">
+          <label htmlFor="target-user" className="block text-sm font-medium text-gray-700 mb-1">Target User</label>
+          <input
+            id="target-user"
+            type="text"
+            value={targetUser}
+            onChange={(e) => { setTargetUser(e.target.value); handleUserSearch(e.target.value, false); }}
+            className="px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full"
+            placeholder="GitHub username"
+            ref={targetInputRef}
+          />
+          {suggestions.length > 0 && targetInputRef.current === document.activeElement && (
+            <ul className="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
+              {suggestions.map(suggestion => (
+                <li 
+                  key={suggestion.username}
+                  className="relative cursor-pointer select-none py-2 pl-3 pr-9 hover:bg-blue-100"
+                  onClick={() => handleSelectSuggestion(suggestion.username, false)}
+                >
+                  {suggestion.displayName} (@{suggestion.username})
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+        
+        <div className="flex items-end">
+          <button
+            onClick={findPath}
+            disabled={loading || !sourceUser || !targetUser}
+            className={`px-4 py-2 text-base rounded-md text-white font-bold ${
+              loading || !sourceUser || !targetUser 
+                ? 'bg-gray-400 cursor-not-allowed' 
+                : 'bg-blue-600 hover:bg-blue-700'
+            }`}
+          >
+            {loading ? 'Finding...' : 'Find Path'}
+          </button>
+        </div>
       </div>
       
       {error && (
@@ -355,25 +337,27 @@ const PathFinder = ({ username, isAuthenticated }) => {
       )}
       
       {/* Path visualization */}
-      {pathData && (
+      {pathData && pathData.path && pathData.path.length === 0 && (
+        <div className="my-8 text-center text-gray-500 text-lg">
+          No connection found between these users in the current network.
+        </div>
+      )}
+      {pathData && pathData.path && pathData.path.length > 0 && (
         <div className="space-y-6">
           <div className="border border-blue-200 rounded-lg p-4 bg-white shadow-sm">
             <svg 
               ref={d3Container}
               style={{ width: '100%', height: '250px', backgroundColor: 'white' }}
             />
-            
             <div className="mt-3 text-base text-center text-gray-600">
-              {isAuthenticated ? 
+              {username ? 
                 'Interactive visualization of connection path' :
                 'Sample connection path visualization (octocat → torvalds)'}
             </div>
           </div>
-          
           {/* Path metrics */}
           <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
             <h3 className="text-xl font-semibold mb-4 border-b pb-2">Connection Metrics</h3>
-            
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <h4 className="font-medium text-blue-700 mb-2">Path Details</h4>
@@ -396,7 +380,6 @@ const PathFinder = ({ username, isAuthenticated }) => {
                   </div>
                 </div>
               </div>
-              
               <div>
                 <h4 className="font-medium text-blue-700 mb-2">Users</h4>
                 <div className="space-y-3">

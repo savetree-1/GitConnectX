@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-const RecommendationPanel = ({ username, isLoggedIn = false }) => {
+const RecommendationPanel = ({ username }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [recommendations, setRecommendations] = useState([]);
@@ -12,31 +12,26 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
         setLoading(true);
         setError(null);
         
-        if (isLoggedIn) {
-          // For logged-in users, fetch real recommendations
-          try {
-            const response = await fetch(`http://localhost:5000/api/user/recommendations/${username}`);
-            
-            if (!response.ok) {
-              console.error(`Failed to fetch recommendations: ${response.status} ${response.statusText}`);
-              throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-              setRecommendations(data.data);
-            } else {
-              throw new Error(data.message || 'Failed to load recommendations');
-            }
-          } catch (err) {
-            console.error('Error fetching recommendations from API:', err);
-            // Fall back to demo data if API fails
-            setDemoRecommendations();
+        // For logged-in users, fetch real recommendations
+        try {
+          const response = await fetch(`http://localhost:5000/api/user/recommendations/${username}`);
+          
+          if (!response.ok) {
+            console.error(`Failed to fetch recommendations: ${response.status} ${response.statusText}`);
+            throw new Error(`Failed to fetch recommendations: ${response.statusText}`);
           }
-        } else {
-          // For guests, set blurred preview recommendations
-          setGuestRecommendations();
+          
+          const data = await response.json();
+          
+          if (data.status === 'success') {
+            setRecommendations(data.data);
+          } else {
+            throw new Error(data.message || 'Failed to load recommendations');
+          }
+        } catch (err) {
+          console.error('Error fetching recommendations from API:', err);
+          // Fall back to demo data if API fails
+          setDemoRecommendations();
         }
       } catch (err) {
         console.error('Error in recommendation system:', err);
@@ -136,7 +131,7 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
     };
     
     fetchRecommendations();
-  }, [username, isLoggedIn]);
+  }, [username]);
 
   // Compatibility score meter component
   const ScoreMeter = ({ score }) => {
@@ -263,22 +258,7 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
     <div className="font-sans bg-white rounded-lg border-blue-500 border-2 shadow-md p-5 mb-8">
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-2xl font-bold text-gray-800">Recommended Collaborators</h2>
-        
-        {!isLoggedIn && (
-          <button className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md">
-            Log In To See
-          </button>
-        )}
       </div>
-      
-      {!isLoggedIn && (
-        <div className="bg-blue-50 p-3 rounded-md mb-4">
-          <p className="text-blue-700 text-sm">
-            <span className="font-bold">Connect with collaborators</span> based on shared interests, repositories, and network connections.
-            <span className="block mt-1">Log in to see personalized recommendations.</span>
-          </p>
-        </div>
-      )}
       
       {error && (
         <div className="bg-red-50 p-3 rounded-md mb-4">
@@ -293,17 +273,10 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
       ) : (
         <div className="space-y-4">
           {recommendations.map(recommendation => (
-            isLoggedIn ? (
-              <RecommendationCard 
-                key={recommendation.id} 
-                recommendation={recommendation} 
-              />
-            ) : (
-              <BlurredCard 
-                key={recommendation.id}
-                recommendation={recommendation}
-              />
-            )
+            <RecommendationCard 
+              key={recommendation.id} 
+              recommendation={recommendation} 
+            />
           ))}
           
           {recommendations.length === 0 && (
@@ -314,20 +287,10 @@ const RecommendationPanel = ({ username, isLoggedIn = false }) => {
         </div>
       )}
       
-      {isLoggedIn && (
-        <div className="mt-4 text-center">
-          <button className="px-4 py-2 text-blue-600 hover:text-blue-800 text-sm font-medium">
-            View More Recommendations
-          </button>
-        </div>
-      )}
-      
       <div className="mt-4 border-t border-gray-100 pt-3">
         <h3 className="font-bold text-gray-700 mb-1 text-sm">How Recommendations Work</h3>
         <p className="text-gray-600 text-sm">
-          {isLoggedIn 
-            ? "Recommendations are based on your GitHub activity, shared interests, mutual connections, and repository contributions. Our algorithm uses HITS (Hyperlink-Induced Topic Search) to find the best potential collaborators for you."
-            : "Our recommendation system analyzes your activity patterns, repository interests, and network connections to suggest developers you might want to collaborate with."}
+          "Recommendations are based on your GitHub activity, shared interests, mutual connections, and repository contributions. Our algorithm uses HITS (Hyperlink-Induced Topic Search) to find the best potential collaborators for you."
         </p>
       </div>
     </div>

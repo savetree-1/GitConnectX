@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 
-const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository }) => {
+const DomainProjectFinder = ({ username, onSelectRepository }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDomain, setSelectedDomain] = useState('');
   const [repositories, setRepositories] = useState([]);
   const [showResults, setShowResults] = useState(false);
-  const [visibleRepoCount, setVisibleRepoCount] = useState(isLoggedIn ? 4 : 3);
-  const [totalReposToShow, setTotalReposToShow] = useState(isLoggedIn ? 4 : 3);
+  const [visibleRepoCount, setVisibleRepoCount] = useState(3);
+  const [totalReposToShow, setTotalReposToShow] = useState(3);
   const [popularDomains, setPopularDomains] = useState([
     { id: 'web-development', name: 'Web Development', color: 'bg-blue-500', icon: '🌐' },
     { id: 'machine-learning', name: 'Machine Learning', color: 'bg-green-500', icon: '🤖' },
@@ -42,7 +42,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
         const data = await response.json();
         
         if (data.status === 'success') {
-          setRepositories(data.data);
+          setRepositories(data.data.repositories || []);
         } else {
           throw new Error(data.message || 'Failed to load repositories');
         }
@@ -204,7 +204,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
     setSelectedDomain(domain);
     setSearchTerm(''); // Clear any search term
     // Reset visible count on new domain selection
-    const initialCount = isLoggedIn ? 4 : 3;
+    const initialCount = 3;
     setVisibleRepoCount(initialCount);
     setTotalReposToShow(initialCount);
     searchRepositories(domain);
@@ -228,7 +228,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
   // Function to increase the number of visible repositories
   const handleShowMore = () => {
     // Increase by 4 for logged-in users, by 2 for guests
-    const increment = isLoggedIn ? 4 : 2;
+    const increment = 3;
     setVisibleRepoCount(prevCount => Math.min(prevCount + increment, repositories.length));
     setTotalReposToShow(prevCount => Math.min(prevCount + increment, repositories.length));
   };
@@ -418,10 +418,6 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
                   <RepositoryCard key={repo.id} repo={repo} />
                 ))}
                 
-                {!isLoggedIn && repositories.length > 0 && totalReposToShow >= 3 && (
-                  <LimitedAccessCard />
-                )}
-                
                 {repositories.length === 0 && (
                   <div className="col-span-2 text-center py-12">
                     <p className="text-gray-500">No repositories found matching your criteria.</p>
@@ -464,9 +460,7 @@ const DomainProjectFinder = ({ username, isLoggedIn = false, onSelectRepository 
         <h3 className="font-bold text-gray-700 mb-1 text-sm">How Project Finder Works</h3>
         <p className="text-gray-600 text-sm">
           Our project finder helps you discover relevant GitHub repositories based on domains and technologies. 
-          {isLoggedIn 
-            ? " We analyze repository content, documentation, and community activity to recommend the most valuable resources for your needs."
-            : " Sign in to unlock personalized project recommendations based on your skills and interests."}
+          Sign in to unlock personalized project recommendations based on your skills and interests.
         </p>
       </div>
     </div>

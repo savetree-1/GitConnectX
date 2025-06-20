@@ -14,13 +14,7 @@ recommendations_bp = Blueprint('recommendations', __name__, url_prefix='/api/rec
 @user_bp.route('/<username>', methods=['GET'])
 def get_user_data(username):
     """
-    Get GitHub user data
-    
-    Args:
-        username (str): GitHub username
-    
-    Returns:
-        JSON with user data or error message
+    Get GitHub user profile data and aggregate stats for sidebar/profile display.
     """
     try:
         logger.info(f"Fetching user data for: {username}")
@@ -34,33 +28,36 @@ def get_user_data(username):
         
         if not user_data:
             logger.error(f"User {username} not found on GitHub")
-            return jsonify({'error': f'User {username} not found'}), 404
+            return jsonify({'status': 'error', 'message': f'User {username} not found'}), 404
         
         # Save to database if successful
         controller.db.save_github_user(user_data)
         
-        # Format the response
-        formatted_data = {
-            'name': user_data.get('name', username),
-            'login': user_data.get('login', username),
+        # Fetch repositories to sum stars and forks
+        repos = github_fetcher.fetch_user_repositories(username, max_count=100)
+        total_stars = sum(repo.get('stargazers_count', 0) for repo in repos)
+        total_forks = sum(repo.get('forks_count', 0) for repo in repos)
+        profile = {
             'avatar_url': user_data.get('avatar_url', ''),
-            'public_repos': user_data.get('public_repos', 0),
             'followers_count': user_data.get('followers', 0),
             'following_count': user_data.get('following', 0),
-            'stargazers_count': user_data.get('public_gists', 0) * 5,  # Estimated from gists
-            'forks_count': user_data.get('public_repos', 0) // 2  # Estimated as half of repos
+            'forks_count': total_forks,
+            'login': user_data.get('login', username),
+            'name': user_data.get('name', username),
+            'public_repos': user_data.get('public_repos', 0),
+            'stargazers_count': total_stars
         }
         
         controller.close()
         
         return jsonify({
             'status': 'success',
-            'data': formatted_data
+            'data': profile
         })
         
     except Exception as e:
         logger.error(f"Error fetching user data: {str(e)}")
-        return jsonify({'error': str(e)}), 500 
+        return jsonify({'status': 'error', 'message': str(e)}), 500 
 
 @user_bp.route('/<username>/contributions', methods=['GET'])
 def get_user_contributions(username):
@@ -93,9 +90,18 @@ def get_user_contributions(username):
             language = repo.get('language')
             if language:
                 language_counter[language] += 1
-            # Simulate: In real use, fetch commit/PR/issue counts per month for each repo
-            # Here, just randomize for demo, or use available data if present
-            contribs = random.randint(20, 120)
+            # Use real total contributions from contributors API
+            owner = full_name.split('/')[0] if full_name else username
+            real_contribs = 0
+            try:
+                contributors = github_fetcher.fetch_repository_contributors(owner, repo_name)
+                for contributor in contributors:
+                    if contributor.get('login', '').lower() == username.lower():
+                        real_contribs = contributor.get('contributions', 0)
+                        break
+            except Exception:
+                pass
+            contribs = real_contribs
             last_contrib = f"{random.randint(1, 30)} days ago"
             project_contributions.append({
                 'name': repo_name,
@@ -105,15 +111,12 @@ def get_user_contributions(username):
                 'lastContribution': last_contrib,
                 'language': language or 'Unknown'
             })
-            # Distribute contributions across months
+            # Distribute contributions evenly across months
+            per_month = contribs // len(months) if months else 0
             for i, (m, y) in enumerate(months):
-                # Randomly distribute commits, PRs, issues
-                month_commits = random.randint(0, 20)
-                month_prs = random.randint(0, 5)
-                month_issues = random.randint(0, 3)
-                month_stats[(m, y)]['commits'] += month_commits
-                month_stats[(m, y)]['pullRequests'] += month_prs
-                month_stats[(m, y)]['issues'] += month_issues
+                month_stats[(m, y)]['commits'] += per_month
+                month_stats[(m, y)]['pullRequests'] += 0
+                month_stats[(m, y)]['issues'] += 0
                 month_stats[(m, y)]['repositories'] += 1
 
         # Build timeline

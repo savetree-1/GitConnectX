@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import * as d3 from 'd3';
 
-const ContributionTimelineAnalyzer = ({ username, isLoggedIn = false }) => {
+const ContributionTimelineAnalyzer = ({ username }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [contributionData, setContributionData] = useState(null);
@@ -18,43 +18,33 @@ const ContributionTimelineAnalyzer = ({ username, isLoggedIn = false }) => {
         setLoading(true);
         setError(null);
 
-        if (isLoggedIn) {
-          try {
-            // In a real app, this would call your API endpoint
-            const response = await fetch(`http://localhost:5000/api/contributions/${username}`);
-            
-            if (!response.ok) {
-              console.error(`Failed to fetch contributions: ${response.status} ${response.statusText}`);
-              throw new Error(`Failed to fetch contribution data: ${response.statusText}`);
-            }
-            
-            const data = await response.json();
-            
-            if (data.status === 'success') {
-              setContributionData(data.data);
-              setPatternData(data.patterns);
-            } else {
-              throw new Error(data.message || 'Failed to load contribution data');
-            }
-          } catch (err) {
-            console.error('Error fetching contribution data:', err);
-            // If the API fails, generate demo data
-            generateDemoData();
-          }
+        // In a real app, this would call your API endpoint
+        const response = await fetch(`http://localhost:5000/api/contributions/${username}`);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch contributions: ${response.status} ${response.statusText}`);
+          throw new Error(`Failed to fetch contribution data: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status === 'success') {
+          setContributionData(data.data);
+          setPatternData(data.patterns);
         } else {
-          // For guests, generate demo data
-          generateDemoData();
+          throw new Error(data.message || 'Failed to load contribution data');
         }
       } catch (err) {
-        console.error('Error in contribution timeline analyzer:', err);
-        setError(err.message);
+        console.error('Error fetching contribution data:', err);
+        // If the API fails, generate demo data
+        generateDemoData();
       } finally {
         setLoading(false);
       }
     };
 
     fetchContributionData();
-  }, [username, isLoggedIn]);
+  }, [username]);
 
   // Generate demo data for the visualizations
   const generateDemoData = () => {
@@ -777,11 +767,9 @@ const ContributionTimelineAnalyzer = ({ username, isLoggedIn = false }) => {
               <div className="bg-gray-50 p-2 rounded">
                 <span className="font-semibold">Algorithm:</span> Pattern detection in commit frequency using time-series analysis
               </div>
-              {!isLoggedIn && (
-                <div className="bg-blue-50 p-2 rounded md:col-span-2">
-                  <span className="font-semibold text-blue-800">Note:</span> Sign in to see personalized contribution analysis based on your actual GitHub activity.
-                </div>
-              )}
+              <div className="bg-blue-50 p-2 rounded md:col-span-2">
+                <span className="font-semibold text-blue-800">Note:</span> Sign in to see personalized contribution analysis based on your actual GitHub activity.
+              </div>
             </div>
           </div>
         </>

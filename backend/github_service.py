@@ -38,6 +38,17 @@ class GitHubDataFetcher:
     def fetch_user_data(self, username: str) -> Optional[Dict[str, Any]]:
         # ::::: Fetch user data from GitHub
         try:
+            # Log API token status (do not print the token itself for security)
+            if not self.api_token or self.api_token == 'your_github_token':
+                self.logger.warning('GitHub API token is missing or default! You may be rate-limited or get incomplete data.')
+            else:
+                self.logger.info('GitHub API token is set.')
+            # Log current rate limit
+            try:
+                rate_limit = self.client.get_rate_limit()
+                self.logger.info(f"GitHub API rate limit: {rate_limit.core.remaining} remaining, resets at {rate_limit.core.reset}")
+            except Exception as e:
+                self.logger.warning(f"Could not fetch GitHub API rate limit: {e}")
             user = self.client.get_user(username)
             
             # ::::: Ensure user ID exists
