@@ -17,13 +17,33 @@ export default class DemoDataGenerator {
     const communityCount = algorithm === 'louvain' ? 5 : 3; // Louvain finds more communities
     const usersPerCommunity = 12;
     
+    // More realistic community names
+    const communityNames = [
+      'Frontend Developers',
+      'Backend Engineers', 
+      'Data Scientists',
+      'DevOps Specialists',
+      'Mobile Developers',
+      'AI/ML Researchers',
+      'Open Source Maintainers',
+      'Full Stack Developers'
+    ];
+    
+    // More realistic user names
+    const userPrefixes = ['alex', 'sarah', 'mike', 'emma', 'david', 'lisa', 'john', 'anna', 'tom', 'julia', 'mark', 'sophie'];
+    const userSuffixes = ['dev', 'coder', 'engineer', 'hacker', 'builder', 'creator', 'programmer', 'developer'];
+    
     // Generate sample community data
     for (let i = 0; i < communityCount; i++) {
       for (let j = 0; j < usersPerCommunity; j++) {
-        const username = `user${i}_${j}`;
+        const prefix = userPrefixes[Math.floor(Math.random() * userPrefixes.length)];
+        const suffix = userSuffixes[Math.floor(Math.random() * userSuffixes.length)];
+        const username = `${prefix}_${suffix}_${i}_${j}`;
+        const displayName = `${prefix.charAt(0).toUpperCase() + prefix.slice(1)} ${suffix.charAt(0).toUpperCase() + suffix.slice(1)}`;
+        
         nodes.push({
           id: username,
-          name: `User ${i}.${j}`,
+          name: displayName,
           communityId: i,
           group: i
         });
@@ -39,32 +59,64 @@ export default class DemoDataGenerator {
         
         // Higher chance to connect within same community
         const sameCommunity = source.communityId === target.communityId;
-        const connectionProbability = sameCommunity ? 0.3 : 0.02;
+        const connectionProbability = sameCommunity ? 0.4 : 0.03; // Increased probability for more connections
         
         if (Math.random() < connectionProbability) {
           links.push({
             source: source.id,
             target: target.id,
-            value: sameCommunity ? Math.random() * 5 + 5 : Math.random() * 3 + 1
+            value: sameCommunity ? Math.random() * 8 + 7 : Math.random() * 4 + 2 // Higher weights for stronger connections
           });
         }
       });
     });
     
-    // Generate metrics for each community
+    // Generate metrics for each community with more realistic data
     const communityMetrics = [];
     for (let i = 0; i < communityCount; i++) {
-      communityMetrics.push({
-        id: i,
-        name: `Community ${i + 1}`,
-        size: usersPerCommunity,
-        density: (0.4 + Math.random() * 0.5).toFixed(2),
-        cohesion: (0.3 + Math.random() * 0.6).toFixed(2),
-        dominantLanguages: [
+      const communityName = communityNames[i % communityNames.length];
+      
+      // Different language preferences for different communities
+      let dominantLanguages;
+      if (communityName.includes('Frontend')) {
+        dominantLanguages = [
+          { name: 'JavaScript', percentage: Math.floor(Math.random() * 40 + 50) },
+          { name: 'TypeScript', percentage: Math.floor(Math.random() * 30 + 20) },
+          { name: 'CSS', percentage: Math.floor(Math.random() * 20 + 10) }
+        ];
+      } else if (communityName.includes('Backend')) {
+        dominantLanguages = [
+          { name: 'Python', percentage: Math.floor(Math.random() * 40 + 45) },
+          { name: 'Java', percentage: Math.floor(Math.random() * 25 + 15) },
+          { name: 'Go', percentage: Math.floor(Math.random() * 20 + 10) }
+        ];
+      } else if (communityName.includes('Data')) {
+        dominantLanguages = [
+          { name: 'Python', percentage: Math.floor(Math.random() * 50 + 40) },
+          { name: 'R', percentage: Math.floor(Math.random() * 25 + 15) },
+          { name: 'SQL', percentage: Math.floor(Math.random() * 20 + 10) }
+        ];
+      } else if (communityName.includes('DevOps')) {
+        dominantLanguages = [
+          { name: 'Shell', percentage: Math.floor(Math.random() * 35 + 40) },
+          { name: 'Python', percentage: Math.floor(Math.random() * 25 + 20) },
+          { name: 'YAML', percentage: Math.floor(Math.random() * 20 + 15) }
+        ];
+      } else {
+        dominantLanguages = [
           { name: 'JavaScript', percentage: Math.floor(Math.random() * 60 + 20) },
           { name: 'Python', percentage: Math.floor(Math.random() * 40 + 10) },
           { name: 'TypeScript', percentage: Math.floor(Math.random() * 30) }
-        ]
+        ];
+      }
+      
+      communityMetrics.push({
+        id: i,
+        name: communityName,
+        size: usersPerCommunity,
+        density: (0.5 + Math.random() * 0.4).toFixed(2), // Higher density for more realistic communities
+        cohesion: (0.4 + Math.random() * 0.5).toFixed(2), // Higher cohesion
+        dominantLanguages: dominantLanguages
       });
     }
     
@@ -74,9 +126,9 @@ export default class DemoDataGenerator {
       visualizationData: { nodes, links },
       metrics: communityMetrics,
       stats: {
-        modularity: (0.4 + Math.random() * 0.4).toFixed(3),
+        modularity: (0.5 + Math.random() * 0.3).toFixed(3), // Higher modularity for better community separation
         communities: communityCount,
-        coverage: (0.65 + Math.random() * 0.3).toFixed(3)
+        coverage: (0.75 + Math.random() * 0.2).toFixed(3) // Higher coverage
       }
     };
   }

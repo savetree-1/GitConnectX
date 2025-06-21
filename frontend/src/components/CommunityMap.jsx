@@ -16,18 +16,8 @@ const CommunityMap = ({ username }) => {
         setLoading(true);
         setError(null);
         
-        // Try to fetch real data from API
-        const response = await fetch(`http://localhost:5000/api/network/communities?algorithm=${algorithm}&username=${username}`);
-        
-        if (response.ok) {
-          const data = await response.json();
-          if (data.status === 'success') {
-            setCommunityData(data.data);
-            return;
-          }
-        }
-        if (!response.ok) console.error(`Failed to fetch communities: ${response.status} ${response.statusText}`);
-        // If API fails, continue to use demo data
+        // Always use demo data for now
+        console.log('Using demo community data');
         
         // Generate demo data if API fails
         const demoData = DemoDataGenerator.generateCommunityData(algorithm);
@@ -175,7 +165,12 @@ const CommunityMap = ({ username }) => {
 
   return (
     <div className="font-sans bg-white border-blue-500 border-2 rounded-lg shadow-md p-5 mb-8">
-      <h2 className="text-2xl font-bold text-gray-800 mb-4">GitHub Community Detection</h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-bold text-gray-800">GitHub Community Detection</h2>
+        <div className="bg-yellow-100 border border-yellow-400 text-yellow-800 px-3 py-1 rounded-full text-sm font-medium">
+          Demo Data
+        </div>
+      </div>
       
       <div className="flex justify-between mb-5">
         <div className="flex items-center space-x-2">
